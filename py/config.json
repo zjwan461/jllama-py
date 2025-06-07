@@ -1,0 +1,13 @@
+{
+  "db": {
+    "url": "localhost",
+    "username": "root",
+    "password": "root",
+    "database": "local_db"
+  },
+  "log": {
+    "path": "log"
+  },
+  "model": "dev",
+  "app_name": "jllama"
+}

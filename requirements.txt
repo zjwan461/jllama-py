@@ -1,0 +1,7 @@
+pywebview==5.4
+flask==3.1.1
+zhconv==1.4.3
+requests==2.32.3
+psutil==7.0.0
+GPUtil==1.4.0
+WMI==1.5.1

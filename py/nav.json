@@ -1,0 +1,71 @@
+[
+  {
+    "id": 1,
+    "title": "进程管理",
+    "icon": "el-icon-connection",
+    "href": "/watch",
+    "children": [
+      {
+        "id": 11,
+        "title": "模型部署",
+        "icon": "el-icon-magic-stick",
+        "href": "/watch"
+      },
+      {
+        "id": 12,
+        "title": "运行历史",
+        "icon": "el-icon-data-line",
+        "href": "/history"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "模型管理",
+    "icon": "el-icon-sold-out",
+    "children": [
+      {
+        "id": 21,
+        "title": "模型仓库",
+        "icon": "el-icon-s-grid",
+        "href": "/mgn/model-download"
+      },
+      {
+        "id": 22,
+        "title": "模型导入",
+        "icon": "el-icon-document-add",
+        "href": "/mgn/model-import"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "工具箱",
+    "icon": "el-icon-s-tools",
+    "children": [
+      {
+        "id": 31,
+        "title": "gguf拆分/合并",
+        "icon": "el-icon-scissors",
+        "href": "/tools/split-merge"
+      },
+      {
+        "id": 32,
+        "title": "模型量化",
+        "icon": "el-icon-edit",
+        "href": "/tools/quantization"
+      },
+      {
+        "id": 33,
+        "title": "模型转换",
+        "icon": "el-icon-refresh",
+        "href": "/tools/convert"
+      }, {
+        "id": 34,
+        "title": "模型微调",
+        "icon": "el-icon-edit-outline",
+        "href": "/tools/train"
+      }
+    ]
+  }
+]
