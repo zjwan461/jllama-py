@@ -71,6 +71,9 @@ def get_gpu_info():
             print(f"获取AMD GPU信息失败: {e}")
     return result
 
+def is_cuda_available():
+    gpus = GPUtil.getGPUs()
+    return len(gpus) > 0
 
 if __name__ == '__main__':
     res = get_cpu_info()

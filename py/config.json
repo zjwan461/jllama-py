@@ -1,13 +1,11 @@
 {
-  "db": {
-    "url": "localhost",
-    "username": "root",
-    "password": "root",
-    "database": "local_db"
-  },
+  "db_url": "sqlite:///db/jllama.db",
   "log": {
     "path": "log"
   },
   "model": "dev",
-  "app_name": "jllama"
+  "auth_start_dev_server": false,
+  "app_name": "jllama",
+  "app_width": 1366,
+  "app_height": 768
 }

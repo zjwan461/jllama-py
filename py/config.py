@@ -29,33 +29,19 @@ def is_prd():
     return get_model() == "prd"
 
 
-def get_db_config():
-    return DbConfig(dic.get("db"))
-
-
 def get_log_config():
     return LogConfig(dic.get("log"))
 
 
-class DbConfig:
+def get_app_height():
+    return dic.get("app_height")
 
-    def __init__(self, kwargs: dict):
-        self.url = kwargs.get("url")
-        self.username = kwargs.get("username")
-        self.password = kwargs.get("password")
-        self.database = kwargs.get("database")
 
-    def get_url(self):
-        return self.url
+def get_app_width():
+    return dic.get("app_width")
 
-    def get_username(self):
-        return self.username
-
-    def get_password(self):
-        return self.password
-
-    def get_database(self):
-        return self.database
+def get_db_url():
+    return dic.get("db_url")
 
 
 class LogConfig:

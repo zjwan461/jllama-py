@@ -122,13 +122,15 @@ export default {
     }
   },
   created() {
-    // this.showTips()
+    this.initEnv()
     this.getMenuTree()
     this.active = window.sessionStorage.getItem('menu-active-path') ? window.sessionStorage.getItem('menu-active-path') : '/home';
   },
   methods: {
-    showTips() {
-      apis.showTips()
+    initEnv() {
+      apis.initEnv().then(res => {
+        console.log(res)
+      })
     },
     handleSelect(index, indexPath) {
       window.sessionStorage.setItem('menu-active-path', index)
@@ -144,15 +146,6 @@ export default {
       apis.getNav().then(res => {
         this.menuData = res
       })
-      // this.$http
-      //   .get('/api/base/nav')
-      //   .then(res => {
-      //     // console.log(res.data)
-      //     this.menuData = res.data
-      //   })
-      //   .catch(err => {
-      //     console.log(err)
-      //   })
     },
     logout() {
       window.sessionStorage.clear()

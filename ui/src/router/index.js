@@ -10,11 +10,6 @@ const routes = [{
   redirect: '/home'
 },
 {
-  path: '/register',
-  name: 'register',
-  component: () => import('../components/register.vue')
-},
-{
   path: '/home',
   name: 'home',
   component: () => import('../components/home.vue'),
@@ -78,10 +73,6 @@ NProgress.configure({
 
 router.beforeEach((to, from, next) => {
   NProgress.start()
-  // console.log(to.path)
-  // if (to.path === '/register') return next()
-  // const register = window.sessionStorage.getItem('register')
-  // if (!register) return next('/register')
   next()
 })
 

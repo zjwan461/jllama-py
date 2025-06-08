@@ -1,6 +1,7 @@
 import subprocess
 import webview
 from flask import Flask
+from py.util.dbutil import SqliteSqlalchemy
 
 import py.config as config
 from py.controller import api
@@ -19,15 +20,17 @@ def start_dev_server():
 
 if config.is_dev():
     print("dev")
-    # start_dev_server()
-
-    window = webview.create_window(app_name, url="http://localhost:8001/app/", js_api=js_api, width=1200, height=800,
+    if config.get_value("auth_start_dev_server"):
+        start_dev_server()
+    window = webview.create_window(app_name, url="http://localhost:8001/app/", js_api=js_api,
+                                   width=config.get_app_width(), height=config.get_app_height(),
                                    confirm_close=True,
                                    text_select=True)
 elif config.is_prd():
     print("prd")
     server = Flask(__name__, static_folder="static", template_folder="template")
-    window = webview.create_window(app_name, server=server, js_api=js_api, width=1200, height=800,
+    window = webview.create_window(app_name, server=server, js_api=js_api, width=config.get_app_width(),
+                                   height=config.get_app_height(),
                                    confirm_close=True,
                                    text_select=True)
 else:

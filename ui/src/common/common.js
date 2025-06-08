@@ -1,4 +1,4 @@
-import {Message} from 'element-ui'
+import {Loading, Message} from 'element-ui'
 
 export function copy(value) {
   const input = document.createElement('input')
@@ -49,5 +49,23 @@ export async function fetchFluxData(uri, callback, signal) {
     }
   } catch (error) {
     console.error('Error fetching data:', error)
+  }
+}
+
+export function startLoading(text) {
+  if (!text) {
+    text = '拼命加载中...'
+  }
+  return Loading.service({
+    lock: true,
+    text: text,
+    background: 'rgba(255,255,255,0.5)',
+    target: document.querySelector('body')
+  });
+}
+
+export function endLoading(loading) { //  关闭加载动画
+  if (loading) {
+    loading.close()
   }
 }

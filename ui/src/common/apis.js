@@ -1,4 +1,5 @@
-import {Message} from 'element-ui'
+import {Loading, Message} from 'element-ui'
+
 
 export default {
   showTips() {
@@ -11,5 +12,8 @@ export default {
   },
   getSysInfo() {
     return window.pywebview.api.get_sys_info()
-  }
+  },
+  initEnv() {
+    return window.pywebview.api.init_env()
+  },
 }

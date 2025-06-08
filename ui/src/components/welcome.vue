@@ -245,6 +245,7 @@
 
 <script>
 import apis from '@/common/apis'
+import {endLoading, startLoading} from "@/common/common";
 
 export default {
   name: 'Server',
@@ -261,12 +262,9 @@ export default {
   methods: {
     /** 查询服务器信息 */
     getList() {
-      // this.$http.get('/api/server/monitor').then(res => {
-      //   // console.log(res.data)
-      //   this.server = res.data;
-      // })
+      const loading = startLoading()
       apis.getSysInfo().then(res => {
-        console.log(res)
+        endLoading(loading)
         this.server = res
       })
     }

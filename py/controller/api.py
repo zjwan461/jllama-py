@@ -2,6 +2,7 @@ import json
 import py.util.systemInfoUtil as sysInfoUtil
 
 from py.util.logutil import Logger
+from py.util.dbutil import SqliteSqlalchemy, SysInfo
 
 logger = Logger("Api.py")
 
@@ -22,6 +23,23 @@ class Api:
                   "gpus": sysInfoUtil.get_gpu_info(),
                   "os": sysInfoUtil.get_os_info()}
         return result
+
+    def init_env(self):
+        session = SqliteSqlalchemy().session
+        result = session.query(SysInfo).all()
+        if len(result) <= 0:
+            try:
+                os_info = sysInfoUtil.get_os_info()
+                gpu_platform = "cuda" if sysInfoUtil.is_cuda_available() else "cpu"
+                sys_info = SysInfo(id=999, os_arch=os_info['arch'], platform=os_info['os'], gpu_platform=gpu_platform,
+                        cpp_version="B4942", factory_version="v0.9.2", self_version="v1.0")
+                session.add(sys_info)
+                session.commit()
+            except Exception as e:
+                logger.error(e)
+                session.rollback()
+            finally:
+                session.close()
 
 
 if __name__ == '__main__':
