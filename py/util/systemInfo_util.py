@@ -4,6 +4,7 @@ import platform
 import GPUtil
 import psutil
 import wmi
+from py.util.db_util import SqliteSqlalchemy, SysInfo
 
 
 def get_cpu_info():
@@ -68,9 +69,17 @@ def get_gpu_info():
             print(f"获取AMD GPU信息失败: {e}")
     return result
 
+
 def is_cuda_available():
     gpus = GPUtil.getGPUs()
     return len(gpus) > 0
+
+
+def get_jllama_info():
+    session = SqliteSqlalchemy().session
+    sys_info = session.query(SysInfo).get(999)
+    return sys_info.to_dict() if sys_info else None
+
 
 if __name__ == '__main__':
     res = get_cpu_info()

@@ -129,7 +129,9 @@ export default {
   methods: {
     initEnv() {
       apis.initEnv().then(res => {
-        console.log(res)
+        if (res !== "no_need") {
+          res === "success" ? this.$message.success("初始化成功") : this.$message.error("初始化失败")
+        }
       })
     },
     handleSelect(index, indexPath) {

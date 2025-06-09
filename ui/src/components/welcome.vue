@@ -219,19 +219,19 @@
                   <div class="cell">{{ server.jllamaInfo.platform }}</div>
                 </td>
                 <td class="el-table__cell is-leaf">
-                  <div class="cell">{{ server.jllamaInfo.osArch }}</div>
+                  <div class="cell">{{ server.jllamaInfo.os_arch }}</div>
                 </td>
                 <td class="el-table__cell is-leaf">
-                  <div class="cell">{{ server.jllamaInfo.gpuPlatform }}</div>
+                  <div class="cell">{{ server.jllamaInfo.gpu_platform }}</div>
                 </td>
                 <td class="el-table__cell is-leaf">
-                  <div class="cell">{{ server.jllamaInfo.cppVersion }}</div>
+                  <div class="cell">{{ server.jllamaInfo.cpp_version }}</div>
                 </td>
                 <td class="el-table__cell is-leaf">
-                  <div class="cell">{{ server.jllamaInfo.factoryVersion }}</div>
+                  <div class="cell">{{ server.jllamaInfo.factory_version }}</div>
                 </td>
                 <td class="el-table__cell is-leaf">
-                  <div class="cell">{{ server.jllamaInfo.selfVersion }}</div>
+                  <div class="cell">{{ server.jllamaInfo.self_version }}</div>
                 </td>
               </tr>
               </tbody>
@@ -265,7 +265,11 @@ export default {
       const loading = startLoading()
       apis.getSysInfo().then(res => {
         endLoading(loading)
+        console.log(res)
         this.server = res
+      }).catch(e => {
+        endLoading(loading)
+        this.$message.error(e)
       })
     }
   }
