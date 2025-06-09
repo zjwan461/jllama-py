@@ -3,3 +3,5 @@ ui/node_modules
 ui/dist
 .idea
 *.db
+**/__pycache__
+.venv

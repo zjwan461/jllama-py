@@ -1,7 +1,6 @@
 import subprocess
 import webview
-from flask import Flask
-from py.util.dbutil import SqliteSqlalchemy
+from flask import Flask, send_from_directory
 
 import py.config as config
 from py.controller import api
@@ -28,17 +27,19 @@ if config.is_dev():
                                    text_select=True)
 elif config.is_prd():
     print("prd")
-    server = Flask(__name__, static_folder="static", template_folder="template")
+    server = Flask(__name__)
     window = webview.create_window(app_name, server=server, js_api=js_api, width=config.get_app_width(),
                                    height=config.get_app_height(),
                                    confirm_close=True,
                                    text_select=True)
+    @server.route("/")
+    def index():
+        return send_from_directory("ui/dist", "index.html")
+
 else:
     raise RuntimeError("不支持的运行模式类型:" + config.get_model())
 
-# @server.route("/")
-# def index():
-#     return render_template("index.html")
+
 
 
 if __name__ == '__main__':
