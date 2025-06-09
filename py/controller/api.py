@@ -1,8 +1,8 @@
 import json
-import py.util.systemInfoUtil as sysInfoUtil
+import py.util.systemInfo_util as sysInfoUtil
 
 from py.util.logutil import Logger
-from py.util.dbutil import SqliteSqlalchemy, SysInfo
+from py.util.db_util import SqliteSqlalchemy, SysInfo
 
 logger = Logger("Api.py")
 

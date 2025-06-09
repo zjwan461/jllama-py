@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP
 from sqlalchemy.orm import declarative_base, sessionmaker
 import py.config as config
 
@@ -16,6 +16,19 @@ class SysInfo(Base):
     cpp_version = Column(String(255))
     factory_version = Column(String(255))
     self_version = Column(String(255))
+
+
+class FileDownload(Base):
+    __tablename__ = "file_download"
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    model_id = Column(Integer, nullable=False)
+    model_name = Column(String(50), nullable=False)
+    file_path = Column(String(255), nullable=False)
+    file_size = Column(Integer, nullable=False)
+    type=Column(String(50), nullable=False)
+    create_time=Column(TIMESTAMP)
+    update_time=Column(TIMESTAMP)
+
 
 
 class SqliteSqlalchemy(object):
