@@ -83,7 +83,7 @@ class Api:
 
     def create_model(self, params):
         model = Model(name=params.get('name'), repo=params.get('repo'),
-                      download_platform=params.get('downloadPlatform'),
+                      download_platform=params.get('download_platform'),
                       save_dir=config.get_ai_config().get_model_save_dir(),
                       import_dir=config.get_ai_config().get_model_import_dir())
 

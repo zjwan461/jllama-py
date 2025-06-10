@@ -67,7 +67,7 @@
     <el-dialog :title="dialogTitle" :visible.sync="showDialog" :close-on-press-escape=false :close-on-click-modal=false
                :destroy-on-close=true @close="resetDialog">
       <el-form :model="modelForm" :rules="rules" ref="modelForm">
-        <el-form-item label="下载平台" label-width="120px" prop="downloadPlatform">
+        <el-form-item label="下载平台" label-width="120px" prop="download_platform">
           <el-select v-model="modelForm.download_platform" placeholder="下载平台">
             <el-option label="modelscope" value="modelscope"></el-option>
             <el-option label="huggingface" value="huggingface" :disabled="true"></el-option>
@@ -134,12 +134,12 @@ export default {
         repo: [
           {required: true, message: '请输入repo仓库名称', trigger: 'blur'}
         ],
-        downloadPlatform: [
+        download_platform: [
           {required: true, message: '请输入下载平台', trigger: 'blur'}
         ]
       },
       modelForm: {
-        downloadPlatform: 'modelscope',
+        download_platform: 'modelscope',
         revision: '',
         root: ''
       },
