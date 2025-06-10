@@ -68,7 +68,7 @@
                :destroy-on-close=true @close="resetDialog">
       <el-form :model="modelForm" :rules="rules" ref="modelForm">
         <el-form-item label="下载平台" label-width="120px" prop="downloadPlatform">
-          <el-select v-model="modelForm.downloadPlatform" placeholder="下载平台">
+          <el-select v-model="modelForm.download_platform" placeholder="下载平台">
             <el-option label="modelscope" value="modelscope"></el-option>
             <el-option label="huggingface" value="huggingface" :disabled="true"></el-option>
           </el-select>

@@ -203,7 +203,7 @@
                   <div class="cell">GPU平台</div>
                 </th>
                 <th class="el-table__cell is-leaf">
-                  <div class="cell">llama.cpp版本</div>
+                  <div class="cell">llama-cpp-python版本</div>
                 </th>
                 <th class="el-table__cell is-leaf">
                   <div class="cell">LLamaFactory版本</div>
