@@ -7,5 +7,9 @@
   "auth_start_dev_server": false,
   "app_name": "jllama",
   "app_width": 1366,
-  "app_height": 768
+  "app_height": 768,
+  "ai_config": {
+    "model_save_dir": "D:/models",
+    "model_import_dir": "D:/models/import"
+  }
 }

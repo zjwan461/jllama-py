@@ -7,3 +7,4 @@ GPUtil==1.4.0
 WMI==1.5.1
 SQLAlchemy==2.0.41
 modelscope==1.26.0
+orjson==3.10.18

@@ -22,20 +22,23 @@
               <el-form-item label="模型文件列表">
                 <!--                <span v-html="props.row.files"></span>-->
                 <ul>
-                  <li v-for="(item, index) in props.row.files" :key="index">{{ item.fileName }} &nbsp;&nbsp;&nbsp;&nbsp; {{ item.type }} &nbsp;&nbsp;&nbsp;&nbsp;
-                    {{ item.percent }} &nbsp;&nbsp;&nbsp;&nbsp; <el-button type="text" size="small"
-                      @click="delFile(item.id)">删除</el-button>
+                  <li v-for="(item, index) in props.row.files" :key="index">{{ item.fileName }} &nbsp;&nbsp;&nbsp;&nbsp;
+                    {{ item.type }} &nbsp;&nbsp;&nbsp;&nbsp;
+                    {{ item.percent }} &nbsp;&nbsp;&nbsp;&nbsp;
+                    <el-button type="text" size="small"
+                               @click="delFile(item.id)">删除
+                    </el-button>
                   </li>
                 </ul>
               </el-form-item>
               <el-form-item label="存储目录">
-                <span>{{ props.row.saveDir }}</span>
+                <span>{{ props.row.save_dir }}</span>
               </el-form-item>
               <el-form-item label="导入目录">
-                <span>{{ props.row.importDir }}</span>
+                <span>{{ props.row.import_dir }}</span>
               </el-form-item>
               <el-form-item label="创建时间">
-                <span>{{ props.row.createTime }}</span>
+                <span>{{ props.row.create_time }}</span>
               </el-form-item>
             </el-form>
           </template>
@@ -44,24 +47,25 @@
         </el-table-column>
         <el-table-column prop="name" label="模型名称">
         </el-table-column>
-        <el-table-column prop="downloadPlatform" label="下载平台">
+        <el-table-column prop="download_platform" label="下载平台">
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="160">
           <template slot-scope="scope">
-              <el-button @click="edit(scope.row, scope.$index)" type="primary" size="small">修改</el-button>
-              <el-button @click="delModel(scope.row.id, scope.$index)" type="danger" size="small">删除</el-button>
+            <el-button @click="edit(scope.row, scope.$index)" type="primary" size="small">修改</el-button>
+            <el-button @click="delModel(scope.row.id, scope.$index)" type="danger" size="small">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
       <div class="block">
         <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
-          :page-sizes="pageSizes" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
+                       :page-sizes="pageSizes" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper"
+                       :total="total">
         </el-pagination>
       </div>
     </el-card>
 
     <el-dialog :title="dialogTitle" :visible.sync="showDialog" :close-on-press-escape=false :close-on-click-modal=false
-      :destroy-on-close=true @close="resetDialog">
+               :destroy-on-close=true @close="resetDialog">
       <el-form :model="modelForm" :rules="rules" ref="modelForm">
         <el-form-item label="下载平台" label-width="120px" prop="downloadPlatform">
           <el-select v-model="modelForm.downloadPlatform" placeholder="下载平台">
@@ -83,12 +87,12 @@
         </el-form-item>
         <el-form-item label="模型文件" label-width="120px">
           <el-table v-show="showModelFiles" :data="modelFiles" @selection-change="handleSelectionChange"
-            style="width: 100%">
+                    style="width: 100%">
             <el-table-column type="selection" width="55">
             </el-table-column>
-            <el-table-column prop="name" label="文件名" width="180">
+            <el-table-column prop="Name" label="文件名" width="180">
             </el-table-column>
-            <el-table-column prop="size" label="文件大小" width="180">
+            <el-table-column prop="Size" label="文件大小" width="180">
             </el-table-column>
             <el-table-column label="操作" width="100">
               <template slot-scope="scope">
@@ -108,7 +112,9 @@
 </template>
 
 <script>
-import { getRequestBodyJson, fetchFluxData } from "@/common/common"
+import {getRequestBodyJson, fetchFluxData} from "@/common/common"
+import apis from "../../../common/apis";
+import {endLoading, startLoading} from "../../../common/common";
 
 export default {
   name: 'model-download',
@@ -123,13 +129,13 @@ export default {
       showModelFiles: false,
       rules: {
         name: [
-          { required: true, message: '请输入模型名称', trigger: 'blur' }
+          {required: true, message: '请输入模型名称', trigger: 'blur'}
         ],
         repo: [
-          { required: true, message: '请输入repo仓库名称', trigger: 'blur' }
+          {required: true, message: '请输入repo仓库名称', trigger: 'blur'}
         ],
         downloadPlatform: [
-          { required: true, message: '请输入下载平台', trigger: 'blur' }
+          {required: true, message: '请输入下载平台', trigger: 'blur'}
         ]
       },
       modelForm: {
@@ -223,7 +229,7 @@ export default {
             line.files.forEach((item, index) => {
               if (item.percent.indexOf('100.00%') < 0) {
                 fetchFluxData('/api/mgn/dl-percent?fileId=' + item.id, (res) => {
-                  if(res && res.trim().length > 0) {
+                  if (res && res.trim().length > 0) {
                     item.percent = res
                   }
                 });
@@ -285,21 +291,40 @@ export default {
     selectRepo(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.$http.post('/api/mgn/create', getRequestBodyJson(this.modelForm))
+          // this.$http.post('/api/mgn/create', getRequestBodyJson(this.modelForm))
+          //   .then(res => {
+          //     if (res.success === true) {
+          //       this.model = res.data
+          //       this.$http.get('/api/mgn/dl/files?repo=' + this.modelForm.repo + '&revision=' + this.modelForm.revision + '&root=' + this.modelForm.root)
+          //         .then(res => {
+          //           if (res.success === true) {
+          //             this.modelFiles = res.data;
+          //             this.showModelFiles = true
+          //             this.showDownload = true
+          //             this.showSubmit = false
+          //           }
+          //         });
+          //     }
+          //   })
+          apis.createModel(this.modelForm)
             .then(res => {
-              if (res.success === true) {
-                this.model = res.data
-                this.$http.get('/api/mgn/dl/files?repo=' + this.modelForm.repo + '&revision=' + this.modelForm.revision + '&root=' + this.modelForm.root)
-                  .then(res => {
-                    if (res.success === true) {
-                      this.modelFiles = res.data;
-                      this.showModelFiles = true
-                      this.showDownload = true
-                      this.showSubmit = false
-                    }
-                  });
+              console.log(res)
+              if (res === "success") {
+                apis.searchModelFile(this.modelForm).then(res => {
+                  console.log(res)
+                  this.modelFiles = res
+                  this.showModelFiles = true
+                  this.showDownload = true
+                  this.showSubmit = false
+                }).catch(e => {
+                  this.$message.error(e)
+                })
+              } else {
+                this.$message.error('创建模型失败')
               }
-            })
+            }).catch(e => {
+            this.$message.error(e)
+          })
         } else {
           return false
         }
@@ -310,11 +335,22 @@ export default {
       this.showDialog = true
     },
     getTableData() {
-      this.$http.get('/api/mgn/list?page=' + this.currentPage + '&limit=' + this.pageSize + '&search=' + this.formInline.search).then(res => {
-        if (res.success === true) {
-          this.tableData = res.data.records;
-          this.total = res.data.total
-        }
+      // this.$http.get('/api/mgn/list?page=' + this.currentPage + '&limit=' + this.pageSize + '&search=' + this.formInline.search).then(res => {
+      //   if (res.success === true) {
+      //     this.tableData = res.data.records;
+      //     this.total = res.data.total
+      //   }
+      // })
+      const loading = startLoading();
+      apis.modelList(this.currentPage, this.pageSize, this.formInline.search).then(res => {
+        endLoading(loading)
+        const resp = JSON.parse(res)
+        console.log(resp)
+        this.tableData = resp.record
+        this.total = resp.total
+      }).catch(e => {
+        endLoading(loading)
+        this.$message.error(e);
       })
     },
     handleSizeChange(pageSize) {

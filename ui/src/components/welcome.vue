@@ -265,8 +265,7 @@ export default {
       const loading = startLoading()
       apis.getSysInfo().then(res => {
         endLoading(loading)
-        console.log(res)
-        this.server = res
+        this.server = JSON.parse(res)
       }).catch(e => {
         endLoading(loading)
         this.$message.error(e)

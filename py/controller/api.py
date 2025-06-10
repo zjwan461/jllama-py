@@ -1,8 +1,12 @@
 import json
+
 import py.util.systemInfo_util as sysInfoUtil
 
 from py.util.logutil import Logger
-from py.util.db_util import SqliteSqlalchemy, SysInfo
+from py.util.db_util import SqliteSqlalchemy, SysInfo, Model
+import py.config as config
+import orjson
+import py.util.model_file_util as model_file_util
 
 logger = Logger("Api.py")
 
@@ -13,7 +17,7 @@ class Api:
         return "today is a good day"
 
     def get_nav(self):
-        f = open("py/nav.json", "r")
+        f = open("py/nav.json", "r", encoding="utf-8")
         conf = f.read()
         json_data = json.loads(conf)
         return json_data
@@ -22,7 +26,7 @@ class Api:
         result = {"cpu": sysInfoUtil.get_cpu_info(), "memory": sysInfoUtil.get_memory_info(),
                   "gpus": sysInfoUtil.get_gpu_info(),
                   "os": sysInfoUtil.get_os_info(), "jllamaInfo": sysInfoUtil.get_jllama_info()}
-        return result
+        return orjson.dumps(result).decode("utf-8")
 
     def init_env(self):
         session = SqliteSqlalchemy().session
@@ -44,6 +48,60 @@ class Api:
                 session.close()
         else:
             return "no_need"
+
+    def model_list(self, param):
+        page = param.get('page')
+        limit = param.get('limit')
+        search = param.get('search')
+        offset = (page - 1) * limit
+        session = SqliteSqlalchemy().session
+        result = {"page": page, "limit": limit}
+        try:
+            if search is None or len(search) == 0:
+                total = session.query(Model).count()
+                result["total"] = total
+                record = session.query(Model).order_by(
+                    Model.create_time.desc()).offset(
+                    offset).limit(limit).all()
+                r_list = []
+                for item in record:
+                    r_list.append(item.to_dic())
+                result["record"] = r_list
+            else:
+                total = session.query(Model).filter(Model.name.like('%' + search + '%')).count()
+                result["total"] = total
+                record = session.query(Model).filter(Model.name.like('%' + search + '%')).order_by(
+                    Model.create_time.desc()).offset(
+                    offset).limit(limit).all()
+                r_list = []
+                for item in record:
+                    r_list.append(item.to_dic())
+                result["record"] = r_list
+            return orjson.dumps(result).decode("utf-8")
+        finally:
+            session.close()
+
+    def create_model(self, params):
+        model = Model(name=params.get('name'), repo=params.get('repo'),
+                      download_platform=params.get('downloadPlatform'),
+                      save_dir=config.get_ai_config().get_model_save_dir(),
+                      import_dir=config.get_ai_config().get_model_import_dir())
+
+        session = SqliteSqlalchemy().session
+        try:
+            session.add(model)
+            session.commit()
+            return "success"
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            return "error"
+        finally:
+            session.close()
+
+    def search_model_file(self, params):
+        return model_file_util.get_model_file(repo=params.get("repo"), revision=params.get("revision"),
+                                              root=params.get("root"))
 
 
 if __name__ == '__main__':

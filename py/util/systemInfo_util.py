@@ -78,7 +78,7 @@ def is_cuda_available():
 def get_jllama_info():
     session = SqliteSqlalchemy().session
     sys_info = session.query(SysInfo).get(999)
-    return sys_info.to_dict() if sys_info else None
+    return sys_info.to_dic()
 
 
 if __name__ == '__main__':

@@ -16,4 +16,13 @@ export default {
   initEnv() {
     return window.pywebview.api.init_env()
   },
+  modelList(page, limit, search) {
+    return window.pywebview.api.model_list({page: page, limit: limit, search: search})
+  },
+  createModel(modelInfo) {
+    return window.pywebview.api.create_model(modelInfo)
+  },
+  searchModelFile(modelInfo) {
+    return window.pywebview.api.search_model_file(modelInfo)
+  },
 }

@@ -32,6 +32,9 @@ def is_prd():
 def get_log_config():
     return LogConfig(dic.get("log"))
 
+def get_ai_config():
+    return AiConfig(dic.get("ai_config"))
+
 
 def get_app_height():
     return dic.get("app_height")
@@ -39,6 +42,7 @@ def get_app_height():
 
 def get_app_width():
     return dic.get("app_width")
+
 
 def get_db_url():
     return dic.get("db_url")
@@ -51,6 +55,19 @@ class LogConfig:
 
     def get_path(self):
         return self.path
+
+
+class AiConfig:
+
+    def __init__(self, kwargs: dict):
+        self.model_save_dir = kwargs.get("model_save_dir")
+        self.model_import_dir = kwargs.get("model_import_dir")
+
+    def get_model_save_dir(self):
+        return self.model_save_dir
+
+    def get_model_import_dir(self):
+        return self.model_import_dir
 
 
 if __name__ == '__main__':
