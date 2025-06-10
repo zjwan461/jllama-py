@@ -174,7 +174,7 @@ export default {
     },
     resetDialog() {
       this.modelForm = {
-        downloadPlatform: 'modelscope',
+        download_platform: 'modelscope',
         revision: '',
         root: ''
       }
