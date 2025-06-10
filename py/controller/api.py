@@ -89,7 +89,15 @@ class Api:
 
         session = SqliteSqlalchemy().session
         try:
-            session.add(model)
+            old = session.query(Model).filter(Model.name == model.name).first()
+            if old:
+                old.name = model.name
+                old.repo = model.repo
+                old.download_platform = model.download_platform
+                old.save_dir = model.save_dir
+                old.import_dir = model.import_dir
+            else:
+                session.add(model)
             session.commit()
             return "success"
         except Exception as e:
@@ -102,6 +110,21 @@ class Api:
     def search_model_file(self, params):
         return model_file_util.get_model_file(repo=params.get("repo"), revision=params.get("revision"),
                                               root=params.get("root"))
+
+    def delete_model(self, id):
+        session = SqliteSqlalchemy().session
+        try:
+            record = session.query(Model).get(id)
+            if record:
+                session.delete(record)
+                session.commit()
+            else:
+                logger.info(f"can not found model with id={id}")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+        finally:
+            session.close()
 
 
 if __name__ == '__main__':

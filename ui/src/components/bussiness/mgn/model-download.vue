@@ -306,11 +306,13 @@ export default {
           //         });
           //     }
           //   })
+          const loading = startLoading()
           apis.createModel(this.modelForm)
             .then(res => {
               console.log(res)
               if (res === "success") {
                 apis.searchModelFile(this.modelForm).then(res => {
+                  endLoading(loading)
                   console.log(res)
                   this.modelFiles = res
                   this.showModelFiles = true
@@ -318,12 +320,15 @@ export default {
                   this.showSubmit = false
                 }).catch(e => {
                   this.$message.error(e)
+                  endLoading(loading)
                 })
               } else {
+                endLoading(loading)
                 this.$message.error('创建模型失败')
               }
             }).catch(e => {
             this.$message.error(e)
+            endLoading(loading)
           })
         } else {
           return false
