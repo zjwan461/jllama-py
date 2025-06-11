@@ -47,7 +47,8 @@ class FileDownload(BaseEntity):
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     model_id = Column(Integer, nullable=False)
     model_name = Column(String(50), nullable=False)
-    file_path = Column(String(255), nullable=False)
+    file_path = Column(String(1000), nullable=False)
+    file_name = Column(String(255), nullable=False)
     file_size = Column(Integer, nullable=False)
     type = Column(String(50), nullable=False)
 

@@ -25,4 +25,16 @@ export default {
   searchModelFile(modelInfo) {
     return window.pywebview.api.search_model_file(modelInfo)
   },
+  openFileSelector() {
+    return window.pywebview.api.open_file_select()
+  },
+  createDownload(params) {
+    return window.pywebview.api.create_download(params)
+  },
+  createBatchDownload(params) {
+    return window.pywebview.api.create_batch_download(params)
+  },
+  getDownloadFiles(id) {
+    return window.pywebview.api.get_download_files(id)
+  },
 }

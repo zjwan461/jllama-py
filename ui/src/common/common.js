@@ -1,4 +1,4 @@
-import {Loading, Message} from 'element-ui'
+import {Loading, Message, Notification} from 'element-ui'
 
 export function copy(value) {
   const input = document.createElement('input')
@@ -68,4 +68,13 @@ export function endLoading(loading) { //  关闭加载动画
   if (loading) {
     loading.close()
   }
+}
+
+export function showNotice(title, msg, type) {
+  Notification({
+    title: title,
+    message: msg,
+    type: type,
+    duration: 5000
+  })
 }

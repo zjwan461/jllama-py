@@ -18,5 +18,5 @@ def get_model_file(repo: str, revision="master", root=""):
     return None
 
 
-for file in get_model_file("unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF", revision="master"):
-    print(file)
+# for file in get_model_file("unsloth/DeepSeek-R1-Distill-Qwen-1.5B-GGUF", revision="master"):
+#     print(file)

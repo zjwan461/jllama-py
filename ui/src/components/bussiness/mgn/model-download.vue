@@ -22,7 +22,7 @@
               <el-form-item label="模型文件列表">
                 <!--                <span v-html="props.row.files"></span>-->
                 <ul>
-                  <li v-for="(item, index) in props.row.files" :key="index">{{ item.fileName }} &nbsp;&nbsp;&nbsp;&nbsp;
+                  <li v-for="(item, index) in props.row.files" :key="index">{{ item.file_name }} &nbsp;&nbsp;&nbsp;&nbsp;
                     {{ item.type }} &nbsp;&nbsp;&nbsp;&nbsp;
                     {{ item.percent }} &nbsp;&nbsp;&nbsp;&nbsp;
                     <el-button type="text" size="small"
@@ -222,21 +222,12 @@ export default {
     },
     expandChange(row) {
       if (!row.files) {
-        this.$http.get('/api/mgn/list-dl-file?modelId=' + row.id).then(res => {
-          if (res.success === true) {
-            let line = this.tableData.find(item => item.id === row.id)
-            line.files = res.data
-            line.files.forEach((item, index) => {
-              if (item.percent.indexOf('100.00%') < 0) {
-                fetchFluxData('/api/mgn/dl-percent?fileId=' + item.id, (res) => {
-                  if (res && res.trim().length > 0) {
-                    item.percent = res
-                  }
-                });
-              }
-            })
-          }
-        });
+        apis.getDownloadFiles(row.id).then(res => {
+          let line = this.tableData.find(item => item.id === row.id)
+          line.files = JSON.parse(res)
+        }).catch(e => {
+          this.$message.error(e)
+        })
       }
     },
     handleSelectionChange(val) {
@@ -244,46 +235,44 @@ export default {
     },
     download(row, index) {
       if (row) {
-        this.$http.post("/api/mgn/create-download", getRequestBodyJson({
+        const load = startLoading()
+        apis.createDownload({
           modelId: this.model.id,
           modelName: this.model.name,
-          fileName: row.name,
-          fileSize: row.size,
-        }))
-          .then(res => {
-            if (res.success === true) {
-              this.$http.get('/api/mgn/dl?repo=' + this.modelForm.repo + '&filename=' + row.name)
-                .then(res => {
-                  if (res.success === true) {
-                    this.$message({
-                      message: row.name + '开始下载',
-                      type: "success"
-                    })
-                  }
-                })
-            }
-          })
+          fileName: row.Name,
+          fileSize: row.Size,
+        }).then(res => {
+          endLoading(load)
+          if (res === "success") {
+            this.$message.success(row.Name + "开始下载")
+          }
+        }).catch(e => {
+          endLoading(load)
+          this.$message.error(e)
+        })
+
       } else {
         console.log(this.multipleSelection)
+        let fileList = []
         this.multipleSelection.forEach(item => {
-          this.$http.post("/api/mgn/create-download", getRequestBodyJson({
-            modelId: this.model.id,
-            modelName: this.model.name,
-            fileName: item.name,
-            fileSize: item.size,
-          })).then(res => {
-            if (res.success === true) {
-              this.$http.get('/api/mgn/dl?repo=' + this.modelForm.repo + '&filename=' + item.name)
-                .then(res => {
-                  if (res.success === true) {
-                    this.$message({
-                      message: item.name + '开始下载',
-                      type: "success"
-                    })
-                  }
-                })
-            }
+          fileList.push({
+            fileName: item.Name,
+            fileSize: item.Size
           })
+        })
+        const load = startLoading()
+        apis.createBatchDownload({
+          modelId: this.model.id,
+          modelName: this.model.name,
+          fileList: fileList,
+        }).then(res => {
+          endLoading(load)
+          if (res === "success") {
+            this.$message.success("开始下载所选文件")
+          }
+        }).catch(e => {
+          endLoading(load)
+          this.$message.error(e)
         })
       }
 
@@ -291,26 +280,12 @@ export default {
     selectRepo(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // this.$http.post('/api/mgn/create', getRequestBodyJson(this.modelForm))
-          //   .then(res => {
-          //     if (res.success === true) {
-          //       this.model = res.data
-          //       this.$http.get('/api/mgn/dl/files?repo=' + this.modelForm.repo + '&revision=' + this.modelForm.revision + '&root=' + this.modelForm.root)
-          //         .then(res => {
-          //           if (res.success === true) {
-          //             this.modelFiles = res.data;
-          //             this.showModelFiles = true
-          //             this.showDownload = true
-          //             this.showSubmit = false
-          //           }
-          //         });
-          //     }
-          //   })
           const loading = startLoading()
           apis.createModel(this.modelForm)
             .then(res => {
               console.log(res)
-              if (res === "success") {
+              if (res !== "error") {
+                this.model = JSON.parse(res)
                 apis.searchModelFile(this.modelForm).then(res => {
                   endLoading(loading)
                   console.log(res)
@@ -340,12 +315,6 @@ export default {
       this.showDialog = true
     },
     getTableData() {
-      // this.$http.get('/api/mgn/list?page=' + this.currentPage + '&limit=' + this.pageSize + '&search=' + this.formInline.search).then(res => {
-      //   if (res.success === true) {
-      //     this.tableData = res.data.records;
-      //     this.total = res.data.total
-      //   }
-      // })
       const loading = startLoading();
       apis.modelList(this.currentPage, this.pageSize, this.formInline.search).then(res => {
         endLoading(loading)

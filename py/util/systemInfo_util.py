@@ -13,7 +13,7 @@ def get_cpu_info():
     result['cores'] = cores
     use_percent = psutil.cpu_percent(interval=1)
     result['use_percent'] = str(use_percent) + '%'
-    result['free_percent'] = str(100 - use_percent) + '%'
+    result['free_percent'] = str(round(100 - use_percent, 2)) + '%'
     return result
 
 

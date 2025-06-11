@@ -6,8 +6,55 @@ import py.config as config
 from py.controller import api
 
 server = None
-js_api = api.Api()
+controller = api.Api()
 app_name = config.get_app_name()
+
+
+class JsApi:
+
+    def __init__(self, control: api.Api):
+        self.controller = control
+
+    def open_file_select(self):
+        return self.controller.open_file_select()
+
+    def show_tips(self):
+        return self.controller.show_tips()
+
+    def get_nav(self):
+        return self.controller.get_nav()
+
+    def get_sys_info(self):
+        return self.controller.get_sys_info()
+
+    def init_env(self):
+        return self.controller.init_env()
+
+    def model_list(self, param):
+        return self.controller.model_list(param)
+
+    def create_model(self, params):
+        return self.controller.create_model(params)
+
+    def search_model_file(self, params):
+        return self.controller.search_model_file(params)
+
+    def delete_model(self, id):
+        return self.controller.delete_model(id)
+
+    def create_download(self, params):
+        self.controller.create_download(params, window)
+        return "success"
+
+    def create_batch_download(self, params):
+        self.controller.create_batch_download(params, window)
+        return "success"
+
+    def get_download_files(self, model_id):
+        return self.controller.get_download_files(model_id)
+
+
+js_api = JsApi(controller)
 
 
 def start_dev_server():
@@ -32,15 +79,14 @@ elif config.is_prd():
                                    height=config.get_app_height(),
                                    confirm_close=True,
                                    text_select=True)
+
+
     @server.route("/")
     def index():
         return send_from_directory("ui/dist", "index.html")
 
 else:
     raise RuntimeError("不支持的运行模式类型:" + config.get_model())
-
-
-
 
 if __name__ == '__main__':
     webview.start(http_server=True, debug=config.is_dev())

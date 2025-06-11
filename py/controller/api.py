@@ -1,17 +1,31 @@
 import json
-
+import os.path
+import threading
+import tkinter as tk
+from tkinter import filedialog
 import py.util.systemInfo_util as sysInfoUtil
 
 from py.util.logutil import Logger
-from py.util.db_util import SqliteSqlalchemy, SysInfo, Model
+from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload
 import py.config as config
 import orjson
 import py.util.model_file_util as model_file_util
+from py.util.download import download
 
 logger = Logger("Api.py")
 
 
 class Api:
+
+    def set_window(self, window):
+        self.window = window
+
+    def open_file_select(self):
+        # 创建一个隐藏的主窗口（不需要显示完整的GUI）
+        root = tk.Tk()
+        root.withdraw()  # 隐藏主窗口
+        files = filedialog.askopenfilenames(title="请选择文件", filetypes=[("文本文件", "*.txt"), ("所有文件", "*.*")])
+        return files
 
     def show_tips(self):
         return "today is a good day"
@@ -99,7 +113,8 @@ class Api:
             else:
                 session.add(model)
             session.commit()
-            return "success"
+            result = old.to_dic() if old else model.to_dic()
+            return orjson.dumps(result).decode("utf-8")
         except Exception as e:
             logger.error(e)
             session.rollback()
@@ -126,7 +141,96 @@ class Api:
         finally:
             session.close()
 
+    def create_download(self, params, window=None):
+        model_id = params.get("modelId")
+        model_name = params.get("modelName")
+        file_name = params.get('fileName')
+        file_size = params.get('fileSize')
+        save_dir = config.get_ai_config().get_model_save_dir()
+        full_file_name = save_dir + "/" + model_name + "/" + file_name
+        file_entity = FileDownload(model_id=model_id, model_name=model_name, file_name=file_name,
+                                   file_path=full_file_name,
+                                   file_size=file_size, type="下载")
+        session = SqliteSqlalchemy().session
+        try:
+            old = session.query(FileDownload).filter(FileDownload.file_path == full_file_name).first()
+            if old:
+                old.model_id = model_id
+                old.model_name = model_name
+                old.file_size = file_size
+            else:
+                session.add(file_entity)
+            session.commit()
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
 
-if __name__ == '__main__':
-    api = Api()
-    api.show_tips()
+        file_list = [file_name]
+
+        process = threading.Thread(target=download,
+                                   name="download",
+                                   args=(model_name, config.get_ai_config().get_model_save_dir(), file_list, window))
+        process.start()
+        return file_list
+
+
+    def create_batch_download(self, params, window=None):
+        model_id = params.get("modelId")
+        model_name = params.get("modelName")
+        file_list = params.get('fileList')
+        save_dir = config.get_ai_config().get_model_save_dir()
+        file_name_list = []
+        for file in file_list:
+            file_name = file.get('fileName')
+            file_size = file.get('fileSize')
+            full_file_name = save_dir + "/" + model_name + "/" + file_name
+            file_entity = FileDownload(model_id=model_id, model_name=model_name, file_name=file_name,
+                                   file_path=full_file_name,
+                                   file_size=file_size, type="下载")
+            session = SqliteSqlalchemy().session
+            try:
+                old = session.query(FileDownload).filter(FileDownload.file_name == file_name).first()
+                if old:
+                    old.model_id = model_id
+                    old.model_name = model_name
+                    old.file_size = file_size
+                else:
+                    session.add(file_entity)
+                session.commit()
+            except Exception as e:
+                logger.error(e)
+                session.rollback()
+                raise e
+            finally:
+                session.close()
+
+            file_name_list.append(file_name)
+
+
+        process = threading.Thread(target=download,
+                                   name="download",
+                                   args=(model_name, config.get_ai_config().get_model_save_dir(), file_name_list, window))
+        process.start()
+        return file_name_list
+
+    def get_download_files(self, model_id):
+        session = SqliteSqlalchemy().session
+        model = session.query(Model).get(model_id)
+        if model is None:
+            raise Exception("找不到model_id=" + model_id + "的数据")
+
+        record = session.query(FileDownload).filter(FileDownload.model_id == model_id).all()
+        result = []
+        for item in record:
+            percent = "0%"
+            if os.path.exists(item.file_path):
+                current_size = os.path.getsize(item.file_path)
+                percent = current_size / item.file_size
+                percent = f"{percent * 100:.2f}%"
+            dic_item = item.to_dic()
+            dic_item["percent"] = percent
+            result.append(dic_item)
+        return orjson.dumps(result).decode("utf-8")

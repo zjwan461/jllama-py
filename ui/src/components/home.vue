@@ -115,8 +115,8 @@ import apis from '@/common/apis'
 export default {
   data() {
     return {
-      collapse: false,
-      asideWidth: '200px',
+      collapse: true,
+      asideWidth: '64px',
       menuData: [],
       active: ''
     }
