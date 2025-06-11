@@ -145,6 +145,8 @@ class Api:
         model_id = params.get("modelId")
         model_name = params.get("modelName")
         file_name = params.get('fileName')
+        if file_name == '.gitattributes':
+            return "skip"
         file_size = params.get('fileSize')
         save_dir = config.get_ai_config().get_model_save_dir()
         full_file_name = save_dir + "/" + model_name + "/" + file_name
@@ -153,7 +155,8 @@ class Api:
                                    file_size=file_size, type="下载")
         session = SqliteSqlalchemy().session
         try:
-            old = session.query(FileDownload).filter(FileDownload.file_path == full_file_name).first()
+            old = session.query(FileDownload).filter(FileDownload.file_name == file_name).filter(
+                FileDownload.model_id == model_id).first()
             if old:
                 old.model_id = model_id
                 old.model_name = model_name
@@ -176,11 +179,13 @@ class Api:
         process.start()
         return file_list
 
-
     def create_batch_download(self, params, window=None):
         model_id = params.get("modelId")
         model_name = params.get("modelName")
         file_list = params.get('fileList')
+        for item in file_list:
+            if item["fileName"] == '.gitattributes':
+                file_list.remove(item)
         save_dir = config.get_ai_config().get_model_save_dir()
         file_name_list = []
         for file in file_list:
@@ -188,11 +193,12 @@ class Api:
             file_size = file.get('fileSize')
             full_file_name = save_dir + "/" + model_name + "/" + file_name
             file_entity = FileDownload(model_id=model_id, model_name=model_name, file_name=file_name,
-                                   file_path=full_file_name,
-                                   file_size=file_size, type="下载")
+                                       file_path=full_file_name,
+                                       file_size=file_size, type="下载")
             session = SqliteSqlalchemy().session
             try:
-                old = session.query(FileDownload).filter(FileDownload.file_name == file_name).first()
+                old = session.query(FileDownload).filter(FileDownload.file_name == file_name).filter(
+                    FileDownload.model_id == model_id).first()
                 if old:
                     old.model_id = model_id
                     old.model_name = model_name
@@ -209,10 +215,10 @@ class Api:
 
             file_name_list.append(file_name)
 
-
         process = threading.Thread(target=download,
                                    name="download",
-                                   args=(model_name, config.get_ai_config().get_model_save_dir(), file_name_list, window))
+                                   args=(model_name, config.get_ai_config().get_model_save_dir(), file_name_list,
+                                         window))
         process.start()
         return file_name_list
 
