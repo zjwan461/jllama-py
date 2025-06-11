@@ -1,1 +1,6 @@
+# linux:
 CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python
+
+# Windows
+$env:CMAKE_ARGS = "-DGGML_CUDA=ON"
+pip install llama-cpp-python
