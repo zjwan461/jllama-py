@@ -37,4 +37,10 @@ export default {
   getDownloadFiles(id) {
     return window.pywebview.api.get_download_files(id)
   },
+  delFile(file_id) {
+    return window.pywebview.api.delete_file_download(file_id)
+  },
+  delModel(params) {
+    return window.pywebview.api.delete_model(params)
+  },
 }

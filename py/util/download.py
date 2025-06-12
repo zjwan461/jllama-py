@@ -17,6 +17,6 @@ def download(model_name: str, cache_dir, file_pattern, window: None):
     if window:
         content = ""
         for item in file_pattern:
-            content += item + ","
+            content += item + "; "
         content += '已下載'
         window.evaluate_js("vue.messageArrive('jllama提醒','" + content + "','success')")

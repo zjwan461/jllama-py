@@ -4,7 +4,7 @@
     "path": "log"
   },
   "model": "dev",
-  "auth_start_dev_server": false,
+  "auto_start_dev_server": false,
   "app_name": "jllama",
   "app_width": 1366,
   "app_height": 768,

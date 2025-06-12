@@ -1,11 +1,11 @@
 import subprocess
+
 import webview
 from flask import Flask, send_from_directory
 
 import py.config as config
 from py.controller import api
 
-server = None
 controller = api.Api()
 app_name = config.get_app_name()
 
@@ -39,8 +39,9 @@ class JsApi:
     def search_model_file(self, params):
         return self.controller.search_model_file(params)
 
-    def delete_model(self, id):
-        return self.controller.delete_model(id)
+    def delete_model(self, params):
+        self.controller.delete_model(params)
+        return "success"
 
     def create_download(self, params):
         self.controller.create_download(params, window)
@@ -53,8 +54,13 @@ class JsApi:
     def get_download_files(self, model_id):
         return self.controller.get_download_files(model_id)
 
+    def delete_file_download(self, file_id):
+        self.controller.delete_file_download(file_id)
+        return "success"
+
 
 js_api = JsApi(controller)
+server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 
 
 def start_dev_server():
@@ -66,16 +72,15 @@ def start_dev_server():
 
 if config.is_dev():
     print("dev")
-    if config.get_value("auth_start_dev_server"):
+    if config.get_value("auto_start_dev_server"):
         start_dev_server()
-    window = webview.create_window(app_name, url="http://localhost:8001/app/", js_api=js_api,
+    window = webview.create_window(app_name, url="http://localhost:8001/", js_api=js_api,
                                    width=config.get_app_width(), height=config.get_app_height(),
                                    confirm_close=True,
                                    text_select=True)
 elif config.is_prd():
     print("prd")
-    server = Flask(__name__)
-    window = webview.create_window(app_name, server=server, js_api=js_api, width=config.get_app_width(),
+    window = webview.create_window(app_name, server, js_api=js_api, width=config.get_app_width(),
                                    height=config.get_app_height(),
                                    confirm_close=True,
                                    text_select=True)
@@ -84,9 +89,11 @@ elif config.is_prd():
     @server.route("/")
     def index():
         return send_from_directory("ui/dist", "index.html")
-
 else:
     raise RuntimeError("不支持的运行模式类型:" + config.get_model())
 
 if __name__ == '__main__':
-    webview.start(http_server=True, debug=config.is_dev())
+    if config.is_dev():
+        webview.start(debug=True)
+    else:
+        webview.start(http_server=True, debug=False)

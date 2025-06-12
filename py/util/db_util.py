@@ -8,8 +8,9 @@ Base = declarative_base()
 class BaseEntity(Base):
     __abstract__ = True
 
-    create_time = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'))
-    update_time = Column(TIMESTAMP, server_default=text('CURRENT_TIMESTAMP'), onupdate=text('CURRENT_TIMESTAMP'))
+    create_time = Column(TIMESTAMP, server_default=text("DATETIME(CURRENT_TIMESTAMP, '+8 hours')"))
+    update_time = Column(TIMESTAMP, server_default=text("DATETIME(CURRENT_TIMESTAMP, '+8 hours')"),
+                         onupdate=text("DATETIME(CURRENT_TIMESTAMP, '+8 hours')"))
 
     def to_dic(self):
         return {

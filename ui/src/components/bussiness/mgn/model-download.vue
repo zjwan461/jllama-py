@@ -15,18 +15,17 @@
           <el-button type="success" @click="create">新增</el-button>
         </el-form-item>
       </el-form>
-      <el-table :data="tableData" border style="width: 100%" @expand-change="expandChange">
+      <el-table :data="tableData" border style="width: 100%" @expand-change="loadExpandData">
         <el-table-column type="expand">
           <template slot-scope="props">
             <el-form label-position="left" inline class="demo-table-expand">
               <el-form-item label="模型文件列表">
-                <!--                <span v-html="props.row.files"></span>-->
                 <ul>
                   <li v-for="(item, index) in props.row.files" :key="index">{{ item.file_name }} &nbsp;&nbsp;&nbsp;&nbsp;
                     {{ item.type }} &nbsp;&nbsp;&nbsp;&nbsp;
                     {{ item.percent }} &nbsp;&nbsp;&nbsp;&nbsp;
                     <el-button type="text" size="small"
-                               @click="delFile(item.id)">删除
+                               @click="delFile(item)">删除
                     </el-button>
                   </li>
                 </ul>
@@ -47,7 +46,7 @@
         </el-table-column>
         <el-table-column prop="name" label="模型名称">
         </el-table-column>
-        <el-table-column prop="download_platform" label="下载平台">
+        <el-table-column prop="download_platform" label="下载平台" width="120">
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="160">
           <template slot-scope="scope">
@@ -112,7 +111,6 @@
 </template>
 
 <script>
-import {getRequestBodyJson, fetchFluxData} from "@/common/common"
 import apis from "../../../common/apis";
 import {endLoading, startLoading} from "../../../common/common";
 
@@ -159,18 +157,18 @@ export default {
     this.getTableData()
   },
   methods: {
-    delFile(id) {
-      this.$http
-        .delete('/api/mgn/del-file/' + id)
-        .then(res => {
-          if (res.success === true) {
-            this.$message({
-              message: '已删除',
-              type: 'success'
-            })
-            this.getTableData()
-          }
-        })
+    delFile(item) {
+      const loading = startLoading()
+      apis.delFile(item.id).then(res => {
+        endLoading(loading)
+        if (res === "success") {
+          this.$message.success(item.file_name + "已删除")
+          this.reloadFiles(item.model_id)
+        }
+      }).catch(e => {
+        endLoading(loading)
+        this.$message.error(e)
+      })
     },
     resetDialog() {
       this.modelForm = {
@@ -197,38 +195,41 @@ export default {
     },
     delModel(id) {
       this.$confirm('你确定要删除此模型配置？', '提示').then(() => {
+        let req = {model_id: id}
         this.$confirm('是否删除已经下载的模型？').then(() => {
-          this.$http.delete('/api/mgn/del/' + id + '/true').then(res => {
-            if (res.success === true) {
-              this.$message({
-                message: '已删除',
-                type: 'success'
-              })
-              this.getTableData()
-            }
-          })
+          req.del_file = true
+          this.doDelModel(req)
         }).catch(() => {
-          this.$http.delete('/api/mgn/del/' + id + '/false').then(res => {
-            if (res.success === true) {
-              this.$message({
-                message: '已删除',
-                type: 'success'
-              })
-              this.getTableData()
-            }
-          })
+          req.del_file = false
+          this.doDelModel(req)
         })
       })
     },
-    expandChange(row) {
+    doDelModel(param) {
+      const loading = startLoading()
+      apis.delModel(param).then(res => {
+        endLoading(loading)
+        if (res === "success") {
+          this.$message.success("模型已删除")
+          this.getTableData()
+        }
+      }).catch(e => {
+        endLoading(loading)
+        this.$message.error(e)
+      })
+    },
+    loadExpandData(row) {
       if (!row.files) {
-        apis.getDownloadFiles(row.id).then(res => {
-          let line = this.tableData.find(item => item.id === row.id)
-          line.files = JSON.parse(res)
-        }).catch(e => {
-          this.$message.error(e)
-        })
+        this.reloadFiles(row.id)
       }
+    },
+    reloadFiles(moel_id) {
+      apis.getDownloadFiles(moel_id).then(res => {
+        let line = this.tableData.find(item => item.id === moel_id)
+        line.files = JSON.parse(res)
+      }).catch(e => {
+        this.$message.error(e)
+      })
     },
     handleSelectionChange(val) {
       this.multipleSelection = val

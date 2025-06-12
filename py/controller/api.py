@@ -3,6 +3,9 @@ import os.path
 import threading
 import tkinter as tk
 from tkinter import filedialog
+
+from Demos.win32ts_logoff_disconnected import session
+
 import py.util.systemInfo_util as sysInfoUtil
 
 from py.util.logutil import Logger
@@ -126,11 +129,21 @@ class Api:
         return model_file_util.get_model_file(repo=params.get("repo"), revision=params.get("revision"),
                                               root=params.get("root"))
 
-    def delete_model(self, id):
+    def delete_model(self, params):
+        model_id = params.get("model_id")
+        del_file = params.get("del_file")
         session = SqliteSqlalchemy().session
         try:
-            record = session.query(Model).get(id)
+            record = session.query(Model).get(model_id)
             if record:
+                file_query = session.query(FileDownload).filter(FileDownload.model_id == model_id)
+                file_list = file_query.all()
+                if len(file_list) > 0:
+                    if del_file == True:
+                        for file in file_list:
+                            os.remove(file.file_path) if os.path.exists(file.file_path) else logger.warn(
+                                f"can not found this file: {file.file_path}")
+                    file_query.delete()
                 session.delete(record)
                 session.commit()
             else:
@@ -138,6 +151,7 @@ class Api:
         except Exception as e:
             logger.error(e)
             session.rollback()
+            raise e
         finally:
             session.close()
 
@@ -240,3 +254,21 @@ class Api:
             dic_item["percent"] = percent
             result.append(dic_item)
         return orjson.dumps(result).decode("utf-8")
+
+    def delete_file_download(self, file_id):
+        session = SqliteSqlalchemy().session
+        file_entity = session.query(FileDownload).get(file_id)
+        try:
+            if file_entity is not None:
+                file_path = file_entity.file_path
+                os.remove(file_path) if os.path.exists(file_path) else logger.warn(f"找不到此文件{file_path}")
+                session.delete(file_entity)
+                session.commit()
+            else:
+                logger.info(f"can not found file download record with id={file_id}")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
