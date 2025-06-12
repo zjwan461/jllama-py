@@ -19,14 +19,22 @@ logger = Logger("Api.py")
 
 
 class Api:
+    root = None
+
+    def __init__(self):
+        tk_thread = threading.Thread(target=self.init_tk, name="tk thread", daemon=True)
+        tk_thread.start()
 
     def set_window(self, window):
         self.window = window
 
+    def init_tk(self):
+        self.root = tk.Tk()
+        self.root.withdraw()  # 隐藏主窗口
+        self.root.mainloop()
+
     def open_file_select(self):
         # 创建一个隐藏的主窗口（不需要显示完整的GUI）
-        root = tk.Tk()
-        root.withdraw()  # 隐藏主窗口
         files = filedialog.askopenfilenames(title="请选择文件", filetypes=[("文本文件", "*.txt"), ("所有文件", "*.*")])
         return files
 
@@ -266,6 +274,35 @@ class Api:
                 session.commit()
             else:
                 logger.info(f"can not found file download record with id={file_id}")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def import_file(self, params):
+        model_id = params.get("model_id")
+        file_path = params.get("file_path")
+        for full_file_path in file_path:
+            if not os.path.exists(full_file_path):
+                raise Exception(f"{full_file_path} is not exist")
+
+        try:
+            session = SqliteSqlalchemy().session
+            model = session.query(Model).get(model_id)
+            if model is None:
+                raise Exception(f"model_id={model_id} can not be found in db")
+
+            for full_file_path in file_path:
+                file_name = os.path.basename(full_file_path)
+                file_size = os.path.getsize(full_file_path)
+                file_entity = FileDownload(model_id=model_id, model_name=model.name, file_path=full_file_path,
+                                           file_name=file_name,
+                                           file_size=file_size,
+                                           type="导入")
+                session.add(file_entity)
+            session.commit()
         except Exception as e:
             logger.error(e)
             session.rollback()

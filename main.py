@@ -58,6 +58,10 @@ class JsApi:
         self.controller.delete_file_download(file_id)
         return "success"
 
+    def import_file(self, params):
+        self.controller.import_file(params)
+        return "success"
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

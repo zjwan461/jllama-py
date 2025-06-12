@@ -253,7 +253,7 @@ export default {
         })
 
       } else {
-        console.log(this.multipleSelection)
+        // console.log(this.multipleSelection)
         let fileList = []
         this.multipleSelection.forEach(item => {
           fileList.push({
@@ -284,12 +284,12 @@ export default {
           const loading = startLoading()
           apis.createModel(this.modelForm)
             .then(res => {
-              console.log(res)
+              // console.log(res)
               if (res !== "error") {
                 this.model = JSON.parse(res)
                 apis.searchModelFile(this.modelForm).then(res => {
                   endLoading(loading)
-                  console.log(res)
+                  // console.log(res)
                   this.modelFiles = res
                   this.showModelFiles = true
                   this.showDownload = true
@@ -320,7 +320,7 @@ export default {
       apis.modelList(this.currentPage, this.pageSize, this.formInline.search).then(res => {
         endLoading(loading)
         const resp = JSON.parse(res)
-        console.log(resp)
+        // console.log(resp)
         this.tableData = resp.record
         this.total = resp.total
       }).catch(e => {

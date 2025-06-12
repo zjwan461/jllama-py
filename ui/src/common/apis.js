@@ -43,4 +43,7 @@ export default {
   delModel(params) {
     return window.pywebview.api.delete_model(params)
   },
+  importFile(params) {
+    return window.pywebview.api.import_file(params)
+  },
 }
