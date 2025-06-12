@@ -54,6 +54,18 @@ class FileDownload(BaseEntity):
     type = Column(String(50), nullable=False)
 
 
+class LlamaExecLog(BaseEntity):
+    __tablename__ = "llama_exec_log"
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    model_id = Column(Integer, nullable=False)
+    model_name = Column(String(50), nullable=False)
+    file_id = Column(Integer, nullable=False)
+    file_path = Column(String(1000), nullable=False)
+    file_name = Column(String(255), nullable=False)
+    cpp_args = Column(String(1000))
+    log_file_path = Column(String(1000))
+
+
 class SqliteSqlalchemy(object):
     def __init__(self):
         # 创建Sqlite连接引擎
