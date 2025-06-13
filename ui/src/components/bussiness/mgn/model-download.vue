@@ -261,20 +261,22 @@ export default {
             fileSize: item.Size
           })
         })
-        const load = startLoading()
-        apis.createBatchDownload({
-          modelId: this.model.id,
-          modelName: this.model.name,
-          fileList: fileList,
-        }).then(res => {
-          endLoading(load)
-          if (res === "success") {
-            this.$message.success("开始下载所选文件")
-          }
-        }).catch(e => {
-          endLoading(load)
-          this.$message.error(e)
-        })
+        if (fileList.length > 0) {
+          const load = startLoading();
+          apis.createBatchDownload({
+            modelId: this.model.id,
+            modelName: this.model.name,
+            fileList: fileList,
+          }).then(res => {
+            endLoading(load)
+            if (res === "success") {
+              this.$message.success("开始下载所选文件")
+            }
+          }).catch(e => {
+            endLoading(load)
+            this.$message.error(e)
+          })
+        }
       }
 
     },
