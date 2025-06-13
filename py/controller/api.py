@@ -110,7 +110,8 @@ class Api:
         model = Model(name=params.get('name'), repo=params.get('repo'),
                       download_platform=params.get('download_platform'),
                       save_dir=config.get_ai_config().get_model_save_dir(),
-                      import_dir=config.get_ai_config().get_model_import_dir())
+                      import_dir=config.get_ai_config().get_model_import_dir(),
+                      type="gguf" if "gguf" in params.get("repo").lower() else "hf")
 
         session = SqliteSqlalchemy().session
         try:

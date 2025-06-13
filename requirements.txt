@@ -8,3 +8,6 @@ WMI==1.5.1
 SQLAlchemy==2.0.41
 modelscope==1.26.0
 orjson==3.10.18
+transformers==4.52.4
+accelerate==1.7.0
+addict==2.4.0

@@ -38,6 +38,7 @@ class Model(BaseEntity):
     name = Column(String(50), nullable=False)
     repo = Column(String(50), nullable=False)
     download_platform = Column(String(50))
+    type = Column(String(10), default="gguf")
     files = Column(Text)
     save_dir = Column(String(255))
     import_dir = Column(String(255))
