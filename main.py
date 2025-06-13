@@ -1,7 +1,8 @@
 import subprocess
+from typing import List, Dict
 
 import webview
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, request, jsonify
 
 import py.config as config
 from py.controller import api
@@ -95,6 +96,72 @@ elif config.is_prd():
         return send_from_directory("ui/dist", "index.html")
 else:
     raise RuntimeError("不支持的运行模式类型:" + config.get_model())
+
+
+@server.route("/v1/chat/completions", methods="POST")
+def chat_completions():
+    data = request.json
+    # 提取请求参数
+    model = data.get("model", "llama-2-7b")
+    messages = data.get("messages", [])
+    temperature = data.get("temperature", 0.7)
+    top_p = data.get("top_p", 0.95)
+    top_k = data.get("top_k", 40)
+    max_tokens = data.get("max_tokens", 512)
+    stream = data.get("stream", False)
+    stop = data.get("stop", [])
+
+    # 验证参数
+    if not messages:
+        return jsonify({"error": {"message": "Missing messages"}}), 400
+
+    # 构建提示词
+    prompt = messages_to_prompt(messages, model)
+
+    # 准备生成参数
+    generate_params = {
+        "prompt": prompt,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+        "top_p": top_p,
+        "top_k": top_k,
+        "stop": stop if isinstance(stop, list) else [stop] if stop else [],
+        "stream": stream
+    }
+    # todo
+    return None
+
+
+# 解析消息历史，转换为提示词
+def messages_to_prompt(messages: List[Dict[str, str]], model: str) -> str:
+    """将消息历史转换为模型特定的提示词格式"""
+    if "llama-2" in model:
+        # Llama 2 聊天格式
+        prompt = ""
+        for message in messages:
+            role = message["role"]
+            content = message["content"]
+
+            if role == "system":
+                prompt += f"<<SYS>>\n{content}\n<</SYS>>\n\n"
+            elif role == "user":
+                prompt += f"[INST] {content} [/INST]"
+            elif role == "assistant":
+                prompt += f" {content} "
+
+        # 如果最后一条消息是用户消息，添加助手响应前缀
+        if messages[-1]["role"] == "user":
+            prompt += " "
+        return prompt
+    else:
+        # 默认格式
+        prompt = ""
+        for message in messages:
+            role = message["role"]
+            content = message["content"]
+            prompt += f"{role}: {content}\n"
+        return prompt
+
 
 if __name__ == '__main__':
     if config.is_dev():
