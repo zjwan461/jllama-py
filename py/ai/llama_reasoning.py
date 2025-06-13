@@ -3,11 +3,12 @@ import json
 from llama_cpp import Llama
 
 llm = Llama(
-    model_path="E:\models\Qwen\Qwen3-1___7B-GGUF\Qwen3-1.7B-Q8_0.gguf",
+    model_path="E:\models\Qwen\Qwen3-0___6B-GGUF\Qwen3-0.6B-Q8_0.gguf",
     # n_gpu_layers=-1, # Uncomment to use GPU acceleration
     # seed=1337, # Uncomment to set a specific seed
     n_ctx=2048,  # Uncomment to increase the context window
     # chat_format="qwen"
+    n_gpu_layers=-1
 )
 
 

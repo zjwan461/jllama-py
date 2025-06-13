@@ -4,12 +4,12 @@ from modelscope import snapshot_download
 
 
 def download():
-    snapshot_download("Qwen/Qwen3-0.6B", cache_dir="D:/models", allow_file_pattern="*")
+    snapshot_download("Qwen/Qwen3-0.6B", cache_dir="E:/models", allow_file_pattern="*")
 
 
 # download()
 
-model_name = "D:/models/Qwen/Qwen3-0.6B"
+model_name = "E:/models/Qwen/Qwen3-0___6B"
 
 
 def reasoning():
@@ -75,7 +75,7 @@ def reasoning_pipline():
 
     generated_text = ""
     for new_text in streamer:
-        print(new_text)
+        print(new_text,end="")
         generated_text += new_text
 
     print(generated_text)

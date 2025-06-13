@@ -1,4 +1,5 @@
 import subprocess
+import threading
 from typing import List, Dict
 
 import webview
@@ -98,7 +99,7 @@ else:
     raise RuntimeError("不支持的运行模式类型:" + config.get_model())
 
 
-@server.route("/v1/chat/completions", methods="POST")
+@server.route("/v1/chat/completions", methods=["POST"])
 def chat_completions():
     data = request.json
     # 提取请求参数
@@ -129,7 +130,7 @@ def chat_completions():
         "stream": stream
     }
     # todo
-    return None
+    return jsonify({}), 200
 
 
 # 解析消息历史，转换为提示词
@@ -163,8 +164,13 @@ def messages_to_prompt(messages: List[Dict[str, str]], model: str) -> str:
         return prompt
 
 
+def start_dev_flask():
+    server.run(port=5000)
+
+
 if __name__ == '__main__':
     if config.is_dev():
+        threading.Thread(target=start_dev_flask).start()
         webview.start(debug=True)
     else:
         webview.start(http_server=True, debug=False)

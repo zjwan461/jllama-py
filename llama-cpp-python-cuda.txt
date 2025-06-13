@@ -3,4 +3,6 @@ CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python
 
 # Windows
 $env:CMAKE_ARGS = "-DGGML_CUDA=ON"
+$env:CMAKE_GENERATOR = "MinGW Makefiles"
+$env:CMAKE_ARGS = "-DGGML_OPENBLAS=on -DCMAKE_C_COMPILER=F:/software/mingw64/bingcc.exe -DCMAKE_CXX_COMPILER=F:/software/mingw64/bin/g++.exe"
 pip install llama-cpp-python

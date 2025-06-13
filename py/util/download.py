@@ -1,6 +1,5 @@
 # 模型下载
 import os.path
-import traceback
 
 from modelscope import snapshot_download
 from py.util.db_util import SqliteSqlalchemy, FileDownload
