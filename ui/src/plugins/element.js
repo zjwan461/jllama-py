@@ -44,7 +44,7 @@ import {
   Steps,
   Alert,
   Tabs,
-  TabPane
+  TabPane, Slider
 
 } from 'element-ui'
 
@@ -95,3 +95,4 @@ Vue.use(Steps)
 Vue.use(Alert)
 Vue.use(Tabs)
 Vue.use(TabPane)
+Vue.use(Slider)

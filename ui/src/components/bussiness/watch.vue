@@ -47,6 +47,12 @@
           </template>
         </el-table-column>
       </el-table>
+      <div class="block">
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
+                       :page-sizes="pageSizes" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper"
+                       :total="total">
+        </el-pagination>
+      </div>
     </el-card>
 
     <el-dialog title="创建服务进程"
@@ -54,38 +60,21 @@
                :close-on-press-escape=false
                :close-on-click-modal=false
                :destroy-on-close=true
-               width="700px"
+               width="800px"
                @close="resetDialog"
     >
       <el-form :model="modelForm" :rules="rules" ref="modelForm">
-        <el-form-item label="模型" label-width="80px" prop="modelId">
+        <el-form-item label="模型" label-width="120px" prop="modelId">
           <el-select v-model="modelForm.modelId" placeholder="模型" @change="modelChange">
             <el-option v-for="item in modelList" :key="item.id" :label="item.name" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="文件名" label-width="80px" prop="fileId">
+        <el-form-item label="文件名" label-width="120px" prop="fileId" v-if="selectedModel.type ==='gguf'">
           <el-select v-model="modelForm.fileId" placeholder="文件名">
-            <el-option v-for="item in fileList" :key="item.id" :label="item.fileName" :value="item.id"></el-option>
+            <el-option v-for="item in fileList" :key="item.id" :label="item.file_name" :value="item.id"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="命令" label-width="80px" prop="llamaCommand">
-          <el-select v-model="modelForm.llamaCommand" placeholder="命令">
-            <el-option v-for="item in commandList" :key="item" :label="item" :value="item"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="host" label-width="80px" prop="host">
-          <el-input type="text" v-model="modelForm.host" placeholder="host,例如：localhost,默认值：127.0.0.1"></el-input>
-        </el-form-item>
-        <el-form-item label="端口" label-width="80px" prop="port">
-          <el-input
-            type="number"
-            placeholder="请输入端口"
-            v-model="modelForm.port"
-            show-word-limit
-          >
-          </el-input>
-        </el-form-item>
-        <el-form-item label="-ngl" label-width="80px" prop="ngl">
+        <el-form-item label="-ngl" label-width="120px" prop="ngl" v-if="selectedModel.type ==='gguf'">
           <el-input
             type="number"
             placeholder="存储在 VRAM 中的层数,通常数值越大性能越好,但是过大也会导致显存不足"
@@ -94,7 +83,7 @@
           >
           </el-input>
         </el-form-item>
-        <el-form-item label="-t" label-width="80px" prop="threads">
+        <el-form-item label="-t" label-width="120px" prop="threads" v-if="selectedModel.type ==='gguf'">
           <el-input
             type="number"
             placeholder="生成期间使用的线程数（默认值：-1）"
@@ -103,7 +92,7 @@
           >
           </el-input>
         </el-form-item>
-        <el-form-item label="-c" label-width="80px" prop="ctxSize">
+        <el-form-item label="-c" label-width="120px" prop="ctxSize" v-if="selectedModel.type ==='gguf'">
           <el-input
             type="number"
             placeholder="提示上下文的大小（默认值：4096，0 = 从模型加载）"
@@ -112,17 +101,37 @@
           >
           </el-input>
         </el-form-item>
-        <el-form-item label="-np" label-width="80px" prop="parallel">
+        <el-form-item label="其他参数" label-width="120px" prop="args" v-if="selectedModel.type ==='gguf'">
+          <el-input type="textarea" v-model="modelForm.args" placeholder="其他llama.cpp参数"></el-input>
+        </el-form-item>
+        <el-form-item label="temperature" label-width="120px" prop="temperature">
           <el-input
-            type="number"
-            placeholder="要解码的并行序列数（默认值：1）"
-            v-model="modelForm.parallel"
-            show-word-limit
+            v-model="modelForm.temperature"
+            placeholder="请输入0.0-1.0之间的小数"
+            clearable
           >
           </el-input>
         </el-form-item>
-        <el-form-item label="其他参数" label-width="80px" prop="args">
-          <el-input type="textarea" v-model="modelForm.args"></el-input>
+        <el-form-item label="top_k" label-width="120px" prop="top_k">
+          <el-input
+            v-model="modelForm.top_k"
+            placeholder="请输入0.0-1.0之间的小数"
+            clearable
+          >
+          </el-input>
+        </el-form-item>
+        <el-form-item label="top_p" label-width="120px" prop="top_p">
+          <el-input
+            v-model="modelForm.top_p"
+            placeholder="请输入0.0-1.0之间的小数"
+            clearable
+          >
+          </el-input>
+        </el-form-item>
+        <el-form-item label="流式输出" label-width="120px" prop="stream">
+          <el-switch v-model="modelForm.stream"></el-switch>
+          <i style="color: #909399;">
+            大模型流式输出即文本逐字实时生成显示，如果不开启则需要等待模型完成推理后再生产显示</i>
         </el-form-item>
       </el-form>
 
@@ -130,73 +139,48 @@
         <el-button type="primary" @click="exec('modelForm')">确 定</el-button>
       </div>
     </el-dialog>
-
-    <el-dialog :title="log.logFilePath"
-               :visible.sync="showLogDialog"
-               :close-on-press-escape=false
-               :close-on-click-modal=false
-               :destroy-on-close=true
-               @close="resetLogDialog"
-    >
-      <el-card>
-        <div slot="header">
-          <el-button style="float: right; padding: 3px 0" type="text" @click="copyLogPath">复制文件地址</el-button>
-        </div>
-        <div ref="scrollableDiv" id="scrollableDiv" class="logDialog">
-          {{ log.logContent }}
-        </div>
-        <div>
-          <el-button style="float: right; padding: 3px 0" type="text" @click="loadLog(-1)">加载更多</el-button>
-        </div>
-      </el-card>
-    </el-dialog>
   </div>
 </template>
 
 <script>
 import {copy, getRequestBodyJson} from '@/common/common'
+import apis from "../../common/apis";
+import {endLoading, startLoading} from "../../common/common";
 
 export default {
   name: 'watch',
   data() {
-    const validatePort = (rule, value, callback) => {
-      if (value < 1 || value > 65535) {
-        callback(new Error('请输入1~65535的端口值'))
-      } else {
-        callback()
-      }
-    }
     return {
-      logIndex: 1,
-      logLine: 30,
-      showLogDialog: false,
-      log: {
-        logFilePath: '',
-        logContent: '',
-        id: -1
-      },
       showDialog: false,
       modelForm: {
         modelId: '',
         fileId: '',
-        port: 8000,
+        ngl: 99,
+        threads: -1,
+        ctxSize: 0,
+        temperature: '0.8',
+        top_p: 0.90,
+        top_k: 40,
+        stream: true
       },
+      selectedModel: {},
       modelList: [],
       fileList: [],
-      commandList: [],
       rules: {
         modelId: [
           {required: true, message: '请输入模型名称', trigger: 'blur'}
         ],
-        fileId: [
-          {required: true, message: '请输入文件名', trigger: 'blur'}
+        stream: [
+          {required: true, message: '请确认是否开启流式输出', trigger: 'blur'}
         ],
-        port: [
-          {required: true, message: '请输入端口', trigger: 'blur'},
-          {validator: validatePort, trigger: 'blur'}
+        temperature: [
+          {pattern: /^(0(\.\d+)?|1(\.0+)?)$/, message: '请输入0.1-1.0之间的小数', trigger: 'blur'}
         ],
-        llamaCommand: [
-          {required: true, message: '请输入命令', trigger: 'blur'}
+        top_k: [
+          {pattern: /[1-9]\d*/, message: '请输入数字', trigger: 'blur'}
+        ],
+        top_p: [
+          {pattern: /^(0(\.\d+)?|1(\.0+)?)$/, message: '请输入0.1-1.0之间的小数', trigger: 'blur'}
         ],
       },
       formInline: {
@@ -204,32 +188,23 @@ export default {
       },
       tableData: [],
       currentPage: 1,
-      pageSize: 10
+      pageSize: 10,
+      total: 0,
+      pageSizes: [10, 20, 50],
     }
   },
   created() {
-    const settings = getSettings();
-    this.logLine = settings.logLine
     this.getModelList()
     this.getTableData()
-    this.getCommandList()
   },
   methods: {
-    webui(row, index) {
-      let argArray = JSON.parse(row.args);
-      if (argArray.length > 0) {
-        let port = 8000
-        let portIndex = argArray.findIndex(item => item.indexOf('--port') >= 0)
-        if (portIndex !== -1) {
-          port = argArray[portIndex + 1]
-        }
-        let host = '127.0.0.1'
-        let hostIndex = argArray.findIndex(item => item.indexOf('--host') >= 0)
-        if (hostIndex !== -1) {
-          host = argArray[hostIndex + 1] === '0.0.0.0' ? '127.0.0.1' : argArray[hostIndex + 1];
-        }
-        window.open('http://' + host + ':' + port + '/', '_blank')
-      }
+    handleSizeChange(pageSize) {
+      this.pageSize = pageSize
+      this.getTableData()
+    },
+    handleCurrentChange(current) {
+      this.currentPage = current
+      this.getTableData()
     },
     stop(row, index) {
       this.$http.get('/api/process/stop/' + row.execId).then(res => {
@@ -242,60 +217,26 @@ export default {
         }
       })
     },
-    copyLogPath() {
-      if (this.log.logFilePath.length > 0) {
-        copy(this.log.logFilePath)
+    async modelChange(modelId) {
+      await this.getModel(modelId)
+      if (this.selectedModel.type === 'gguf') {
+        this.getFileList(modelId);
       }
-    },
-    resetLogDialog() {
-      this.showDialog = false
-      this.log = {
-        logFilePath: '',
-        logContent: '',
-        id: -1
-      }
-      this.logIndex = 1
-    },
-    loadLog() {
-      this.$http.get('/api/process/log?logFilePath=' + encodeURIComponent(this.log.logFilePath) + '&index=' + this.logIndex + '&line=' + this.logLine).then(res => {
-        if (res.success === true) {
-          if (res.data.length > 0) {
-            this.log.logContent += res.data
-            this.logIndex = this.logIndex + this.logLine
-            setTimeout(() => {
-              if (this.$refs.scrollableDiv) {
-                this.$refs.scrollableDiv.scrollTo({
-                  top: this.$refs.scrollableDiv.scrollHeight,
-                  behavior: 'smooth'
-                });
-              }
-            }, 100)
-          } else {
-            this.$message({
-              type: 'info',
-              message: '没有更多日志了'
-            })
-          }
-        }
-      })
-    },
-    showLog(item) {
-      this.showLogDialog = true
-      let argsArr = JSON.parse(item.args)
-      this.log.logFilePath = argsArr[argsArr.length - 1]
-      this.log.id = item.id
-      this.loadLog(item.id)
-    },
-    modelChange(modelId) {
-      this.getFileList(modelId)
     },
     resetDialog() {
       this.showDialog = false
       this.modelForm = {
         modelId: '',
         fileId: '',
-        port: 8000
+        ngl: 99,
+        threads: -1,
+        ctxSize: 0,
+        temperature: '0.8',
+        top_p: 0.90,
+        top_k: 40,
+        stream: true
       }
+      this.selectedModel = {}
     },
     addNew() {
       this.showDialog = true
@@ -303,43 +244,55 @@ export default {
     exec(form) {
       this.$refs[form].validate((valid) => {
         if (valid) {
-          this.$http.post('/api/process/create', getRequestBodyJson(this.modelForm)).then(res => {
-            if (res.success === true) {
-              this.$message.success('创建成功')
-              this.resetDialog()
-              this.getTableData()
+          const loading = startLoading()
+          apis.runModel(this.modelForm).then(res => {
+            endLoading(loading)
+            if (res === 'success') {
+              this.$message.success('运行成功')
             }
+          }).catch(e => {
+            endLoading(loading)
+            this.$message.error(e)
           })
         }
       })
     },
     getTableData() {
-      this.$http.get('/api/process/list?page=' + this.currentPage + '&limit=' + this.pageSize + '&search=' + this.formInline.search).then(res => {
-        if (res.success === true) {
-          this.tableData = res.data.records
-          this.total = res.data.total
-        }
+      const loading = startLoading()
+      apis.listRunningModel({
+        page: this.currentPage,
+        limit: this.pageSize,
+        search: this.formInline.search
+      }).then(res => {
+        endLoading(loading)
+        const data = JSON.parse(res)
+        this.tableData = data.record
+        this.total = data.total
+      }).catch(e => {
+        endLoading(loading)
+        this.$message.error(e)
+      });
+    },
+    async getModel(modelId) {
+      await apis.getModel(modelId).then(res => {
+        this.selectedModel = JSON.parse(res)
+      }).catch(e => {
+        this.$message.error(e);
       })
     },
     getModelList() {
-      this.$http.get('/api/mgn/list-model').then(res => {
-        if (res.success === true) {
-          this.modelList = res.data
-        }
+      apis.modelList(1, 9999).then(res => {
+        const data = JSON.parse(res)
+        this.modelList = data.record
+      }).catch(e => {
+        this.$message.error(e);
       })
     },
     getFileList(modelId) {
-      this.$http.get('/api/mgn/list-download-file?modelId=' + modelId).then(res => {
-        if (res.success === true) {
-          this.fileList = res.data
-        }
-      })
-    },
-    getCommandList() {
-      this.$http.get('/api/process/list-command').then(res => {
-        if (res.success === true) {
-          this.commandList = res.data
-        }
+      apis.fileList({modelId: modelId, ggufOnly: true}).then(res => {
+        this.fileList = JSON.parse(res)
+      }).catch(e => {
+        this.$message.error(e)
       })
     }
   }

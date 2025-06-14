@@ -145,14 +145,14 @@
       <el-col :span="12" class="card-box">
         <el-card>
           <div slot="header">
-            <span><i class="el-icon-monitor"></i> 服务器信息</span>
+            <span><i class="el-icon-monitor"></i> 主机信息</span>
           </div>
           <div class="el-table el-table--enable-row-hover el-table--medium">
             <table cellspacing="0" style="width: 100%;">
               <tbody>
               <tr>
                 <td class="el-table__cell is-leaf">
-                  <div class="cell">服务器名称</div>
+                  <div class="cell">主机名称</div>
                 </td>
                 <td class="el-table__cell is-leaf">
                   <div class="cell" v-if="server.os">{{ server.os.hostname }}</div>

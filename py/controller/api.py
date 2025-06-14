@@ -4,16 +4,17 @@ import threading
 import tkinter as tk
 from tkinter import filedialog
 
-from Demos.win32ts_logoff_disconnected import session
-
 import py.util.systemInfo_util as sysInfoUtil
 
+import py.ai.reasoning as reasoning
+from py.ai.reasoning import running_llama
+
 from py.util.logutil import Logger
-from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload
+from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog
 import py.config as config
 import orjson
 import py.util.model_file_util as model_file_util
-from py.util.download import download
+from py.util.download import modelscope_download
 
 logger = Logger("Api.py")
 
@@ -196,7 +197,7 @@ class Api:
 
         file_list = [file_name]
 
-        process = threading.Thread(target=download,
+        process = threading.Thread(target=modelscope_download,
                                    name="download",
                                    args=(model_name, config.get_ai_config().get_model_save_dir(), file_list, window))
         process.start()
@@ -238,7 +239,7 @@ class Api:
 
             file_name_list.append(file_name)
 
-        process = threading.Thread(target=download,
+        process = threading.Thread(target=modelscope_download,
                                    name="download",
                                    args=(model_name, config.get_ai_config().get_model_save_dir(), file_name_list,
                                          window))
@@ -289,8 +290,8 @@ class Api:
             if not os.path.exists(full_file_path):
                 raise Exception(f"{full_file_path} is not exist")
 
+        session = SqliteSqlalchemy().session
         try:
-            session = SqliteSqlalchemy().session
             model = session.query(Model).get(model_id)
             if model is None:
                 raise Exception(f"model_id={model_id} can not be found in db")
@@ -304,6 +305,89 @@ class Api:
                                            type="导入")
                 session.add(file_entity)
             session.commit()
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def file_list(self, model_id, gguf_only):
+        session = SqliteSqlalchemy().session
+        try:
+            query = session.query(FileDownload).filter(FileDownload.model_id == model_id)
+            if gguf_only:
+                query = query.filter(FileDownload.file_name.like("%.gguf"))
+            files = query.all()
+            result = []
+            for item in files:
+                dict_item = item.to_dic()
+                result.append(dict_item)
+            return orjson.dumps(result).decode("utf-8")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def get_model(self, model_id):
+        session = SqliteSqlalchemy().session
+        try:
+            model = session.query(Model).get(model_id)
+            return orjson.dumps(model.to_dic()).decode("utf-8")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def run_model(self, params):
+        global file_download
+        model_id = params.get("modelId")
+        session = SqliteSqlalchemy().session
+        model = session.query(Model).get(model_id)
+        if model is None:
+            raise Exception(f"model_id={model_id} can not be found in db")
+        if model.type == "gguf":
+            file_id = params.get("fileId")
+            file_download = session.query(FileDownload).get(file_id)
+            if file_download is None:
+                raise Exception(f"file_id={file_id} can not be found in db")
+            if file_download.model_id != model_id:
+                raise Exception(f"file_id={file_id} is not belong to model_id={model_id}")
+
+        reasoning.run_reasoning(model, file_download, **params)
+        file_path = file_download.file_path
+        file_id = file_download.id
+        if file_download is None:
+            file_path = os.path.join(model.save_dir, model.repo)
+
+        reasoning_exec_log = ReasoningExecLog(model_id=model_id, model_name=model.name, model_type=model.type,
+                                              file_id=file_id, file_path=file_path, reasoning_args=str(params))
+        session.add(reasoning_exec_log)
+        session.commit()
+        session.close()
+        return "success"
+
+    def list_running_model(self, params):
+        page = params.get("page")
+        limit = params.get("limit")
+        search = params.get('search')
+        offset = (page - 1) * limit
+        running_llama = reasoning.running_llama
+        running_transformers = reasoning.running_transformers
+        llama_keys = list(running_llama.keys())
+        transformers_keys = list(running_transformers.keys())
+        running_keys = llama_keys + transformers_keys
+        session = SqliteSqlalchemy().session
+        try:
+            reason_exec_logs = session.query(ReasoningExecLog).order_by(ReasoningExecLog.create_time.desc()).offset(
+                offset).limit(limit).filter(ReasoningExecLog.id.in_(running_keys)).filter(
+                ReasoningExecLog.model_name.like('%' + search + '%')).all()
+            result = [item.to_dic() for item in reason_exec_logs]
+            return orjson.dumps(result).decode("utf-8")
         except Exception as e:
             logger.error(e)
             session.rollback()

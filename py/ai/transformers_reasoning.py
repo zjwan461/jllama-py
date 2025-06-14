@@ -1,20 +1,11 @@
 import threading
+from transformers import pipeline, TextStreamer, TextIteratorStreamer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from modelscope import snapshot_download
-
-
-def download():
-    snapshot_download("Qwen/Qwen3-0.6B", cache_dir="E:/models", allow_file_pattern="*")
-
-
-# download()
-
-model_name = "E:/models/Qwen/Qwen3-0___6B"
+model_name = "E:/models/Qwen/Qwen3-0.6B"
 
 
 def reasoning():
-    from transformers import AutoModelForCausalLM, AutoTokenizer
-
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         torch_dtype="auto",
@@ -51,9 +42,6 @@ def reasoning():
 
 
 def reasoning_pipline():
-    from transformers import pipeline, TextStreamer, TextIteratorStreamer
-    from transformers import AutoModelForCausalLM, AutoTokenizer
-
     model = AutoModelForCausalLM.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     generator = pipeline(task="text-generation", model=model, tokenizer=tokenizer,
@@ -64,22 +52,20 @@ def reasoning_pipline():
         {"role": "user", "content": prompt}
     ]
 
-    # streamer = TextStreamer(generator.tokenizer, skip_prompt=True, skip_special_tokens=True)
-    # res = generator(messages, max_new_tokens=32768, streamer=streamer)
     streamer = TextIteratorStreamer(generator.tokenizer, skip_prompt=True, skip_special_tokens=True)
 
     t = threading.Thread(target=generator,
-                         kwargs=dict(text_inputs=messages, max_new_tokens=32768, streamer=streamer, do_sample=True,
+                         kwargs=dict(text_inputs=messages, streamer=streamer, do_sample=True,
                                      temperature=0.8, top_k=40, top_p=0.95))
     t.start()
 
-    generated_text = ""
     for new_text in streamer:
-        print(new_text,end="")
-        generated_text += new_text
+        yield new_text
+    else:
+        yield "Done"
 
-    print(generated_text)
-    # print(json.dumps(res[0]["generated_text"], indent=4))
+    t.join()
 
 
-reasoning_pipline()
+for token in reasoning_pipline():
+    print(token, end="")

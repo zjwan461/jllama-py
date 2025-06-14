@@ -37,13 +37,25 @@ export default {
   getDownloadFiles(id) {
     return window.pywebview.api.get_download_files(id)
   },
-  delFile(file_id) {
-    return window.pywebview.api.delete_file_download(file_id)
+  delFile(fileId) {
+    return window.pywebview.api.delete_file_download(fileId)
   },
   delModel(params) {
     return window.pywebview.api.delete_model(params)
   },
   importFile(params) {
     return window.pywebview.api.import_file(params)
+  },
+  fileList(params) {
+    return window.pywebview.api.file_list(params)
+  },
+  getModel(modelId) {
+    return window.pywebview.api.get_model(modelId)
+  },
+  runModel(params) {
+    return window.pywebview.api.run_model(params)
+  },
+  listRunningModel(params) {
+    return window.pywebview.api.list_running_model(params)
   },
 }

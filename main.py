@@ -64,6 +64,20 @@ class JsApi:
         self.controller.import_file(params)
         return "success"
 
+    def file_list(self, params):
+        model_id = params.get("modelId")
+        gguf_only = params.get("ggufOnly", False)
+        return self.controller.file_list(model_id, gguf_only)
+
+    def get_model(self, model_id):
+        return self.controller.get_model(model_id)
+
+    def run_model(self, params):
+        return self.controller.run_model(params)
+
+    def list_running_model(self,params):
+        return self.controller.list_running_model(params)
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

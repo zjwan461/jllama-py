@@ -33,9 +33,6 @@
               <el-form-item label="存储目录">
                 <span>{{ props.row.save_dir }}</span>
               </el-form-item>
-              <el-form-item label="导入目录">
-                <span>{{ props.row.import_dir }}</span>
-              </el-form-item>
               <el-form-item label="创建时间">
                 <span>{{ props.row.create_time }}</span>
               </el-form-item>
@@ -46,7 +43,9 @@
         </el-table-column>
         <el-table-column prop="name" label="模型名称">
         </el-table-column>
-        <el-table-column prop="download_platform" label="下载平台" width="120">
+        <el-table-column prop="type" label="模型类型">
+        </el-table-column>
+        <el-table-column prop="download_platform" label="下载平台">
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="160">
           <template slot-scope="scope">

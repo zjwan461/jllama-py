@@ -8,7 +8,7 @@ from py.util.logutil import Logger
 logger = Logger("Api.py")
 
 
-def download(model_name: str, cache_dir, file_pattern, window: None):
+def modelscope_download(model_name: str, cache_dir, file_pattern, window: None):
     try:
         model_dir = snapshot_download(model_name, cache_dir=cache_dir, allow_file_pattern=file_pattern)
         print(f"Model downloaded to {model_dir}")
