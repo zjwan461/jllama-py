@@ -17,12 +17,12 @@ def run_reasoning(model: Model, file_download: FileDownload = None, **kwargs):
     if model.type == "gguf":
         if file_download is None:
             raise Exception("gguf model must provide a gguf file")
-        llama_cpp_reasoning = LlamaReasoning(model_path=model, n_gpu_layers=kwargs["ngl"], n_ctx=kwargs["ctxSize"],
+        llama_cpp_reasoning = LlamaReasoning(model_path=file_download.file_path, n_gpu_layers=kwargs["ngl"], n_ctx=kwargs["ctxSize"],
                                              temperature=kwargs["temperature"], top_k=kwargs["top_k"],
                                              top_p=kwargs["top_p"],
                                              n_threads=kwargs["threads"], stream=kwargs["stream"])
-        running_llama[model_id] = llama_cpp_reasoning
         llama_cpp_reasoning.init_model()
+        running_llama[model_id] = llama_cpp_reasoning
     else:
         file_path = os.path.join(model.save_dir, model.repo)
         if not os.path.exists(file_path):

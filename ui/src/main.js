@@ -5,6 +5,7 @@ import store from './store'
 import './plugins/element.js'
 import './assets/css/global.css'
 import './assets/css/ruoyi.css'
+import './assets/iconfont/iconfont.css'
 import {showNotice} from "./common/common";
 
 

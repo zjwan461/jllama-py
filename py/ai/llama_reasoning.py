@@ -72,7 +72,7 @@ class LlamaReasoning:
 
 
 if __name__ == '__main__':
-    llm = LlamaReasoning("E:\models\Qwen\Qwen3-0.6B-GGUF\Qwen3-0.6B-Q8_0.gguf", stream=True)
+    llm = LlamaReasoning("E:\models\Qwen\Qwen3-0___6B-GGUF\Qwen3-0.6B-Q8_0.gguf", stream=True)
     print("let`s chat!")
     while True:
         command = input("pls input command: ")

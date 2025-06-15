@@ -157,16 +157,18 @@ export default {
   },
   methods: {
     delFile(item) {
-      const loading = startLoading()
-      apis.delFile(item.id).then(res => {
-        endLoading(loading)
-        if (res === "success") {
-          this.$message.success(item.file_name + "已删除")
-          this.reloadFiles(item.model_id)
-        }
-      }).catch(e => {
-        endLoading(loading)
-        this.$message.error(e)
+      this.$confirm('你确定要删除此模型文件？', '提示').then(() => {
+        const loading = startLoading()
+        apis.delFile(item.id).then(res => {
+          endLoading(loading)
+          if (res === "success") {
+            this.$message.success(item.file_name + "已删除")
+            this.reloadFiles(item.model_id)
+          }
+        }).catch(e => {
+          endLoading(loading)
+          this.$message.error(e)
+        })
       })
     },
     resetDialog() {

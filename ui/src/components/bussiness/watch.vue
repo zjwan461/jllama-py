@@ -20,30 +20,29 @@
         style="width: 100%"
       >
         <el-table-column
-          prop="modelName"
+          prop="model_name"
           label="模型名称">
         </el-table-column>
         <el-table-column
-          prop="cppDir"
-          label="执行目录">
+          width="60"
+          prop="model_type"
+          label="类型">
         </el-table-column>
         <el-table-column
-          width="120px"
-          prop="command"
-          label="command">
+          prop="file_path"
+          label="文件路径">
         </el-table-column>
         <el-table-column
-          prop="args"
+          prop="reasoning_args"
           label="运行参数">
         </el-table-column>
         <el-table-column
           fixed="right"
           label="操作"
-          width="300">
+          width="160">
           <template slot-scope="scope">
-            <el-button @click="showLog(scope.row, scope.$index)" type="success" size="small">查看日志</el-button>
-            <el-button @click="stop(scope.row, scope.$index)" type="primary" size="small">停止</el-button>
-            <el-button @click="webui(scope.row, scope.$index)" type="primary" size="small">webui</el-button>
+            <el-button @click="chat(scope.row, scope.$index)" type="primary" size="small">chat</el-button>
+            <el-button @click="stop(scope.row, scope.$index)" type="danger" size="small">停止</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -206,6 +205,12 @@ export default {
       this.currentPage = current
       this.getTableData()
     },
+    chat(row, index) {
+      this.$router.push({
+        path:'/ai/chat',
+        query: row.model_id
+      })
+    },
     stop(row, index) {
       this.$http.get('/api/process/stop/' + row.execId).then(res => {
         if (res.success === true) {
@@ -237,6 +242,7 @@ export default {
         stream: true
       }
       this.selectedModel = {}
+      this.getTableData()
     },
     addNew() {
       this.showDialog = true

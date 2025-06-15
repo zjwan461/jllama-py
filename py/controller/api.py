@@ -382,11 +382,15 @@ class Api:
         transformers_keys = list(running_transformers.keys())
         running_keys = llama_keys + transformers_keys
         session = SqliteSqlalchemy().session
+        result = {}
         try:
-            reason_exec_logs = session.query(ReasoningExecLog).order_by(ReasoningExecLog.create_time.desc()).offset(
-                offset).limit(limit).filter(ReasoningExecLog.id.in_(running_keys)).filter(
-                ReasoningExecLog.model_name.like('%' + search + '%')).all()
-            result = [item.to_dic() for item in reason_exec_logs]
+            query = session.query(ReasoningExecLog).filter(ReasoningExecLog.id.in_(running_keys)).filter(
+                ReasoningExecLog.model_name.like('%' + search + '%'))
+            total = query.count()
+            result['total'] = total
+            reason_exec_logs = query.order_by(ReasoningExecLog.create_time.desc()).offset(offset).limit(limit).all()
+            record = [item.to_dic() for item in reason_exec_logs]
+            result['record'] = record
             return orjson.dumps(result).decode("utf-8")
         except Exception as e:
             logger.error(e)

@@ -9,55 +9,59 @@ const routes = [{
   path: '/',
   redirect: '/home'
 },
-{
-  path: '/home',
-  name: 'home',
-  component: () => import('../components/home.vue'),
-  redirect: '/welcome',
-  children: [{
-    path: '/welcome',
-    name: 'welcome',
-    component: () => import('../components/welcome.vue')
-  }, {
-    path: '/setting',
-    name: 'setting',
-    component: () => import('../components/setting.vue')
-  }, {
-    path: '/watch',
-    name: 'watch',
-    component: () => import('../components/bussiness/watch.vue')
-  }, {
-    path: '/mgn/model-download',
-    name: 'model-download',
-    component: () => import('../components/bussiness/mgn/model-download.vue')
-  }, {
-    path: '/mgn/model-import',
-    name: 'model-import',
-    component: () => import('../components/bussiness/mgn/model-import.vue')
-  }
-  , {
-    path: '/history',
-    name: 'watch',
-    component: () => import('../components/bussiness/history.vue')
-  },{
-    path: '/tools/split-merge',
-    name: 'split-merge',
-    component: () => import('../components/bussiness/tools/split-merge.vue')
-  },{
-    path: '/tools/quantization',
-    name: 'quantization',
-    component: () => import('../components/bussiness/tools/quantization.vue')
-  },{
-    path: '/tools/convert',
-    name: 'convert',
-    component: () => import('../components/bussiness/tools/convert.vue')
-  },{
-    path: '/tools/train',
-    name: 'train',
-    component: () => import('../components/bussiness/tools/train.vue')
-  }
-  ]
-}]
+  {
+    path: '/home',
+    name: 'home',
+    component: () => import('../components/home.vue'),
+    redirect: '/welcome',
+    children: [{
+      path: '/welcome',
+      name: 'welcome',
+      component: () => import('../components/welcome.vue')
+    }, {
+      path: '/setting',
+      name: 'setting',
+      component: () => import('../components/setting.vue')
+    }, {
+      path: '/watch',
+      name: 'watch',
+      component: () => import('../components/bussiness/watch.vue')
+    }, {
+      path: '/mgn/model-download',
+      name: 'model-download',
+      component: () => import('../components/bussiness/mgn/model-download.vue')
+    }, {
+      path: '/mgn/model-import',
+      name: 'model-import',
+      component: () => import('../components/bussiness/mgn/model-import.vue')
+    }, {
+      path: '/history',
+      name: 'watch',
+      component: () => import('../components/bussiness/history.vue')
+    }, {
+      path: '/tools/split-merge',
+      name: 'split-merge',
+      component: () => import('../components/bussiness/tools/split-merge.vue')
+    }, {
+      path: '/tools/quantization',
+      name: 'quantization',
+      component: () => import('../components/bussiness/tools/quantization.vue')
+    }, {
+      path: '/tools/convert',
+      name: 'convert',
+      component: () => import('../components/bussiness/tools/convert.vue')
+    }, {
+      path: '/tools/train',
+      name: 'train',
+      component: () => import('../components/bussiness/tools/train.vue')
+    },
+      {
+        path: '/ai/chat',
+        name: 'AIChat',
+        component: () => import('../components/bussiness/ai-chat.vue')
+      }
+    ]
+  }]
 
 const router = new VueRouter({
   routes
