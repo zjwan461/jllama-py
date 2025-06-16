@@ -50,20 +50,33 @@
 </template>
 
 <script>
-import {Loading} from 'element-ui';
+import apis from "@/common/apis";
+import {endLoading, startLoading} from "@/common/common";
 
 export default {
   name: 'ChatWindow',
-  components: {
-    'el-loading-spinner': Loading.component
-  },
   data() {
     return {
       messages: [],
       inputMessage: '',
       isLoading: false,
       apiKey: '',
-      apiUrl: 'https://api.openai.com/v1/chat/completions'
+      apiUrl: 'https://api.openai.com/v1/chat/completions',
+      modelId: '',
+      model: {}
+    }
+  },
+  created() {
+    this.modelId = this.$route.query.modelId
+    if (this.modelId) {
+      const loading = startLoading("加载模型...");
+      apis.getModel(this.modelId).then(res => {
+        endLoading(loading)
+        this.model = JSON.parse(res)
+      }).catch(e => {
+        endLoading(loading)
+        this.$message.error(e)
+      })
     }
   },
   methods: {
@@ -201,6 +214,16 @@ export default {
 .chat-input .el-button {
   height: 40px;
   white-space: nowrap;
+}
+
+.el-loading-text {
+  /* 禁止文本换行 */
+  white-space: nowrap;
+  /* 自动扩展容器宽度以适应文本 */
+  display: inline-block;
+  /* 可选：添加最小宽度或 padding 避免过于紧凑 */
+  min-width: 120px;
+  padding: 0 10px;
 }
 </style>
 

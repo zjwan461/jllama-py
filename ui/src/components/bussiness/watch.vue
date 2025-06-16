@@ -207,19 +207,20 @@ export default {
     },
     chat(row, index) {
       this.$router.push({
-        path:'/ai/chat',
-        query: row.model_id
+        path: '/ai/chat',
+        query: {
+          modelId: row.model_id
+        }
       })
     },
     stop(row, index) {
-      this.$http.get('/api/process/stop/' + row.execId).then(res => {
-        if (res.success === true) {
-          this.$message({
-            type: 'success',
-            message: '停止成功'
-          })
-          this.getTableData()
+      apis.stopRunningModel(row.id).then(res => {
+        if (res === "success") {
+          this.$message.success(row.model_name + '已停止')
         }
+        this.getTableData()
+      }).catch(e => {
+        this.$message.error(e)
       })
     },
     async modelChange(modelId) {
@@ -250,11 +251,18 @@ export default {
     exec(form) {
       this.$refs[form].validate((valid) => {
         if (valid) {
+          if (this.selectedModel.type === 'gguf') {
+            if (!this.modelForm.fileId || this.modelForm.fileId.length == 0) {
+              this.$message.error('gguf模型需要选择模型文件')
+              return false;
+            }
+          }
           const loading = startLoading()
           apis.runModel(this.modelForm).then(res => {
             endLoading(loading)
-            if (res === 'success') {
+            if (res) {
               this.$message.success('运行成功')
+
             }
           }).catch(e => {
             endLoading(loading)

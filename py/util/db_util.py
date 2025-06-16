@@ -64,6 +64,8 @@ class ReasoningExecLog(BaseEntity):
     file_id = Column(Integer)
     file_path = Column(String(1000), nullable=False)
     reasoning_args = Column(String(1000))
+    start_time = Column(TIMESTAMP)
+    stop_time = Column(TIMESTAMP)
 
 
 class SqliteSqlalchemy(object):

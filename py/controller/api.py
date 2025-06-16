@@ -2,12 +2,12 @@ import json
 import os.path
 import threading
 import tkinter as tk
+from datetime import datetime
 from tkinter import filedialog
 
 import py.util.systemInfo_util as sysInfoUtil
 
 import py.ai.reasoning as reasoning
-from py.ai.reasoning import running_llama
 
 from py.util.logutil import Logger
 from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog
@@ -36,7 +36,7 @@ class Api:
 
     def open_file_select(self):
         # 创建一个隐藏的主窗口（不需要显示完整的GUI）
-        files = filedialog.askopenfilenames(title="请选择文件", filetypes=[("文本文件", "*.txt"), ("所有文件", "*.*")])
+        files = filedialog.askopenfilenames(title="请选择文件", filetypes=[("所有文件", "*.*")])
         return files
 
     def show_tips(self):
@@ -347,29 +347,36 @@ class Api:
         global file_download
         model_id = params.get("modelId")
         session = SqliteSqlalchemy().session
-        model = session.query(Model).get(model_id)
-        if model is None:
-            raise Exception(f"model_id={model_id} can not be found in db")
-        if model.type == "gguf":
-            file_id = params.get("fileId")
-            file_download = session.query(FileDownload).get(file_id)
+        try:
+            model = session.query(Model).get(model_id)
+            if model is None:
+                raise Exception(f"model_id={model_id} can not be found in db")
+            if model.type == "gguf":
+                file_id = params.get("fileId")
+                file_download = session.query(FileDownload).get(file_id)
+                if file_download is None:
+                    raise Exception(f"file_id={file_id} can not be found in db")
+                if file_download.model_id != model_id:
+                    raise Exception(f"file_id={file_id} is not belong to model_id={model_id}")
+
+            reasoning.run_reasoning(model, file_download, **params)
+            file_path = file_download.file_path
+            file_id = file_download.id
             if file_download is None:
-                raise Exception(f"file_id={file_id} can not be found in db")
-            if file_download.model_id != model_id:
-                raise Exception(f"file_id={file_id} is not belong to model_id={model_id}")
+                file_path = os.path.join(model.save_dir, model.repo)
 
-        reasoning.run_reasoning(model, file_download, **params)
-        file_path = file_download.file_path
-        file_id = file_download.id
-        if file_download is None:
-            file_path = os.path.join(model.save_dir, model.repo)
-
-        reasoning_exec_log = ReasoningExecLog(model_id=model_id, model_name=model.name, model_type=model.type,
-                                              file_id=file_id, file_path=file_path, reasoning_args=str(params))
-        session.add(reasoning_exec_log)
-        session.commit()
-        session.close()
-        return "success"
+            reasoning_exec_log = ReasoningExecLog(model_id=model_id, model_name=model.name, model_type=model.type,
+                                                  file_id=file_id, file_path=file_path, reasoning_args=str(params),
+                                                  start_time=datetime.now())
+            session.add(reasoning_exec_log)
+            session.commit()
+            return orjson.dumps(reasoning_exec_log.to_dic()).decode("utf-8")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
 
     def list_running_model(self, params):
         page = params.get("page")
@@ -392,6 +399,21 @@ class Api:
             record = [item.to_dic() for item in reason_exec_logs]
             result['record'] = record
             return orjson.dumps(result).decode("utf-8")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def stop_running_model(self, exec_log_id):
+        session = SqliteSqlalchemy().session
+        try:
+            reasoning_exec_log = session.query(ReasoningExecLog).get(exec_log_id)
+            reasoning.stop_reasoning(reasoning_exec_log.model_id)
+            reasoning_exec_log.stop_time = datetime.now()
+            session.commit()
+            return "success"
         except Exception as e:
             logger.error(e)
             session.rollback()

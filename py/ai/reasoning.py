@@ -31,3 +31,14 @@ def run_reasoning(model: Model, file_download: FileDownload = None, **kwargs):
         # todo transformers model reasoning
         raise Exception("Not support yet")
 
+def stop_reasoning(model_id):
+    global running_llama
+    global running_transformers
+    if model_id in running_llama:
+        llama_cpp_reasoning = running_llama[model_id]
+        llama_cpp_reasoning.close_model()
+        del running_llama[model_id]
+    elif model_id in running_transformers:
+        # todo transformers model stop reasoning
+        del running_transformers[model_id]
+

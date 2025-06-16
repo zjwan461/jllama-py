@@ -29,6 +29,7 @@ class LlamaReasoning:
 
     def close_model(self):
         self.llm.close()
+        self.state = "close"
 
     def chat(self, messages):
         if self.state == "init":

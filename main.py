@@ -78,6 +78,9 @@ class JsApi:
     def list_running_model(self,params):
         return self.controller.list_running_model(params)
 
+    def stop_running_model(self,exec_log_id):
+        return self.controller.stop_running_model(exec_log_id)
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

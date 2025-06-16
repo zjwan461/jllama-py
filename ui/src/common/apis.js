@@ -58,4 +58,7 @@ export default {
   listRunningModel(params) {
     return window.pywebview.api.list_running_model(params)
   },
+  stopRunningModel(execLogId) {
+    return window.pywebview.api.stop_running_model(execLogId)
+  },
 }
