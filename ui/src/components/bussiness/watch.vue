@@ -127,6 +127,13 @@
           >
           </el-input>
         </el-form-item>
+        <el-form-item label="记忆轮次" label-width="120px" prop="memory">
+          <el-input-number
+            v-model="modelForm.memory"
+            placeholder="保存上下文记忆的轮次"
+          >
+          </el-input-number>
+        </el-form-item>
         <el-form-item label="流式输出" label-width="120px" prop="stream">
           <el-switch v-model="modelForm.stream"></el-switch>
           <i style="color: #909399;">
@@ -160,6 +167,7 @@ export default {
         temperature: 0.8,
         top_p: 0.90,
         top_k: 40,
+        memory: 5,
         stream: true
       },
       selectedModel: {},
@@ -243,6 +251,7 @@ export default {
         temperature: '0.8',
         top_p: 0.90,
         top_k: 40,
+        memory: 5,
         stream: true
       }
       this.selectedModel = {}

@@ -67,7 +67,8 @@ export default {
       modelName: '',
       modelType: '',
       reasoningArgs: '',
-      model: {}
+      model: {},
+      memory: 5,
     }
   },
   created() {
@@ -75,6 +76,7 @@ export default {
     this.modelName = this.$route.query.modelName
     this.modelType = this.$route.query.modelType
     this.reasoningArgs = JSON.parse(this.$route.query.reasoningArgs)
+    this.memory = this.reasoningArgs.memory
     if (this.modelId) {
       const loading = startLoading("加载模型...");
       apis.getModel(this.modelId).then(res => {
@@ -102,7 +104,12 @@ export default {
       const userMessage = {
         role: 'user',
         content: this.inputMessage
-      };
+      }
+
+      if (this.messages.length >= this.memory) {
+        this.messages.shift()
+        this.messages.shift()
+      }
       this.messages.push(userMessage);
 
       this.toEnd()
@@ -112,8 +119,9 @@ export default {
       try {
         this.isLoading = true;
         // 调用API获取回复
-        const response = await this.callOpenAIAPI(userMessage, this.reasoningArgs);
+        const response = await this.callOpenAIAPI(this.messages, this.reasoningArgs);
         this.messages.push(response);
+
         this.toEnd()
       } catch (error) {
         console.error('Error:', error);
@@ -125,7 +133,7 @@ export default {
         this.isLoading = false;
       }
     },
-    async callOpenAIAPI(userMessage, reasoningArgs) {
+    async callOpenAIAPI(messages, reasoningArgs) {
       const response = await fetch(this.apiUrl, {
         method: 'POST',
         headers: {
@@ -135,10 +143,7 @@ export default {
         body: JSON.stringify(
           Object.assign({
             model: this.model.name,
-            messages: [
-              {role: 'system', content: '你是一个AI助手，回答用户的问题。'},
-              userMessage
-            ],
+            messages: messages,
           }, reasoningArgs)
         )
       });
