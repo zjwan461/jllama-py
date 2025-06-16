@@ -1,7 +1,7 @@
 import os.path
 
 from py.ai.llama_reasoning import LlamaReasoning
-from py.util.db_util import Model, FileDownload
+from py.util.db_util import Model, FileDownload, SqliteSqlalchemy
 
 running_llama = {}
 running_transformers = {}
@@ -17,7 +17,8 @@ def run_reasoning(model: Model, file_download: FileDownload = None, **kwargs):
     if model.type == "gguf":
         if file_download is None:
             raise Exception("gguf model must provide a gguf file")
-        llama_cpp_reasoning = LlamaReasoning(model_path=file_download.file_path, n_gpu_layers=kwargs["ngl"], n_ctx=kwargs["ctxSize"],
+        llama_cpp_reasoning = LlamaReasoning(model_path=file_download.file_path, n_gpu_layers=kwargs["ngl"],
+                                             n_ctx=kwargs["ctxSize"],
                                              temperature=kwargs["temperature"], top_k=kwargs["top_k"],
                                              top_p=kwargs["top_p"],
                                              n_threads=kwargs["threads"], stream=kwargs["stream"])
@@ -31,6 +32,7 @@ def run_reasoning(model: Model, file_download: FileDownload = None, **kwargs):
         # todo transformers model reasoning
         raise Exception("Not support yet")
 
+
 def stop_reasoning(model_id):
     global running_llama
     global running_transformers
@@ -42,3 +44,26 @@ def stop_reasoning(model_id):
         # todo transformers model stop reasoning
         del running_transformers[model_id]
 
+
+def stop_all_reasoning():
+    global running_llama
+    global running_transformers
+    for model_id in running_llama:
+        llama_cpp_reasoning = running_llama[model_id]
+        llama_cpp_reasoning.close_model()
+        del running_llama[model_id]
+
+    for model_id in running_transformers:
+        running_transformers_reasoning = running_transformers[model_id]
+        # todo transformers model stop reasoning
+        del running_transformers[model_id]
+
+
+def chat(params: dict):
+    model = params["model"]
+    if model.type == "gguf":
+        if model.id not in running_llama:
+            run_reasoning(model, params["file"], **params)
+        return running_llama[model.id].chat(params["messages"])
+    else:
+        pass

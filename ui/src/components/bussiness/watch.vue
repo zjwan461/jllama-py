@@ -157,7 +157,7 @@ export default {
         ngl: 99,
         threads: -1,
         ctxSize: 0,
-        temperature: '0.8',
+        temperature: 0.8,
         top_p: 0.90,
         top_k: 40,
         stream: true
@@ -209,8 +209,11 @@ export default {
       this.$router.push({
         path: '/ai/chat',
         query: {
-          modelId: row.model_id
-        }
+          modelId: row.model_id,
+          modelName: row.model_name,
+          modelType: row.model_type,
+          reasoningArgs: row.reasoning_args,
+         }
       })
     },
     stop(row, index) {

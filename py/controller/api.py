@@ -108,13 +108,19 @@ class Api:
             session.close()
 
     def create_model(self, params):
+
+        session = SqliteSqlalchemy().session
+
+        count = session.query(Model).filter(Model.name == params.get('name')).count()
+        if count > 0:
+            raise Exception(f"模型{params.get('name')}已存在")
+
         model = Model(name=params.get('name'), repo=params.get('repo'),
                       download_platform=params.get('download_platform'),
                       save_dir=config.get_ai_config().get_model_save_dir(),
                       import_dir=config.get_ai_config().get_model_import_dir(),
                       type="gguf" if "gguf" in params.get("repo").lower() else "hf")
 
-        session = SqliteSqlalchemy().session
         try:
             old = session.query(Model).filter(Model.name == model.name).first()
             if old:
@@ -366,7 +372,7 @@ class Api:
                 file_path = os.path.join(model.save_dir, model.repo)
 
             reasoning_exec_log = ReasoningExecLog(model_id=model_id, model_name=model.name, model_type=model.type,
-                                                  file_id=file_id, file_path=file_path, reasoning_args=str(params),
+                                                  file_id=file_id, file_path=file_path, reasoning_args=json.dumps(params),
                                                   start_time=datetime.now())
             session.add(reasoning_exec_log)
             session.commit()
@@ -391,8 +397,8 @@ class Api:
         session = SqliteSqlalchemy().session
         result = {}
         try:
-            query = session.query(ReasoningExecLog).filter(ReasoningExecLog.id.in_(running_keys)).filter(
-                ReasoningExecLog.model_name.like('%' + search + '%'))
+            query = session.query(ReasoningExecLog).filter(ReasoningExecLog.model_id.in_(running_keys)).filter(
+                ReasoningExecLog.model_name.like('%' + search + '%')).filter(ReasoningExecLog.stop_time.is_(None))
             total = query.count()
             result['total'] = total
             reason_exec_logs = query.order_by(ReasoningExecLog.create_time.desc()).offset(offset).limit(limit).all()
@@ -420,3 +426,18 @@ class Api:
             raise e
         finally:
             session.close()
+
+    def stop_all_running_model(self):
+        session = SqliteSqlalchemy().session
+        try:
+            session.query(ReasoningExecLog).filter(ReasoningExecLog.stop_time.is_(None)).update(
+                {ReasoningExecLog.stop_time: datetime.now()})
+            session.commit()
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+        reasoning.stop_all_reasoning()

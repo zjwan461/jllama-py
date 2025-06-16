@@ -35,7 +35,7 @@ class SysInfo(BaseEntity):
 class Model(BaseEntity):
     __tablename__ = 'model'
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    name = Column(String(50), nullable=False)
+    name = Column(String(50), nullable=False, unique=True)
     repo = Column(String(50), nullable=False)
     download_platform = Column(String(50))
     type = Column(String(10), default="gguf")

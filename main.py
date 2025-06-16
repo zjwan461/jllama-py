@@ -1,12 +1,16 @@
+import os
 import subprocess
+from flask_cors import CORS
 import threading
 from typing import List, Dict
 
 import webview
-from flask import Flask, send_from_directory, request, jsonify
+from flask import Flask, send_from_directory, request, jsonify, Response
 
 import py.config as config
 from py.controller import api
+from py.util.db_util import SqliteSqlalchemy, Model, FileDownload
+from py.ai.reasoning import chat
 
 controller = api.Api()
 app_name = config.get_app_name()
@@ -75,15 +79,17 @@ class JsApi:
     def run_model(self, params):
         return self.controller.run_model(params)
 
-    def list_running_model(self,params):
+    def list_running_model(self, params):
         return self.controller.list_running_model(params)
 
-    def stop_running_model(self,exec_log_id):
+    def stop_running_model(self, exec_log_id):
         return self.controller.stop_running_model(exec_log_id)
 
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
+
+CORS(server)
 
 
 def start_dev_server():
@@ -120,34 +126,43 @@ else:
 def chat_completions():
     data = request.json
     # 提取请求参数
-    model = data.get("model", "llama-2-7b")
+    model_name = data.get("model", "llama-2-7b")
     messages = data.get("messages", [])
-    temperature = data.get("temperature", 0.7)
-    top_p = data.get("top_p", 0.95)
-    top_k = data.get("top_k", 40)
-    max_tokens = data.get("max_tokens", 512)
-    stream = data.get("stream", False)
-    stop = data.get("stop", [])
 
+    session = SqliteSqlalchemy().session
+    model = session.query(Model).filter(Model.name == model_name).first()
+    if model is None:
+        gguf_file = session.query(FileDownload).filter(FileDownload.file_path == model_name).first()
+        if gguf_file is None:
+            return jsonify({"error": {"message": "Model not found"}}), 400
+        else:
+            model = session.query(Model).get(gguf_file.model_id)
+    else:
+        gguf_file = session.query(FileDownload).get(data.get("fileId"))
     # 验证参数
     if not messages:
         return jsonify({"error": {"message": "Missing messages"}}), 400
 
     # 构建提示词
-    prompt = messages_to_prompt(messages, model)
+    # prompt = messages_to_prompt(messages, model)
 
     # 准备生成参数
     generate_params = {
-        "prompt": prompt,
-        "max_tokens": max_tokens,
-        "temperature": temperature,
-        "top_p": top_p,
-        "top_k": top_k,
-        "stop": stop if isinstance(stop, list) else [stop] if stop else [],
-        "stream": stream
+        "messages": messages,
+        "model": model,
+        "file": gguf_file,
+        "ngl": data.get("ngl", 0),
+        "thread": data.get("thread", -1),
+        "ctxSize": data.get("ctxSize", 0),
+        "temperature": data.get("temperature", 0.8),
+        "top_k": data.get("top_k", 30),
+        "top_p": data.get("top_p", 0.9),
+        "stream": data.get("stream", False)
     }
-    # todo
-    return jsonify({}), 200
+    if data.get("stream"):
+        return Response(chat(generate_params), mimetype="text/event-stream", status=200)
+    else:
+        return chat(generate_params), 200
 
 
 # 解析消息历史，转换为提示词
@@ -185,7 +200,16 @@ def start_dev_flask():
     server.run(port=5000)
 
 
+def on_close():
+    print("closed")
+    controller.stop_all_running_model()
+    os._exit(0)
+
+
 if __name__ == '__main__':
+    # 添加关闭的监听
+    window.events.closed += on_close
+
     if config.is_dev():
         threading.Thread(target=start_dev_flask).start()
         webview.start(debug=True)

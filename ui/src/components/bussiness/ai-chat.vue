@@ -4,12 +4,13 @@
       <el-breadcrumb-item>模型进程</el-breadcrumb-item>
       <el-breadcrumb-item>AI chat</el-breadcrumb-item>
     </el-breadcrumb>
+
     <el-card class="box-card">
       <div slot="header" class="clearfix">
-        <span>AI聊天助手</span>
-        <el-button style="float: right; padding: 3px 0" type="text">设置</el-button>
+        <span>AI聊天助手: &nbsp;&nbsp; <strong>{{ model.name }}</strong></span>
+        <el-button style="float: right; padding: 3px 0" type="text" @click="$router.back()">返回</el-button>
       </div>
-      <div class="chat-messages">
+      <div class="chat-messages" ref="scrollableDiv">
         <div v-for="(message, index) in messages" :key="index" class="message-item">
           <div class="message-avatar" v-if="message.role === 'user'">
             <i class="el-icon-user"></i>
@@ -61,13 +62,19 @@ export default {
       inputMessage: '',
       isLoading: false,
       apiKey: '',
-      apiUrl: 'https://api.openai.com/v1/chat/completions',
+      apiUrl: 'http://127.0.0.1:5000/v1/chat/completions',
       modelId: '',
+      modelName: '',
+      modelType: '',
+      reasoningArgs: '',
       model: {}
     }
   },
   created() {
     this.modelId = this.$route.query.modelId
+    this.modelName = this.$route.query.modelName
+    this.modelType = this.$route.query.modelType
+    this.reasoningArgs = JSON.parse(this.$route.query.reasoningArgs)
     if (this.modelId) {
       const loading = startLoading("加载模型...");
       apis.getModel(this.modelId).then(res => {
@@ -80,6 +87,14 @@ export default {
     }
   },
   methods: {
+    toEnd() {
+      if (this.$refs.scrollableDiv) {
+        this.$refs.scrollableDiv.scrollTo({
+          top: this.$refs.scrollableDiv.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    },
     async sendMessage() {
       if (!this.inputMessage.trim()) return;
 
@@ -89,13 +104,17 @@ export default {
         content: this.inputMessage
       };
       this.messages.push(userMessage);
+
+      this.toEnd()
+
       this.inputMessage = '';
 
       try {
         this.isLoading = true;
         // 调用API获取回复
-        const response = await this.callOpenAIAPI(userMessage);
+        const response = await this.callOpenAIAPI(userMessage, this.reasoningArgs);
         this.messages.push(response);
+        this.toEnd()
       } catch (error) {
         console.error('Error:', error);
         this.messages.push({
@@ -106,21 +125,22 @@ export default {
         this.isLoading = false;
       }
     },
-    async callOpenAIAPI(userMessage) {
+    async callOpenAIAPI(userMessage, reasoningArgs) {
       const response = await fetch(this.apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.apiKey}`
         },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {role: 'system', content: '你是一个AI助手，回答用户的问题。'},
-            userMessage
-          ],
-          temperature: 0.7
-        })
+        body: JSON.stringify(
+          Object.assign({
+            model: this.model.name,
+            messages: [
+              {role: 'system', content: '你是一个AI助手，回答用户的问题。'},
+              userMessage
+            ],
+          }, reasoningArgs)
+        )
       });
 
       if (!response.ok) {
@@ -141,7 +161,6 @@ export default {
 .chat-container {
   height: 70vh;
   padding: 20px;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -154,11 +173,13 @@ export default {
 .chat-messages {
   flex: 1;
   min-height: 300px; /* 新增：设置聊天区域的最小高度 */
+  height: 50vh;
   overflow-y: auto;
   padding: 15px;
   margin-bottom: 15px;
   border: 1px solid #ebeef5;
   border-radius: 4px;
+  white-space: pre-line;
 }
 
 
