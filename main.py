@@ -5,12 +5,12 @@ import threading
 from typing import List, Dict
 
 import webview
-from flask import Flask, send_from_directory, request, jsonify, Response
+from flask import Flask, send_from_directory, request, jsonify, Response, stream_with_context
 
 import py.config as config
 from py.controller import api
 from py.util.db_util import SqliteSqlalchemy, Model, FileDownload
-from py.ai.reasoning import chat
+import py.ai.reasoning as reasoning
 
 controller = api.Api()
 app_name = config.get_app_name()
@@ -149,20 +149,38 @@ def chat_completions():
     # 准备生成参数
     generate_params = {
         "messages": messages,
-        "model": model,
-        "file": gguf_file,
         "ngl": data.get("ngl", 0),
-        "thread": data.get("thread", -1),
+        "threads": data.get("threads", -1),
         "ctxSize": data.get("ctxSize", 0),
         "temperature": data.get("temperature", 0.8),
         "top_k": data.get("top_k", 30),
         "top_p": data.get("top_p", 0.9),
         "stream": data.get("stream", False)
     }
-    if data.get("stream"):
-        return Response(chat(generate_params), mimetype="text/event-stream", status=200)
+    if model.type == "gguf":
+        if model.id not in reasoning.running_llama:
+            reasoning.run_reasoning(model, gguf_file, **generate_params)
+            # file_path = gguf_file.file_path
+            # file_id = gguf_file.id
+            # if gguf_file is None:
+            #     file_path = os.path.join(model.save_dir, model.repo)
+            #
+            # reasoning_exec_log = ReasoningExecLog(model_id=model_id, model_name=model.name, model_type=model.type,
+            #                                       file_id=file_id, file_path=file_path,
+            #                                       reasoning_args=json.dumps(params),
+            #                                       start_time=datetime.now())
+        if data.get("stream"):
+            return Response(reasoning.running_llama[model.id].chat_stream(messages),
+                            headers={
+                                'Content-Type': 'text/event-stream',
+                                'Cache-Control': 'no-cache',
+                                'Connection': 'keep-alive'
+                            })
+        else:
+            return reasoning.running_llama[model.id].chat_blocking(messages), 200
     else:
-        return chat(generate_params), 200
+        print("not supported yet")
+        pass
 
 
 # 解析消息历史，转换为提示词
@@ -199,16 +217,19 @@ def messages_to_prompt(messages: List[Dict[str, str]], model: str) -> str:
 def start_dev_flask():
     server.run(port=5000)
 
-
-def on_close():
-    print("closed")
-    controller.stop_all_running_model()
-    os._exit(0)
+clean_count = 0
+def before_show():
+    global clean_count
+    print("before_show")
+    if clean_count == 0:
+        controller.stop_all_running_model()
+    clean_count+=1
 
 
 if __name__ == '__main__':
     # 添加关闭的监听
-    window.events.closed += on_close
+    window.events.loaded += before_show
+
 
     if config.is_dev():
         threading.Thread(target=start_dev_flask).start()

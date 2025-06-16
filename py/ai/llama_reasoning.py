@@ -1,5 +1,6 @@
 import inspect
 import json
+import time
 
 from llama_cpp import Llama
 
@@ -57,10 +58,13 @@ class LlamaReasoning:
         )
         # print(json.dumps(output, indent=4))
         # print(output.get("choices")[0].get("message").get("content").get("message"))
+        index = 0
         for line in output:
-            yield json.dumps(line)
-        else:
-            yield "Done"
+            yield f"data: {json.dumps(line)}\n\n"
+            if index == 0:
+                time.sleep(0.1)
+            index+=1
+
 
 
 # print(json.dumps(output, indent=4))
@@ -73,7 +77,7 @@ class LlamaReasoning:
 
 
 if __name__ == '__main__':
-    llm = LlamaReasoning("E:\models\Qwen\Qwen3-0___6B-GGUF\Qwen3-0.6B-Q8_0.gguf", stream=True)
+    llm = LlamaReasoning("E:\models\Qwen\Qwen3-0.6B-GGUF\Qwen3-0.6B-Q8_0.gguf", stream=True)
     print("let`s chat!")
     while True:
         command = input("pls input command: ")

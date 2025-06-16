@@ -69,6 +69,7 @@ export default {
       reasoningArgs: '',
       model: {},
       memory: 5,
+      stream: false
     }
   },
   created() {
@@ -77,6 +78,7 @@ export default {
     this.modelType = this.$route.query.modelType
     this.reasoningArgs = JSON.parse(this.$route.query.reasoningArgs)
     this.memory = this.reasoningArgs.memory
+    this.stream = this.reasoningArgs.stream
     if (this.modelId) {
       const loading = startLoading("加载模型...");
       apis.getModel(this.modelId).then(res => {
@@ -118,10 +120,15 @@ export default {
 
       try {
         this.isLoading = true;
-        // 调用API获取回复
-        const response = await this.callOpenAIAPI(this.messages, this.reasoningArgs);
-        this.messages.push(response);
 
+        if (this.stream) {
+          await this.callOpenAIAPIStream(this.messages, this.reasoningArgs);
+        } else {
+          // 调用API获取回复
+          const response = await this.callOpenAIAPI(this.messages, this.reasoningArgs);
+          this.messages.push(response);
+
+        }
         this.toEnd()
       } catch (error) {
         console.error('Error:', error);
@@ -157,6 +164,60 @@ export default {
         role: 'assistant',
         content: data.choices[0].message.content
       };
+    },
+
+    async callOpenAIAPIStream(messages, reasoningArgs) {
+      const response = await fetch(this.apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify(
+          Object.assign({
+            model: this.model.name,
+            messages: messages,
+          }, reasoningArgs)
+        )
+      });
+
+      // 获取响应的ReadableStream
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+
+      let index = 0
+      while (true) {
+        const {done, value} = await reader.read();
+
+        if (done) {
+          console.log('流读取完成');
+          break;
+        }
+
+        // 处理每一块数据（Uint8Array）
+        const chunk = decoder.decode(value)
+        // console.log('接收到数据块:', chunk);
+        const dataStr = chunk.replace('data:', '').trim()
+        // console.log(chunk.substring(6, chunk.length))
+        const data = JSON.parse(dataStr)
+
+        // 可以在这里更新UI或处理数据
+        let content = data.choices[0].delta.content
+        let role = data.choices[0].delta.role
+        if (index === 0) {
+          const message = {
+            role: role,
+            content: ''
+          }
+          this.messages.push(message)
+        } else {
+          if (content) {
+            const message = this.messages[this.messages.length - 1];
+            message.content += content
+          }
+        }
+        index++;
+      }
     }
   }
 }
@@ -164,8 +225,7 @@ export default {
 
 <style scoped>
 .chat-container {
-  height: 70vh;
-  padding: 20px;
+  padding: 5px;
   margin: 0 auto;
 }
 
@@ -177,14 +237,14 @@ export default {
 
 .chat-messages {
   flex: 1;
-  min-height: 300px; /* 新增：设置聊天区域的最小高度 */
-  height: 50vh;
+  height: 45vh;
   overflow-y: auto;
   padding: 15px;
   margin-bottom: 15px;
   border: 1px solid #ebeef5;
   border-radius: 4px;
-  white-space: pre-line;
+  width: auto;
+  white-space: normal; /* 默认值，在空格处换行 */
 }
 
 
@@ -208,6 +268,9 @@ export default {
 
 .message-content {
   flex: 1;
+  .assistant {
+    max-width: 90%;
+  }
 }
 
 .message-bubble {
@@ -215,7 +278,7 @@ export default {
   border-radius: 4px;
   background-color: #e4e7ed;
   display: inline-block;
-  max-width: 100%;
+  max-width: 90%;
   white-space: pre-wrap;
   word-break: break-all;
 }

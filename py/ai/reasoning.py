@@ -59,11 +59,14 @@ def stop_all_reasoning():
         del running_transformers[model_id]
 
 
-def chat(params: dict):
-    model = params["model"]
-    if model.type == "gguf":
-        if model.id not in running_llama:
-            run_reasoning(model, params["file"], **params)
-        return running_llama[model.id].chat(params["messages"])
-    else:
-        pass
+# def chat(params: dict):
+#     model = params["model"]
+#     if model.type == "gguf":
+#         if model.id not in running_llama:
+#             run_reasoning(model, params["file"], **params)
+#         if params["stream"]:
+#             return running_llama[model.id].chat_stream(params["messages"])
+#         else:
+#             return running_llama[model.id].chat_blocking(params["messages"])
+#     else:
+#         pass
