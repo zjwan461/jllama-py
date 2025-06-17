@@ -39,3 +39,55 @@ def check_cpp_dir():
     if not os.path.exists(cpp_dir):
         raise Exception("can not found ext llama_cpp path")
     return cpp_dir
+
+
+def quantize(input_file_path: str, output_file_path: str, q_type):
+    if q_type not in supported_q_type():
+        raise Exception(f"not supported quantize type: {q_type}")
+    cpp_dir = check_cpp_dir()
+    quantize_exe = os.path.join(cpp_dir, "llama-quantize")
+    cmd = [quantize_exe, input_file_path, output_file_path, q_type]
+    with subprocess.Popen(cmd, text=True, stdout=subprocess.PIPE) as proc:
+        for line in proc.stdout:
+            yield f"{line.strip()}"
+
+
+def supported_q_type():
+    return [
+        "Q4_0",
+        "Q4_1",
+        "Q5_0",
+        "Q5_1",
+        "IQ2_XXS",
+        "IQ2_XS",
+        "IQ2_S",
+        "IQ2_M",
+        "IQ1_S",
+        "IQ1_M",
+        "TQ1_0",
+        "TQ2_0",
+        "Q2_K",
+        "Q2_K_S",
+        "IQ3_XXS",
+        "IQ3_S",
+        "IQ3_M",
+        "Q3_K",
+        "IQ3_XS",
+        "Q3_K_S",
+        "Q3_K_M",
+        "Q3_K_L",
+        "IQ4_NL",
+        "IQ4_XS",
+        "Q4_K",
+        "Q4_K_S",
+        "Q4_K_M",
+        "Q5_K",
+        "Q5_K_S",
+        "Q5_K_M",
+        "Q6_K",
+        "Q8_0",
+        "F16",
+        "BF16",
+        "F32",
+        "COPY"
+    ]
