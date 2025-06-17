@@ -288,23 +288,19 @@ export default {
           apis.createModel(this.modelForm)
             .then(res => {
               // console.log(res)
-              if (res !== "error") {
-                this.model = JSON.parse(res)
-                apis.searchModelFile(this.modelForm).then(res => {
-                  endLoading(loading)
-                  // console.log(res)
-                  this.modelFiles = res
-                  this.showModelFiles = true
-                  this.showDownload = true
-                  this.showSubmit = false
-                }).catch(e => {
-                  this.$message.error(e)
-                  endLoading(loading)
-                })
-              } else {
+              this.model = JSON.parse(res)
+              apis.searchModelFile(this.modelForm).then(res => {
                 endLoading(loading)
-                this.$message.error('创建模型失败')
-              }
+                // console.log(res)
+                this.modelFiles = res
+                this.showModelFiles = true
+                this.showDownload = true
+                this.showSubmit = false
+              }).catch(e => {
+                this.$message.error(e)
+                endLoading(loading)
+              })
+
             }).catch(e => {
             this.$message.error(e)
             endLoading(loading)

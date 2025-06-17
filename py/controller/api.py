@@ -111,33 +111,32 @@ class Api:
 
         session = SqliteSqlalchemy().session
 
-        count = session.query(Model).filter(Model.name == params.get('name')).count()
-        if count > 0:
-            raise Exception(f"模型{params.get('name')}已存在")
-
-        model = Model(name=params.get('name'), repo=params.get('repo'),
-                      download_platform=params.get('download_platform'),
-                      save_dir=config.get_ai_config().get_model_save_dir(),
-                      import_dir=config.get_ai_config().get_model_import_dir(),
-                      type="gguf" if "gguf" in params.get("repo").lower() else "hf")
-
+        model = session.query(Model).get(params.get("id"))
+        action = "insert"
+        if model is None:
+            model = Model(name=params.get('name'), repo=params.get('repo'),
+                          download_platform=params.get('download_platform'),
+                          save_dir=config.get_ai_config().get_model_save_dir(),
+                          import_dir=config.get_ai_config().get_model_import_dir(),
+                          type="gguf" if "gguf" in params.get("repo").lower() else "hf")
+        else:
+            model.name = params.get('name')
+            model.repo = params.get('repo')
+            model.download_platform = params.get('download_platform')
+            model.save_dir = config.get_ai_config().get_model_save_dir()
+            model.import_dir = config.get_ai_config().get_model_import_dir()
+            model.type = "gguf" if "gguf" in params.get("repo").lower() else "hf"
+            action = "update"
         try:
-            old = session.query(Model).filter(Model.name == model.name).first()
-            if old:
-                old.name = model.name
-                old.repo = model.repo
-                old.download_platform = model.download_platform
-                old.save_dir = model.save_dir
-                old.import_dir = model.import_dir
-            else:
+            if action == "insert":
                 session.add(model)
             session.commit()
-            result = old.to_dic() if old else model.to_dic()
+            result = model.to_dic()
             return orjson.dumps(result).decode("utf-8")
         except Exception as e:
             logger.error(e)
             session.rollback()
-            return "error"
+            raise e
         finally:
             session.close()
 
