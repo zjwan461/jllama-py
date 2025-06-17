@@ -61,4 +61,10 @@ export default {
   stopRunningModel(execLogId) {
     return window.pywebview.api.stop_running_model(execLogId)
   },
+  listRunningModeHistory(params) {
+    return window.pywebview.api.list_running_model_history(params)
+  },
+  delRunningModel(id) {
+    return window.pywebview.api.del_running_model(id)
+  },
 }

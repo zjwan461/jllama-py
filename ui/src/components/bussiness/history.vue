@@ -82,9 +82,8 @@
 </template>
 
 <script>
-// import { getRequestBodyJson } from '@/common/common'
-
-import {copy} from "@/common/common";
+import apis from "../../common/apis";
+import {endLoading, startLoading} from "../../common/common";
 
 export default {
   name: 'history',
@@ -109,16 +108,9 @@ export default {
     }
   },
   created() {
-    const settings = getSettings();
-    this.logLine = settings.logLine
     this.getTableData()
   },
   methods: {
-    copyLogPath() {
-      if (this.log.logFilePath.length > 0) {
-        copy(this.log.logFilePath)
-      }
-    },
     resetDialog() {
       this.showDialog = false
       this.log = {
@@ -128,64 +120,37 @@ export default {
       }
       this.logIndex = 1
     },
-    showLog(item) {
-      this.showDialog = true
-      this.log.logFilePath = item.logFilePath
-      this.log.id = item.id
-      this.loadLog(item.id)
-    },
-    loadLog(id) {
-      if (id === -1) {
-        id = this.log.id
-      }
-      this.$http.get('/api/process/log-history/' + id + '/' + this.logIndex + '/' + this.logLine).then(res => {
-        if (res.success === true) {
-          if (res.data.length > 0) {
-            this.log.logContent += res.data
-            this.logIndex = this.logIndex + this.logLine
-            setTimeout(() => {
-              if (this.$refs.scrollableDiv) {
-                this.$refs.scrollableDiv.scrollTo({
-                  top: this.$refs.scrollableDiv.scrollHeight,
-                  behavior: 'smooth'
-                });
-              }
-            }, 100)
-          } else {
-            this.$message({
-              type: 'info',
-              message: '没有更多日志了'
-            })
-          }
-        }
-      })
-    },
+
     del(item) {
       this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.$http.delete('/api/process/del-history/' + item.id).then(res => {
-          if (res.success === true) {
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            })
+        apis.delRunningModel(item.id).then(res => {
+          if (res === "success") {
+            this.$message.success("已删除")
             this.getTableData()
           }
+        }).catch(e => {
+          this.$message.error(e)
         })
       })
     },
-    history() {
-      this.$router.push('/history')
-    },
     getTableData() {
-      this.$http.get('/api/process/list-history?page=' + this.currentPage + '&limit=' + this.pageSize + '&search=' + this.formInline.search).then(res => {
-        if (res.success === true) {
-          this.tableData = res.data.records
-          this.total = res.data.total
-        }
+      const loading = startLoading()
+      apis.listRunningModeHistory({
+        limit: this.pageSize,
+        page: this.currentPage,
+        search: this.formInline.search
+      }).then(res => {
+        endLoading(loading)
+        const data = JSON.parse(res)
+        this.total = data.total
+        this.tableData = data.record
+      }).catch(e => {
+        endLoading(loading)
+        this.$message.error(e)
       })
     },
     handleSizeChange(pageSize) {

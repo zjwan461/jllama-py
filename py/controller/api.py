@@ -372,7 +372,8 @@ class Api:
                 file_path = os.path.join(model.save_dir, model.repo)
 
             reasoning_exec_log = ReasoningExecLog(model_id=model_id, model_name=model.name, model_type=model.type,
-                                                  file_id=file_id, file_path=file_path, reasoning_args=json.dumps(params),
+                                                  file_id=file_id, file_path=file_path,
+                                                  reasoning_args=json.dumps(params),
                                                   start_time=datetime.now())
             session.add(reasoning_exec_log)
             session.commit()
@@ -441,3 +442,34 @@ class Api:
             session.close()
 
         reasoning.stop_all_reasoning()
+
+    def list_running_model_history(self, params):
+        page = params.get("page")
+        limit = params.get("limit")
+        search = params.get("search")
+        offset = (page - 1) * limit
+        result = {}
+        session = SqliteSqlalchemy().session
+        query = session.query(ReasoningExecLog).filter(ReasoningExecLog.model_name.like("%" + search + "%"))
+        total = query.count()
+        result["total"] = total
+        if total > 0:
+            reason_exec_logs = query.order_by(ReasoningExecLog.create_time.desc()).offset(offset).limit(limit).all()
+            record = [item.to_dic() for item in reason_exec_logs]
+            result["record", record]
+        return orjson.dumps(result).decode("utf-8")
+
+    def del_running_model(self, id):
+        session = SqliteSqlalchemy().session
+        try:
+            reasoning_exec_log = session.query(ReasoningExecLog).get(id)
+            if reasoning_exec_log is not None:
+                session.delete(reasoning_exec_log)
+            session.commit()
+            return "success"
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()

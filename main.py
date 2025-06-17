@@ -1,4 +1,3 @@
-import os
 import subprocess
 from flask_cors import CORS
 import threading
@@ -84,6 +83,12 @@ class JsApi:
 
     def stop_running_model(self, exec_log_id):
         return self.controller.stop_running_model(exec_log_id)
+
+    def list_running_model_history(self, params):
+        return self.controller.list_running_model_history(params)
+
+    def del_running_model(self, id):
+        return self.controller.del_running_model(id)
 
 
 js_api = JsApi(controller)
