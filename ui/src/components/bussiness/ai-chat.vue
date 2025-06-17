@@ -40,11 +40,11 @@
         <el-input
           v-model="inputMessage"
           type="textarea"
-          :rows="2"
+          :rows="5"
           placeholder="请输入问题..."
           @keyup.enter.native="sendMessage"
         ></el-input>
-        <el-button @click="sendMessage" :disabled="isLoading">发送</el-button>
+        <el-button @click="sendMessage" type="primary" :disabled="isLoading">发送</el-button>
       </div>
     </el-card>
   </div>
@@ -187,6 +187,9 @@ export default {
 
       let index = 0
       while (true) {
+        if (this.isLoading === true) {
+          this.isLoading = false;
+        }
         const {done, value} = await reader.read();
 
         if (done) {
@@ -216,6 +219,7 @@ export default {
             message.content += content
           }
         }
+        this.toEnd()
         index++;
       }
     }
