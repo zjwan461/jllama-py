@@ -15,12 +15,14 @@ import py.config as config
 import orjson
 import py.util.model_file_util as model_file_util
 from py.util.download import modelscope_download
+import py.tk.log_viewer as log_viewer
 
 logger = Logger("Api.py")
 
 
 class Api:
     root = None
+    log_viewer = None
 
     def __init__(self):
         tk_thread = threading.Thread(target=self.init_tk, name="tk thread", daemon=True)
@@ -31,8 +33,12 @@ class Api:
 
     def init_tk(self):
         self.root = tk.Tk()
+        self.log_viewer = log_viewer.TextViewer(self.root)
         self.root.withdraw()  # 隐藏主窗口
         self.root.mainloop()
+
+    def show_tk(self):
+        self.root.deiconify()
 
     def open_file_select(self):
         # 创建一个隐藏的主窗口（不需要显示完整的GUI）

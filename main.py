@@ -20,6 +20,9 @@ class JsApi:
     def __init__(self, control: api.Api):
         self.controller = control
 
+    def show_tk(self):
+        return self.controller.show_tk()
+
     def open_file_select(self):
         return self.controller.open_file_select()
 

@@ -67,4 +67,7 @@ export default {
   delRunningModel(id) {
     return window.pywebview.api.del_running_model(id)
   },
+  showTk() {
+    return window.pywebview.api.show_tk()
+  },
 }

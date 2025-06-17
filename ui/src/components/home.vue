@@ -21,13 +21,13 @@
         </div>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="setting">
-            设置
+            设  置
           </el-dropdown-item>
           <el-dropdown-item
             divided
-            command="logout"
+            command="sysout"
           >
-            退出
+            SysOut
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -141,21 +141,14 @@ export default {
     handleCommand(command) {
       if (command === 'setting') {
         this.$router.push({path: '/setting'})
-      } else if (command === 'logout') {
+      } else if (command === 'sysout') {
+        apis.showTk()
       }
     },
     getMenuTree() {
       apis.getNav().then(res => {
         this.menuData = res
       })
-    },
-    logout() {
-      window.sessionStorage.clear()
-      // this.$http.get('/api/auth/logout', (res) => {
-      //   sessionStorage.removeItem("login")
-      //   sessionStorage.removeItem("menu-active-path")
-      // })
-      this.$router.push('/')
     },
     // 点击按钮，切换菜单折叠与展开
     toggoleCollapse() {
