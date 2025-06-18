@@ -79,4 +79,10 @@ export default {
   listQuantize(params) {
     return window.pywebview.api.list_quantize(params)
   },
+  listQuantizeParams() {
+    return window.pywebview.api.list_quantize_params()
+  },
+  quantize(params) {
+    return window.pywebview.api.quantize(params)
+  },
 }

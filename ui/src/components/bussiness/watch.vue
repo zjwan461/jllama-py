@@ -1,7 +1,8 @@
 <template>
   <div>
     <el-breadcrumb separator="/">
-      <el-breadcrumb-item>模型进程</el-breadcrumb-item>
+      <el-breadcrumb-item>AI推理</el-breadcrumb-item>
+      <el-breadcrumb-item>模型推理</el-breadcrumb-item>
     </el-breadcrumb>
 
     <el-card>

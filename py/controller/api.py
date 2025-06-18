@@ -580,3 +580,35 @@ class Api:
             raise e
         finally:
             session.close()
+
+    def list_quantize_params(self):
+        return cpp_origin_util.supported_q_type()
+
+    def quantize(self, params, window):
+        input = params.get("input")
+        output = params.get("output")
+        q_type = params.get("qType")
+
+        t = threading.Thread(target=self.show_quantize, args=(input, output, q_type, window))
+        t.start()
+
+        session = SqliteSqlalchemy().session
+        try:
+            quantize = Quantize(input=input, output=output, param=q_type)
+            session.add(quantize)
+            session.commit()
+            return orjson.dumps(quantize.to_dic()).decode('utf-8')
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def show_quantize(self, input, output, q_type, window):
+        self.show_tk()
+        self.log_viewer.append_text("GGUF quantize:\n")
+        for chunk in cpp_origin_util.quantize(input, output, q_type):
+            self.log_viewer.append_text(chunk)
+        else:
+            window.evaluate_js("vue.messageArrive('jllama提醒','gguf量化任务完成','success')")

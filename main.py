@@ -102,6 +102,12 @@ class JsApi:
     def list_quantize(self, params):
         return self.controller.list_quantize(params)
 
+    def list_quantize_params(self):
+        return self.controller.list_quantize_params()
+
+    def quantize(self, params):
+        return self.controller.quantize(params, window)
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

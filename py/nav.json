@@ -1,21 +1,27 @@
 [
   {
     "id": 1,
-    "title": "进程管理",
+    "title": "AI推理",
     "icon": "el-icon-connection",
     "href": "/watch",
     "children": [
       {
         "id": 11,
-        "title": "模型部署",
+        "title": "模型推理",
         "icon": "el-icon-magic-stick",
         "href": "/watch"
       },
       {
         "id": 12,
-        "title": "运行历史",
+        "title": "推理历史",
         "icon": "el-icon-data-line",
         "href": "/history"
+      },
+      {
+        "id": 13,
+        "title": "本地部署",
+        "icon": "el-icon-data-analysis",
+        "href": "/deploy"
       }
     ]
   },

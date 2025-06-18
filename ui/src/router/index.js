@@ -27,6 +27,10 @@ const routes = [{
       name: 'watch',
       component: () => import('../components/bussiness/watch.vue')
     }, {
+      path: '/deploy',
+      name: 'deploy',
+      component: () => import('../components/bussiness/deploy.vue')
+    }, {
       path: '/mgn/model-download',
       name: 'model-download',
       component: () => import('../components/bussiness/mgn/model-download.vue')

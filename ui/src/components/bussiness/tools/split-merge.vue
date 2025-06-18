@@ -44,10 +44,6 @@
               <el-button size="small" type="primary" @click="openFileSelect('output')">选择文件</el-button>
               <br>
             </el-form-item>
-            <el-form-item label="异步执行">
-              <el-switch v-model="form.async"></el-switch>
-              <i style="color: #909399;"> 默认同步执行，开启则会在后台执行，不会阻塞页面</i>
-            </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="onSubmit('form')">提交</el-button>
             </el-form-item>
@@ -94,7 +90,6 @@
 </template>
 
 <script>
-import {getRequestBodyJson} from "@/common/common";
 import apis from "../../../common/apis";
 
 export default {
@@ -112,7 +107,6 @@ export default {
         output: '',
         splitOption: '--split-max-tensors',
         splitParam: '',
-        async: false
       },
       rules: {
         options: [
@@ -145,7 +139,6 @@ export default {
           output: '',
           splitOption: '--split-max-tensors',
           splitParam: '',
-          async: false
         }
       } else if (e === 'merge') {
         this.form = {
@@ -154,7 +147,6 @@ export default {
           output: '',
           splitOption: '',
           splitParam: '',
-          async: false
         }
       }
     },

@@ -30,7 +30,9 @@ def split_gguf(input_file_path: str, output_file_path: str, options: dict):
 
     cmd.append(input_file_path)
     cmd.append(output_file_path)
-    with subprocess.Popen(cmd, text=True, stdout=subprocess.PIPE) as proc:
+    with subprocess.Popen(cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
+        for line in proc.stderr:
+            yield f"{line.strip()}\n"
         for line in proc.stdout:
             yield f"{line.strip()}\n"
 
@@ -49,8 +51,8 @@ def quantize(input_file_path: str, output_file_path: str, q_type):
     cpp_dir = check_cpp_dir()
     quantize_exe = os.path.join(cpp_dir, "llama-quantize")
     cmd = [quantize_exe, input_file_path, output_file_path, q_type]
-    with subprocess.Popen(cmd, text=True, stdout=subprocess.PIPE) as proc:
-        for line in proc.stdout:
+    with subprocess.Popen(cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
+        for line in proc.stderr:
             yield f"{line.strip()}\n"
 
 
