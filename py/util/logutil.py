@@ -7,9 +7,7 @@ log_path = config.get_log_config().get_path()
 if not os.path.exists(log_path):
     os.mkdir(log_path)
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(script_dir, "logging.conf")
-logging.config.fileConfig(file_path)
+logging.config.fileConfig("py/logging.conf")
 
 
 class Logger:

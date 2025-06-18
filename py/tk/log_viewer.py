@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, scrolledtext, filedialog, messagebox
+from tkinter import ttk, scrolledtext
 
 
 class TextViewer:
@@ -67,8 +67,8 @@ class TextViewer:
         self.text_area.see(tk.END) # 滚动到底部
         self.text_area.config(state=tk.DISABLED)  # 禁用编辑
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = TextViewer(root)
-    app.set_text("Hello, World!")
-    root.mainloop()
+# if __name__ == "__main__":
+#     root = tk.Tk()
+#     app = TextViewer(root)
+#     app.set_text("Hello, World!")
+#     root.mainloop()

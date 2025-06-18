@@ -28,7 +28,9 @@ if TYPE_CHECKING:
 if 'NO_LOCAL_GGUF' not in os.environ:
     sys.path.insert(1, str(Path(__file__).parent / 'gguf-py'))
 import gguf
+import logging.config
 
+logging.config.fileConfig("py/logging.conf")
 logger = logging.getLogger("hf-to-gguf")
 
 
@@ -6566,7 +6568,7 @@ def covert(model, outfile, vocab_only=False, outtype='f16',
            split_max_tensors=0, split_max_size='0', dry_run=False,
            no_tensor_first_split=False, metadata=None, print_supported_models=False,
            remote=False, mmproj=False) -> None:
-    
+
     args = argparse.Namespace(vocab_only=vocab_only, outfile=Path(outfile), outtype=outtype,
                               bigendian=bigendian, model=Path(model),
                               use_temp_file=use_temp_file, no_lazy=no_lazy, model_name=model_name, verbose=verbose,
