@@ -108,6 +108,10 @@ class JsApi:
     def quantize(self, params):
         return self.controller.quantize(params, window)
 
+    def convert_hf_to_gguf(self,params):
+        return self.controller.convert_hf_to_gguf(params)
+
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

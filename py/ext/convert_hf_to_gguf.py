@@ -30,7 +30,6 @@ if 'NO_LOCAL_GGUF' not in os.environ:
 import gguf
 import logging.config
 
-logging.config.fileConfig("py/logging.conf")
 logger = logging.getLogger("hf-to-gguf")
 
 
@@ -6568,16 +6567,14 @@ def covert(model, outfile, vocab_only=False, outtype='f16',
            split_max_tensors=0, split_max_size='0', dry_run=False,
            no_tensor_first_split=False, metadata=None, print_supported_models=False,
            remote=False, mmproj=False) -> None:
-
     args = argparse.Namespace(vocab_only=vocab_only, outfile=Path(outfile), outtype=outtype,
                               bigendian=bigendian, model=Path(model),
                               use_temp_file=use_temp_file, no_lazy=no_lazy, model_name=model_name, verbose=verbose,
                               split_max_tensors=split_max_tensors, split_max_size=split_max_size, dry_run=dry_run,
-                              no_tensor_first_split=no_tensor_first_split, metadata=metadata, print_supported_models=print_supported_models,
+                              no_tensor_first_split=no_tensor_first_split, metadata=metadata,
+                              print_supported_models=print_supported_models,
                               remote=remote, mmproj=mmproj)
     run(args)
-
-    pass
 
 
 def main() -> None:

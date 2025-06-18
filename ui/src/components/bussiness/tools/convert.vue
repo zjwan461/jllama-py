@@ -58,8 +58,8 @@
           </el-table>
           <div class="block">
             <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
-              :current-page="currentPage" :page-sizes="pageSizes" :page-size="pageSize"
-              layout="total, sizes, prev, pager, next, jumper" :total="total">
+                           :current-page="currentPage" :page-sizes="pageSizes" :page-size="pageSize"
+                           layout="total, sizes, prev, pager, next, jumper" :total="total">
             </el-pagination>
           </div>
         </el-card>
@@ -69,7 +69,8 @@
 </template>
 
 <script>
-import { getRequestBodyJson } from "@/common/common";
+import {endLoading, getRequestBodyJson, startLoading} from "@/common/common";
+import apis from "@/common/apis";
 
 export default {
   name: "convert",
@@ -81,7 +82,7 @@ export default {
       pageSizes: [5, 10, 20],
       currentPage: 1,
       tableData: [],
-      scriptFileList: [],
+      scriptFileList: ["convert_hf_to_gguf.py"],
       form: {
         input: '',
         output: '',
@@ -90,13 +91,13 @@ export default {
       },
       rules: {
         scriptFile: [
-          { required: true, message: '请选择转换脚本', trigger: 'blur' }
+          {required: true, message: '请选择转换脚本', trigger: 'blur'}
         ]
         , input: [
-          { required: true, message: '请输入被转换模型目录', trigger: 'blur' }
+          {required: true, message: '请输入被转换模型目录', trigger: 'blur'}
         ],
         output: [
-          { required: true, message: '请输入转换输出文件', trigger: 'blur' }
+          {required: true, message: '请输入转换输出文件', trigger: 'blur'}
         ],
       },
     }
@@ -111,22 +112,29 @@ export default {
 
     },
     getScriptFile() {
-      this.$http.get('/api/tools/script-list').then(res => {
-        if (res.success === true) {
-          this.scriptFileList = res.data
-        }
-      })
+      // this.$http.get('/api/tools/script-list').then(res => {
+      //   if (res.success === true) {
+      //     this.scriptFileList = res.data
+      //   }
+      // })
     },
     onSubmit(form) {
       this.$refs[form].validate((valid) => {
         if (valid) {
-          this.$http.post('/api/tools/convert', getRequestBodyJson(this.form)).then(res => {
-            if (res.success === true) {
-              this.$message({
-                type: 'success',
-                message: '操作成功,异步请求请留意站内推送'
-              })
-            }
+          // this.$http.post('/api/tools/convert', getRequestBodyJson(this.form)).then(res => {
+          //   if (res.success === true) {
+          //     this.$message({
+          //       type: 'success',
+          //       message: '操作成功,异步请求请留意站内推送'
+          //     })
+          //   }
+          // })
+          const loading = startLoading('转换中...')
+          apis.convertHfToGguf(this.form).then(res => {
+            endLoading(loading)
+          }).catch(e => {
+            endLoading(loading)
+            this.$message.error(e)
           })
         }
       })
@@ -140,13 +148,13 @@ export default {
       this.getTableData()
     },
     getTableData() {
-      this.$http.get('/api/tools/convert-list?page=' + this.currentPage + "&limit=" + this.pageSize)
-        .then(res => {
-          if (res.success === true) {
-            this.tableData = res.data.records
-            this.total = res.data.total
-          }
-        })
+      // this.$http.get('/api/tools/convert-list?page=' + this.currentPage + "&limit=" + this.pageSize)
+      //   .then(res => {
+      //     if (res.success === true) {
+      //       this.tableData = res.data.records
+      //       this.total = res.data.total
+      //     }
+      //   })
     },
   }
 }

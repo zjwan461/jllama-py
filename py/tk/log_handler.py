@@ -1,5 +1,8 @@
 import logging
-import time
+from py.tk.log_viewer import TextViewer
+
+textViewer: TextViewer
+
 
 class LogViewHandler(logging.Handler):
     """自定义日志处理器，将日志输出到控制台并添加时间戳前缀"""
@@ -12,7 +15,9 @@ class LogViewHandler(logging.Handler):
         try:
             # 获取格式化后的日志消息
             msg = self.format(record)
-            print(msg)
+            # print(msg)
+            if textViewer:
+                textViewer.append_text(msg + "\n") #todo 性能优化
         except Exception:
             # 处理异常，避免日志处理失败导致程序崩溃
             self.handleError(record)

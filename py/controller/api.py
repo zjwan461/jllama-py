@@ -5,12 +5,11 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import filedialog
 
-from requests import session
-
 import py.util.systemInfo_util as sysInfoUtil
 
 import py.ai.reasoning as reasoning
-
+from py.tk import log_handler
+from py.ext.convert_hf_to_gguf import covert
 from py.util.logutil import Logger
 from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog, GgufSplitMerge, Quantize
 import py.config as config
@@ -26,6 +25,9 @@ logger = Logger("Api.py")
 class Api:
     root = None
     log_viewer = None
+
+    def get_log_viewer(self):
+        return self.log_viewer
 
     def __init__(self):
         tk_thread = threading.Thread(target=self.init_tk, name="tk thread", daemon=True)
@@ -520,7 +522,6 @@ class Api:
             session.close()
 
     def split_show(self, input_file, output_file, params: dict, window):
-        self.show_tk()
         self.log_viewer.append_text("GGUF split:\n")
         for chunk in cpp_origin_util.split_gguf(input_file, output_file, params):
             self.log_viewer.append_text(chunk)
@@ -528,7 +529,6 @@ class Api:
             window.evaluate_js("vue.messageArrive('jllama提醒','gguf split任务完成','success')")
 
     def merge_show(self, input_file, output_file, window):
-        self.show_tk()
         self.log_viewer.append_text("GGUF merge:\n")
         for chunk in cpp_origin_util.merge_gguf(input_file, output_file):
             self.log_viewer.append_text(chunk)
@@ -606,9 +606,14 @@ class Api:
             session.close()
 
     def show_quantize(self, input, output, q_type, window):
-        self.show_tk()
         self.log_viewer.append_text("GGUF quantize:\n")
         for chunk in cpp_origin_util.quantize(input, output, q_type):
             self.log_viewer.append_text(chunk)
         else:
             window.evaluate_js("vue.messageArrive('jllama提醒','gguf量化任务完成','success')")
+
+    def convert_hf_to_gguf(self,params):
+        input_dir = params.get("input")
+        output = params.get("output")
+        log_handler.textViewer = self.get_log_viewer()
+        covert(model=input_dir, outfile=output)

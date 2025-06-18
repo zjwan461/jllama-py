@@ -54,6 +54,7 @@ class TextViewer:
 
     def set_text(self, text):
         """设置文本内容"""
+        self.root.deiconify()
         self.text_area.config(state=tk.NORMAL)  # 启用编辑
         self.text_area.delete(1.0, tk.END)      # 清除现有内容
         self.text_area.insert(tk.END, text)     # 插入新文本
@@ -61,6 +62,7 @@ class TextViewer:
         self.text_area.config(state=tk.DISABLED)  # 禁用编辑
 
     def append_text(self, text):
+        self.root.deiconify()
         """设置文本内容"""
         self.text_area.config(state=tk.NORMAL)  # 启用编辑
         self.text_area.insert(tk.END, text)  # 插入新文本

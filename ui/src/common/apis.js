@@ -85,4 +85,7 @@ export default {
   quantize(params) {
     return window.pywebview.api.quantize(params)
   },
+  convertHfToGguf(params) {
+    return window.pywebview.api.convert_hf_to_gguf(params)
+  },
 }
