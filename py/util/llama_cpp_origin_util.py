@@ -7,9 +7,11 @@ def merge_gguf(input_file_path: str, output_file_path):
     cpp_dir = check_cpp_dir()
     split_exe = os.path.join(cpp_dir, "llama-gguf-split")
     cmd = [split_exe, "--merge", input_file_path, output_file_path]
-    with subprocess.Popen(cmd, text=True, stdout=subprocess.PIPE) as proc:
+    with subprocess.Popen(cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
+        for line in proc.stderr:
+            yield f"{line.strip()}\n"
         for line in proc.stdout:
-            yield f"{line.strip()}"
+            yield f"{line.strip()}\n"
 
 
 def split_gguf(input_file_path: str, output_file_path: str, options: dict):
@@ -30,7 +32,7 @@ def split_gguf(input_file_path: str, output_file_path: str, options: dict):
     cmd.append(output_file_path)
     with subprocess.Popen(cmd, text=True, stdout=subprocess.PIPE) as proc:
         for line in proc.stdout:
-            yield f"{line.strip()}"
+            yield f"{line.strip()}\n"
 
 
 def check_cpp_dir():
@@ -49,7 +51,7 @@ def quantize(input_file_path: str, output_file_path: str, q_type):
     cmd = [quantize_exe, input_file_path, output_file_path, q_type]
     with subprocess.Popen(cmd, text=True, stdout=subprocess.PIPE) as proc:
         for line in proc.stdout:
-            yield f"{line.strip()}"
+            yield f"{line.strip()}\n"
 
 
 def supported_q_type():

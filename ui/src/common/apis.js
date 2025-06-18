@@ -70,4 +70,13 @@ export default {
   showTk() {
     return window.pywebview.api.show_tk()
   },
+  splitMergeGguf(params) {
+    return window.pywebview.api.split_merge_gguf(params)
+  },
+  listSplitMerge(params) {
+    return window.pywebview.api.list_split_merge(params)
+  },
+  listQuantize(params) {
+    return window.pywebview.api.list_quantize(params)
+  },
 }

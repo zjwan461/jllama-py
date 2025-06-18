@@ -93,6 +93,15 @@ class JsApi:
     def del_running_model(self, id):
         return self.controller.del_running_model(id)
 
+    def split_merge_gguf(self, params):
+        return self.controller.split_merge_gguf(params, window)
+
+    def list_split_merge(self, params):
+        return self.controller.list_split_merge(params)
+
+    def list_quantize(self, params):
+        return self.controller.list_quantize(params)
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
@@ -225,19 +234,21 @@ def messages_to_prompt(messages: List[Dict[str, str]], model: str) -> str:
 def start_dev_flask():
     server.run(port=5000)
 
+
 clean_count = 0
+
+
 def before_show():
     global clean_count
     print("before_show")
     if clean_count == 0:
         controller.stop_all_running_model()
-    clean_count+=1
+    clean_count += 1
 
 
 if __name__ == '__main__':
     # 添加关闭的监听
     window.events.loaded += before_show
-
 
     if config.is_dev():
         threading.Thread(target=start_dev_flask).start()

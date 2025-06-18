@@ -6,11 +6,11 @@ class TextViewer:
     def  __init__(self, root):
         self.root = root
         self.root.title("系统输出")
-        self.root.geometry("900x600")
-        self.root.minsize(600, 400)
+        self.root.geometry("1000x600")
+        self.root.minsize(800, 400)
 
         # 设置中文字体支持
-        self.font = ('SimHei', 12)
+        self.font = ('微软雅黑', 12)
 
         # 创建UI
         self._create_ui()
@@ -57,6 +57,14 @@ class TextViewer:
         self.text_area.config(state=tk.NORMAL)  # 启用编辑
         self.text_area.delete(1.0, tk.END)      # 清除现有内容
         self.text_area.insert(tk.END, text)     # 插入新文本
+        self.text_area.see(tk.END)  # 滚动到底部
+        self.text_area.config(state=tk.DISABLED)  # 禁用编辑
+
+    def append_text(self, text):
+        """设置文本内容"""
+        self.text_area.config(state=tk.NORMAL)  # 启用编辑
+        self.text_area.insert(tk.END, text)  # 插入新文本
+        self.text_area.see(tk.END) # 滚动到底部
         self.text_area.config(state=tk.DISABLED)  # 禁用编辑
 
 if __name__ == "__main__":

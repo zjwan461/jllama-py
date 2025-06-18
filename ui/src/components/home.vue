@@ -21,13 +21,7 @@
         </div>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="setting">
-            设  置
-          </el-dropdown-item>
-          <el-dropdown-item
-            divided
-            command="sysout"
-          >
-            SysOut
+            设 置
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -141,8 +135,6 @@ export default {
     handleCommand(command) {
       if (command === 'setting') {
         this.$router.push({path: '/setting'})
-      } else if (command === 'sysout') {
-        apis.showTk()
       }
     },
     getMenuTree() {

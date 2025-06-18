@@ -68,6 +68,32 @@ class ReasoningExecLog(BaseEntity):
     stop_time = Column(TIMESTAMP)
 
 
+class GgufSplitMerge(BaseEntity):
+    __tablename__ = "gguf_split_merge"
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    option = Column(String(50), nullable=False)
+    input = Column(String(1000), nullable=False)
+    output = Column(String(1000), nullable=False)
+    split_option = Column(String(50))
+    split_param = Column(String(50))
+
+
+class Quantize(BaseEntity):
+    __tablename__ = "quantize"
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    input = Column(String(1000), nullable=False)
+    output = Column(String(1000), nullable=False)
+    param = Column(String(50), nullable=False)
+
+
+class ModelConvert(BaseEntity):
+    __tablename__ = "model_convert"
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    input = Column(String(1000), nullable=False)
+    output = Column(String(1000), nullable=False)
+    q_type = Column(String(50))
+
+
 class SqliteSqlalchemy(object):
     def __init__(self):
         # 创建Sqlite连接引擎

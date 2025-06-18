@@ -5,17 +5,20 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import filedialog
 
+from requests import session
+
 import py.util.systemInfo_util as sysInfoUtil
 
 import py.ai.reasoning as reasoning
 
 from py.util.logutil import Logger
-from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog
+from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog, GgufSplitMerge, Quantize
 import py.config as config
 import orjson
 import py.util.model_file_util as model_file_util
 from py.util.download import modelscope_download
 import py.tk.log_viewer as log_viewer
+import py.util.llama_cpp_origin_util as cpp_origin_util
 
 logger = Logger("Api.py")
 
@@ -472,6 +475,105 @@ class Api:
                 session.delete(reasoning_exec_log)
             session.commit()
             return "success"
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def split_merge_gguf(self, params, window):
+        input_file = params.get("input")
+        output_file = params.get("output")
+        options = params.get("options")
+        split_option = None
+        split_param = None
+        if options == "split":
+            split_option = params.get("splitOption")
+            split_param = params.get("splitParam")
+            split_params = {}
+            if len(split_param) > 0:
+                split_params = {params.get("splitOption"): params.get("splitParam")}
+
+            t = threading.Thread(target=self.split_show,
+                                 args=(input_file, output_file, split_params, window))
+            t.start()
+        elif options == "merge":
+            t = threading.Thread(target=self.merge_show, args=(input_file, output_file, window))
+            t.start()
+        else:
+            raise Exception(f"illegal options: {options}")
+
+        session = SqliteSqlalchemy().session
+
+        try:
+            gguf_split_merge = GgufSplitMerge(option=options, input=input_file, output=output_file,
+                                              split_option=split_option, split_param=split_param)
+            session.add(gguf_split_merge)
+            session.commit()
+            return orjson.dumps(gguf_split_merge.to_dic()).decode("utf-8")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def split_show(self, input_file, output_file, params: dict, window):
+        self.show_tk()
+        self.log_viewer.append_text("GGUF split:\n")
+        for chunk in cpp_origin_util.split_gguf(input_file, output_file, params):
+            self.log_viewer.append_text(chunk)
+        else:
+            window.evaluate_js("vue.messageArrive('jllama提醒','gguf split任务完成','success')")
+
+    def merge_show(self, input_file, output_file, window):
+        self.show_tk()
+        self.log_viewer.append_text("GGUF merge:\n")
+        for chunk in cpp_origin_util.merge_gguf(input_file, output_file):
+            self.log_viewer.append_text(chunk)
+        else:
+            window.evaluate_js("vue.messageArrive('jllama提醒','gguf merge任务完成','success')")
+
+    def list_split_merge(self, params):
+        page = params.get("page")
+        limit = params.get("limit")
+        offset = (page - 1) * limit
+        result = {}
+        session = SqliteSqlalchemy().session
+        try:
+            total = session.query(GgufSplitMerge).count()
+            result["total"] = total
+            gguf_split_merges = session.query(GgufSplitMerge).order_by(GgufSplitMerge.create_time.desc()).offset(
+                offset).limit(limit).all()
+            record = []
+            for item in gguf_split_merges:
+                record.append(item.to_dic())
+            result["record"] = record
+            return orjson.dumps(result).decode("utf-8")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def list_quantize(self, params):
+        page = params.get("page")
+        limit = params.get("limit")
+        offset = (page - 1) * limit
+        result = {}
+        session = SqliteSqlalchemy().session
+        try:
+            total = session.query(Quantize).count()
+            result["total"] = total
+            quantizes = session.query(Quantize).order_by(Quantize.create_time.desc()).offset(
+                offset).limit(limit).all()
+            record = []
+            for item in quantizes:
+                record.append(item.to_dic())
+            result["record"] = record
+            return orjson.dumps(result).decode("utf-8")
         except Exception as e:
             logger.error(e)
             session.rollback()

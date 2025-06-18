@@ -16,25 +16,33 @@
               </el-select>
             </el-form-item>
             <el-form-item label="输入文件" v-show="form.options === 'merge'">
-              <el-input type="text" v-model="form.input" placeholder="输入合并文件的目录和名称全路径"></el-input>
+              <el-input type="text" disabled v-model="form.input" placeholder="输入合并文件的目录和名称全路径">
+              </el-input>
+              <el-button size="small" type="primary" @click="openFileSelect('input')">选择文件</el-button>
+              <br>
               <i
                 style="color: #909399;">合并文件名规则：模型名-00001-of-00003.gguf。例如：DeepSeek-R1-Distill-Qwen-1.5B-Q2_K-00001-of-00003.gguf</i>
             </el-form-item>
             <el-form-item label="输入文件" v-show="form.options === 'split'">
-              <el-input type="text" v-model="form.input" placeholder="输入拆分文件的目录和名称全路径"></el-input>
+              <el-input type="text" disabled v-model="form.input"
+                        placeholder="输入拆分文件的目录和名称全路径"></el-input>
+              <el-button size="small" type="primary" @click="openFileSelect('input')">选择文件</el-button>
             </el-form-item>
             <el-form-item label="拆分选项" v-show="form.options === 'split'">
               <el-radio-group v-model="form.splitOption" @change="handleSplitOptionChange">
-                <el-radio label="split-max-tensors"></el-radio>
-                <el-radio label="split-max-size"></el-radio>
+                <el-radio label="--split-max-tensors"></el-radio>
+                <el-radio label="--split-max-size"></el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item label="split参数" v-show="form.options === 'split'">
               <el-input type="text" v-model="form.splitParam" placeholder="split参数，参考如下"></el-input>
-              <i style="color: #909399">对于split-max-tensors为拆分的tensors张量（如：256），对于split-max-size则为拆分的文件大小（如：1G/512M）</i>
+              <i
+                style="color: #909399">对于split-max-tensors为拆分的tensors张量（如：256），对于split-max-size则为拆分的文件大小（如：1G/512M）</i>
             </el-form-item>
             <el-form-item label="输出文件" prop="output">
               <el-input type="text" v-model="form.output" placeholder="输出文件的目录和名称全路径"></el-input>
+              <el-button size="small" type="primary" @click="openFileSelect('output')">选择文件</el-button>
+              <br>
             </el-form-item>
             <el-form-item label="异步执行">
               <el-switch v-model="form.async"></el-switch>
@@ -54,10 +62,10 @@
               <template slot-scope="props">
                 <el-form label-position="left" inline class="demo-table-expand">
                   <el-form-item label="分割选项">
-                    <span>{{ props.row.splitOption }}</span>
+                    <span>{{ props.row.split_option }}</span>
                   </el-form-item>
                   <el-form-item label="分割参数">
-                    <span>{{ props.row.splitParam }}</span>
+                    <span>{{ props.row.split_param }}</span>
                   </el-form-item>
                   <el-form-item label="输入文件">
                     <span>{{ props.row.input }}</span>
@@ -68,15 +76,15 @@
                 </el-form>
               </template>
             </el-table-column>
-            <el-table-column label="执行时间" prop="createTime">
+            <el-table-column label="执行时间" prop="create_time">
             </el-table-column>
             <el-table-column label="选项" prop="option">
             </el-table-column>
           </el-table>
           <div class="block">
             <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
-              :current-page="currentPage" :page-sizes="pageSizes" :page-size="pageSize"
-              layout="total, sizes, prev, pager, next, jumper" :total="total">
+                           :current-page="currentPage" :page-sizes="pageSizes" :page-size="pageSize"
+                           layout="total, sizes, prev, pager, next, jumper" :total="total">
             </el-pagination>
           </div>
         </el-card>
@@ -86,7 +94,8 @@
 </template>
 
 <script>
-import { getRequestBodyJson } from "@/common/common";
+import {getRequestBodyJson} from "@/common/common";
+import apis from "../../../common/apis";
 
 export default {
   name: "split-merge",
@@ -101,15 +110,15 @@ export default {
         options: 'split',
         input: '',
         output: '',
-        splitOption: 'split-max-tensors',
+        splitOption: '--split-max-tensors',
         splitParam: '',
         async: false
       },
       rules: {
         options: [
-          { required: true, message: '请输入参数选项', trigger: 'blur' }
+          {required: true, message: '请输入参数选项', trigger: 'blur'}
         ], output: [
-          { required: true, message: '请输入output文件地址', trigger: 'blur' }
+          {required: true, message: '请输入output文件地址', trigger: 'blur'}
         ],
       },
     }
@@ -118,13 +127,23 @@ export default {
     this.getTableData()
   },
   methods: {
+    openFileSelect(val) {
+      apis.openFileSelector().then(res => {
+        if (res.length > 0) {
+          this.form[val] = res[0]
+        }
+      }).catch(e => {
+        this.$message.error(e)
+      })
+      return false
+    },
     handleChangeOptions(e) {
       if (e === 'split') {
         this.form = {
           options: 'split',
           input: '',
           output: '',
-          splitOption: 'split-max-tensors',
+          splitOption: '--split-max-tensors',
           splitParam: '',
           async: false
         }
@@ -148,26 +167,24 @@ export default {
       this.getTableData()
     },
     getTableData() {
-      this.$http.get('/api/tools/list-split-merge?page=' + this.currentPage + "&limit=" + this.pageSize)
+      apis.listSplitMerge({page: this.currentPage, limit: this.pageSize})
         .then(res => {
-          if (res.success === true) {
-            this.tableData = res.data.records
-            this.total = res.data.total
-          }
-        })
+          const data = JSON.parse(res)
+          this.total = data.total
+          this.tableData = data.record
+        }).catch(e => {
+        this.$message.error(e)
+      })
     },
     handleSplitOptionChange(e) {
     },
     onSubmit(form) {
       this.$refs[form].validate((valid) => {
         if (valid) {
-          this.$http.post('/api/tools/split-merge', getRequestBodyJson(this.form)).then(res => {
-            if (res.success === true) {
-              this.$message({
-                type: 'success',
-                message: '操作成功,异步请求请留意站内推送'
-              })
-            }
+          apis.splitMergeGguf(this.form).then(res => {
+            console.log(res)
+          }).catch(e => {
+            this.$message.error(e)
           })
         }
       })
@@ -180,6 +197,7 @@ export default {
 <style scoped>
 .card {
 }
+
 .demo-table-expand {
   font-size: 0;
 }
