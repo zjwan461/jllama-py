@@ -1,12 +1,20 @@
 import json
 import os
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(script_dir, "config.json")
-f = open(file_path, "r")
-conf = f.read()
-dic = json.loads(conf)
-f.close()
+dic: dict
+
+
+def read_config():
+    global file_path, dic
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(script_dir, "config.json")
+    f = open(file_path, "r")
+    conf = f.read()
+    dic = json.loads(conf)
+    f.close()
+
+
+read_config()
 
 
 def get_value(key: str):
@@ -58,25 +66,9 @@ class LogConfig:
         return self.path
 
 
-# class AiConfig:
-#
-#     def __init__(self, kwargs: dict):
-#         self.model_save_dir = kwargs.get("model_save_dir")
-#         self.model_import_dir = kwargs.get("model_import_dir")
-#         self.llama_cpp_dir = kwargs.get("llama_cpp_dir")
-#         self.llama_factory_port = kwargs.get("llama_factory_port", 7860)
-#
-#     def to_dict(self):
-#         return vars(self)  # 返回对象的属性字典
-#
-#     def get_model_save_dir(self):
-#         return self.model_save_dir
-#
-#     def get_model_import_dir(self):
-#         return self.model_import_dir
-
-
 def save_ai_config(config: dict):
     dic["ai_config"] = config
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(dic, f, ensure_ascii=False, indent=4)
+    # reload config
+    read_config()
