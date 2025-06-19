@@ -108,7 +108,7 @@
 
       <el-col :span="12" class="card-box">
         <el-card>
-          <div slot="header"><span><i class="el-icon-cpu"></i> GPU(仅支持cuda)</span></div>
+          <div slot="header"><span><i class="el-icon-cpu"></i> GPU</span></div>
           <div class="el-table el-table--enable-row-hover el-table--medium">
             <table cellspacing="0" style="width: 100%;">
               <thead>
