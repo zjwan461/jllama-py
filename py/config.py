@@ -32,8 +32,9 @@ def is_prd():
 def get_log_config():
     return LogConfig(dic.get("log"))
 
-def get_ai_config():
-    return AiConfig(dic.get("ai_config"))
+
+def get_ai_config() -> dict:
+    return dic.get("ai_config")
 
 
 def get_app_height():
@@ -57,18 +58,25 @@ class LogConfig:
         return self.path
 
 
-class AiConfig:
+# class AiConfig:
+#
+#     def __init__(self, kwargs: dict):
+#         self.model_save_dir = kwargs.get("model_save_dir")
+#         self.model_import_dir = kwargs.get("model_import_dir")
+#         self.llama_cpp_dir = kwargs.get("llama_cpp_dir")
+#         self.llama_factory_port = kwargs.get("llama_factory_port", 7860)
+#
+#     def to_dict(self):
+#         return vars(self)  # 返回对象的属性字典
+#
+#     def get_model_save_dir(self):
+#         return self.model_save_dir
+#
+#     def get_model_import_dir(self):
+#         return self.model_import_dir
 
-    def __init__(self, kwargs: dict):
-        self.model_save_dir = kwargs.get("model_save_dir")
-        self.model_import_dir = kwargs.get("model_import_dir")
 
-    def get_model_save_dir(self):
-        return self.model_save_dir
-
-    def get_model_import_dir(self):
-        return self.model_import_dir
-
-
-if __name__ == '__main__':
-    print(is_dev())
+def save_ai_config(config: dict):
+    dic["ai_config"] = config
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(dic, f, ensure_ascii=False, indent=4)

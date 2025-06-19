@@ -48,15 +48,12 @@
                   <el-form-item label="输出文件">
                     <span>{{ props.row.output }}</span>
                   </el-form-item>
-                  <el-form-item label="异步">
-                    <span>{{ props.row.async }}</span>
-                  </el-form-item>
                 </el-form>
               </template>
             </el-table-column>
-            <el-table-column label="执行时间" prop="createTime">
+            <el-table-column label="执行时间" prop="create_time">
             </el-table-column>
-            <el-table-column label="脚本文件" prop="scriptFile">
+            <el-table-column label="脚本文件" prop="script_file">
             </el-table-column>
           </el-table>
           <div class="block">
@@ -140,13 +137,13 @@ export default {
       this.getTableData()
     },
     getTableData() {
-      // this.$http.get('/api/tools/convert-list?page=' + this.currentPage + "&limit=" + this.pageSize)
-      //   .then(res => {
-      //     if (res.success === true) {
-      //       this.tableData = res.data.records
-      //       this.total = res.data.total
-      //     }
-      //   })
+      apis.listConvertModel({page: this.currentPage, limit: this.pageSize}).then(res => {
+        const data = JSON.parse(res)
+        this.total = data.total
+        this.tableData = data.record
+      }).catch(e => {
+        this.$message.error(e)
+      })
     },
   }
 }

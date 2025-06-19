@@ -5,13 +5,16 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import filedialog
 
+from requests import session
+
 import py.util.systemInfo_util as sysInfoUtil
 
 import py.ai.reasoning as reasoning
 from py.tk import log_handler
 from py.ext.convert_hf_to_gguf import covert as cover_hf
 from py.util.logutil import Logger
-from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog, GgufSplitMerge, Quantize
+from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog, GgufSplitMerge, Quantize, \
+    ModelConvert
 import py.config as config
 import orjson
 import py.util.model_file_util as model_file_util
@@ -635,7 +638,50 @@ class Api:
         else:
             self.show_covert(input_dir, output, q_type, script_file, window)
 
+        session = SqliteSqlalchemy().session
+        try:
+            model_covert = ModelConvert(input=input_dir, output=output, q_type=q_type, script_file=script_file)
+            session.add(model_covert)
+            session.commit()
+            return orjson.dumps(model_covert.to_dic()).decode("utf-8")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+
     def show_covert(self, input_dir, output, q_type, script_file, window):
         if script_file == "convert_hf_to_gguf.py":
             cover_hf(model=input_dir, outfile=output, outtype=q_type)
             window.evaluate_js("vue.messageArrive('jllama提醒','gguf转换任务完成','success')")
+
+    def list_covert_model(self, params):
+        page = params.get("page")
+        limit = params.get("limit")
+        offset = (page -1) * limit
+
+        result = {}
+        session = SqliteSqlalchemy().session
+        try:
+            total = session.query(ModelConvert).count()
+            result["total"] = total
+            model_convert_list = session.query(ModelConvert).order_by(ModelConvert.create_time.desc()).offset(offset).limit(limit)
+            record = []
+            for item in model_convert_list:
+                record.append(item.to_dic())
+            result["record"] = record
+            return orjson.dumps(result).decode("utf-8")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def get_setting(self):
+        return config.get_ai_config()
+
+    def save_setting(self, params):
+        config.save_ai_config(params)

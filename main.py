@@ -108,9 +108,18 @@ class JsApi:
     def quantize(self, params):
         return self.controller.quantize(params, window)
 
-    def convert_hf_to_gguf(self,params):
+    def convert_hf_to_gguf(self, params):
         return self.controller.convert_hf_to_gguf(params, window)
 
+    def list_covert_model(self, params):
+        return self.controller.list_covert_model(params)
+
+    def get_setting(self):
+        return self.controller.get_setting()
+
+    def save_setting(self, params):
+        self.controller.save_setting(params)
+        return "success"
 
 
 js_api = JsApi(controller)

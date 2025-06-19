@@ -88,4 +88,13 @@ export default {
   convertHfToGguf(params) {
     return window.pywebview.api.convert_hf_to_gguf(params)
   },
+  listConvertModel(params) {
+    return window.pywebview.api.list_covert_model(params)
+  },
+  getSetting() {
+    return window.pywebview.api.get_setting()
+  },
+  saveSetting(params) {
+    return window.pywebview.api.save_setting(params)
+  },
 }
