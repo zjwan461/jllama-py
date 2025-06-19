@@ -92,6 +92,7 @@ class ModelConvert(BaseEntity):
     input = Column(String(1000), nullable=False)
     output = Column(String(1000), nullable=False)
     q_type = Column(String(50))
+    script_file = Column(String(255))
 
 
 class SqliteSqlalchemy(object):

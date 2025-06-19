@@ -34,6 +34,10 @@
             <el-form-item label="输出路径" prop="output">
               <el-input type="text" v-model="form3.output" placeholder="输出gguf文件的位置"></el-input>
             </el-form-item>
+            <el-form-item label="异步执行">
+              <el-switch v-model="form3.async"></el-switch>
+              <i style="color: #909399;"> 默认同步执行，开启则会在后台执行，不会阻塞页面</i>
+            </el-form-item>
           </el-form>
           <div class="stepButton">
             <el-button type="info" size="small" :disabled="step === 1" @click="back()">上一步</el-button>
@@ -89,6 +93,7 @@
 
 <script>
 import apis from "../../../common/apis";
+import {endLoading, startLoading} from "../../../common/common";
 
 export default {
   name: "quantization",
@@ -124,6 +129,7 @@ export default {
       },
       form3: {
         output: '',
+        async: true
       },
       rules3: {
         output: [
@@ -182,11 +188,15 @@ export default {
           input: this.form1.file,
           qType: this.form2.quantizeParam,
           output: this.form3.output,
+          async: this.form3.async
         }
         if (this.step >= 3) {
+          const loading = startLoading("量化中")
           apis.quantize(req).then(res => {
+            endLoading(loading)
             console.log(res)
           }).catch(e => {
+            endLoading(loading)
             this.$message.error(e)
           })
         }

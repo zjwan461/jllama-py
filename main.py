@@ -109,7 +109,7 @@ class JsApi:
         return self.controller.quantize(params, window)
 
     def convert_hf_to_gguf(self,params):
-        return self.controller.convert_hf_to_gguf(params)
+        return self.controller.convert_hf_to_gguf(params, window)
 
 
 

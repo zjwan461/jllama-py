@@ -9,7 +9,7 @@ import py.util.systemInfo_util as sysInfoUtil
 
 import py.ai.reasoning as reasoning
 from py.tk import log_handler
-from py.ext.convert_hf_to_gguf import covert
+from py.ext.convert_hf_to_gguf import covert as cover_hf
 from py.util.logutil import Logger
 from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog, GgufSplitMerge, Quantize
 import py.config as config
@@ -488,6 +488,7 @@ class Api:
         input_file = params.get("input")
         output_file = params.get("output")
         options = params.get("options")
+        async_exec = params.get("async")
         split_option = None
         split_param = None
         if options == "split":
@@ -496,13 +497,18 @@ class Api:
             split_params = {}
             if len(split_param) > 0:
                 split_params = {params.get("splitOption"): params.get("splitParam")}
-
-            t = threading.Thread(target=self.split_show,
-                                 args=(input_file, output_file, split_params, window))
-            t.start()
+            if async_exec:
+                t = threading.Thread(target=self.split_show,
+                                     args=(input_file, output_file, split_params, window))
+                t.start()
+            else:
+                self.split_show(input_file, output_file, params, window)
         elif options == "merge":
-            t = threading.Thread(target=self.merge_show, args=(input_file, output_file, window))
-            t.start()
+            if async_exec:
+                t = threading.Thread(target=self.merge_show, args=(input_file, output_file, window))
+                t.start()
+            else:
+                self.merge_show(input_file, output_file, window)
         else:
             raise Exception(f"illegal options: {options}")
 
@@ -588,9 +594,13 @@ class Api:
         input = params.get("input")
         output = params.get("output")
         q_type = params.get("qType")
+        async_exec = params.get("async", False)
 
-        t = threading.Thread(target=self.show_quantize, args=(input, output, q_type, window))
-        t.start()
+        if async_exec:
+            t = threading.Thread(target=self.show_quantize, args=(input, output, q_type, window))
+            t.start()
+        else:
+            self.show_quantize(input, output, q_type, window)
 
         session = SqliteSqlalchemy().session
         try:
@@ -612,8 +622,20 @@ class Api:
         else:
             window.evaluate_js("vue.messageArrive('jllama提醒','gguf量化任务完成','success')")
 
-    def convert_hf_to_gguf(self,params):
+    def convert_hf_to_gguf(self, params, window):
         input_dir = params.get("input")
         output = params.get("output")
+        q_type = params.get("qType")
+        async_exec = params.get("async", False)
+        script_file = params.get("scriptFile")
         log_handler.textViewer = self.get_log_viewer()
-        covert(model=input_dir, outfile=output)
+        if async_exec:
+            t = threading.Thread(target=self.show_covert, args=(input_dir, output, q_type, script_file, window))
+            t.start()
+        else:
+            self.show_covert(input_dir, output, q_type, script_file, window)
+
+    def show_covert(self, input_dir, output, q_type, script_file, window):
+        if script_file == "convert_hf_to_gguf.py":
+            cover_hf(model=input_dir, outfile=output, outtype=q_type)
+            window.evaluate_js("vue.messageArrive('jllama提醒','gguf转换任务完成','success')")

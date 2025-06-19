@@ -17,7 +17,8 @@ class LogViewHandler(logging.Handler):
             msg = self.format(record)
             # print(msg)
             if textViewer:
-                textViewer.append_text(msg + "\n") #todo 性能优化
+                # textViewer.append_text(msg + "\n") # 每次都往tk的log text viewer ui组件里写性能较差
+                textViewer.push_text(msg + "\n")
         except Exception:
             # 处理异常，避免日志处理失败导致程序崩溃
             self.handleError(record)

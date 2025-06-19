@@ -7,12 +7,10 @@
     <el-row>
       <el-col :span="12" class="card-box">
         <el-card class="card">
-          <el-alert :title="tips" type="warning">
-          </el-alert>
           <div slot="header"><span><i class="el-icon-edit"></i> 模型格式转换</span></div>
           <el-form ref="form" :rules="rules" :model="form" label-width="130px" style="margin: 20px 0;">
             <el-form-item label="转换脚本" prop="scriptFile">
-              <el-select v-model="form.scriptFile" placeholder="被转换模型目录">
+              <el-select v-model="form.scriptFile" placeholder="转换脚本">
                 <el-option v-for="item in scriptFileList" :key="item" :label="item" :value="item"></el-option>
               </el-select>
             </el-form-item>
@@ -21,6 +19,11 @@
             </el-form-item>
             <el-form-item label="转换输出文件" prop="output">
               <el-input v-model="form.output" type="text" placeholder="转换输出文件"></el-input>
+            </el-form-item>
+            <el-form-item label="量化参数" prop="qType">
+              <el-select v-model="form.qType">
+                <el-option v-for="item in qTypeList" :key="item" :label="item" :value="item"></el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="异步执行">
               <el-switch v-model="form.async"></el-switch>
@@ -76,18 +79,19 @@ export default {
   name: "convert",
   data() {
     return {
-      tips: '要使用此功能必须先在设置中配置Python运行环境，并按照指引按照convert依赖',
       total: 0,
       pageSize: 5,
       pageSizes: [5, 10, 20],
       currentPage: 1,
       tableData: [],
+      qTypeList: ["auto", "f32", "f16", "bf16", "q8_0", "tq1_0", "tq2_0"],
       scriptFileList: ["convert_hf_to_gguf.py"],
       form: {
         input: '',
         output: '',
         scriptFile: '',
-        async: false
+        qType: 'auto',
+        async: true
       },
       rules: {
         scriptFile: [
@@ -99,11 +103,13 @@ export default {
         output: [
           {required: true, message: '请输入转换输出文件', trigger: 'blur'}
         ],
+        qType: [
+          {required: true, message: '请输入量化参数', trigger: 'blur'}
+        ]
       },
     }
   },
   created() {
-    this.getScriptFile()
     this.getTableData()
     this.showTips()
   },
@@ -111,31 +117,17 @@ export default {
     showTips() {
 
     },
-    getScriptFile() {
-      // this.$http.get('/api/tools/script-list').then(res => {
-      //   if (res.success === true) {
-      //     this.scriptFileList = res.data
-      //   }
-      // })
-    },
     onSubmit(form) {
       this.$refs[form].validate((valid) => {
         if (valid) {
-          // this.$http.post('/api/tools/convert', getRequestBodyJson(this.form)).then(res => {
-          //   if (res.success === true) {
-          //     this.$message({
-          //       type: 'success',
-          //       message: '操作成功,异步请求请留意站内推送'
-          //     })
-          //   }
-          // })
           const loading = startLoading('转换中...')
           apis.convertHfToGguf(this.form).then(res => {
+            console.log(res)
             endLoading(loading)
           }).catch(e => {
             endLoading(loading)
             this.$message.error(e)
-          })
+          });
         }
       })
     },

@@ -44,6 +44,10 @@
               <el-button size="small" type="primary" @click="openFileSelect('output')">选择文件</el-button>
               <br>
             </el-form-item>
+            <el-form-item label="异步执行">
+              <el-switch v-model="form.async"></el-switch>
+              <i style="color: #909399;"> 默认同步执行，开启则会在后台执行，不会阻塞页面</i>
+            </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="onSubmit('form')">提交</el-button>
             </el-form-item>
@@ -91,6 +95,7 @@
 
 <script>
 import apis from "../../../common/apis";
+import {endLoading, startLoading} from "../../../common/common";
 
 export default {
   name: "split-merge",
@@ -107,6 +112,7 @@ export default {
         output: '',
         splitOption: '--split-max-tensors',
         splitParam: '',
+        async: true
       },
       rules: {
         options: [
@@ -139,6 +145,7 @@ export default {
           output: '',
           splitOption: '--split-max-tensors',
           splitParam: '',
+          async: true
         }
       } else if (e === 'merge') {
         this.form = {
@@ -147,6 +154,7 @@ export default {
           output: '',
           splitOption: '',
           splitParam: '',
+          async: true
         }
       }
     },
@@ -173,9 +181,12 @@ export default {
     onSubmit(form) {
       this.$refs[form].validate((valid) => {
         if (valid) {
+          const loading = startLoading("合并/拆分中")
           apis.splitMergeGguf(this.form).then(res => {
+            endLoading(loading)
             console.log(res)
           }).catch(e => {
+            endLoading(loading)
             this.$message.error(e)
           })
         }
