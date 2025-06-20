@@ -1,11 +1,12 @@
 import json
 import os.path
 import threading
+import time
 import tkinter as tk
 from datetime import datetime
 from tkinter import filedialog
 
-from requests import session
+import py.ai.llama_server as llama_server
 
 import py.util.systemInfo_util as sysInfoUtil
 
@@ -694,3 +695,24 @@ class Api:
     def save_llama_cpp_config(self, content):
         with open("py/llama_cpp_config.json", "w", encoding="utf-8") as f:
             f.write(content)
+
+    def get_llama_server_info(self):
+        state = "stop"
+        try:
+            server_process = llama_server.server_process
+            if server_process.is_alive():
+                state = "running"
+        except Exception as e:
+            logger.info("llama server is not running")
+
+        config = json.loads(self.get_llama_cpp_config())
+        result = {"server_port": config["port"], "server_status": state}
+        return result
+
+    def start_llama_server(self):
+        llama_server.run_llama_server_async(config_file="py/llama_cpp_config.json")
+        time.sleep(10)
+
+    def stop_llama_server(self):
+        llama_server.stop_llama_server()
+        time.sleep(10)

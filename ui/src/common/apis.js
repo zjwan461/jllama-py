@@ -103,4 +103,13 @@ export default {
   saveLlamaCppConfig(content) {
     return window.pywebview.api.save_llama_cpp_config(content)
   },
+  getLLamaServerInfo() {
+    return window.pywebview.api.get_llama_server_info()
+  },
+  startLLamaServer() {
+    return window.pywebview.api.start_llama_server()
+  },
+  stopLLamaServer() {
+    return window.pywebview.api.stop_llama_server()
+  },
 }

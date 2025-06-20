@@ -128,6 +128,17 @@ class JsApi:
         self.controller.save_llama_cpp_config(content)
         return "success"
 
+    def get_llama_server_info(self):
+        return self.controller.get_llama_server_info()
+
+    def start_llama_server(self):
+        self.controller.start_llama_server()
+        return "success"
+
+    def stop_llama_server(self):
+        self.controller.stop_llama_server()
+        return "success"
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

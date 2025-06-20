@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import multiprocessing
 import os
 import sys
 import argparse
-import threading
 
 import uvicorn
 
@@ -40,11 +40,15 @@ Then visit http://localhost:8000/docs to see the interactive API docs.
 
 """
 
-state = "stop"
-server_port: int
+server_process: multiprocessing.Process
 
 
-def run_llama_server_async(model: str, model_alias=None, n_gpu_layers=None,
+def stop_llama_server():
+    if server_process is not None:
+        server_process.terminate()
+
+
+def run_llama_server_async(model=None, model_alias=None, n_gpu_layers=None,
                            split_mode=None, main_gpu=None, tensor_split=None, vocab_only=None, use_mmap=None,
                            use_mlock=None, kv_overrides=None, rpc_servers=None, seed=None, n_ctx=None, n_batch=None,
                            n_ubatch=None, n_threads=None, n_threads_batch=None, rope_scaling_type=None,
@@ -57,38 +61,45 @@ def run_llama_server_async(model: str, model_alias=None, n_gpu_layers=None,
                            hf_model_repo_id=None, draft_model=None, draft_model_num_pred_tokens=None, type_k=None,
                            type_v=None, verbose=None, host=None, port=None, ssl_keyfile=None, ssl_certfile=None,
                            api_key=None, interrupt_requests=None, disable_ping_events=None, root_path=None,
-                           config_file=None):
+                           config_file= None):
+    global server_process
+    server_process = multiprocessing.Process(target=run_llama_server, args=(model, model_alias, n_gpu_layers,
+                                                                            split_mode, main_gpu, tensor_split,
+                                                                            vocab_only,
+                                                                            use_mmap,
+                                                                            use_mlock, kv_overrides, rpc_servers, seed,
+                                                                            n_ctx,
+                                                                            n_batch,
+                                                                            n_ubatch, n_threads, n_threads_batch,
+                                                                            rope_scaling_type,
+                                                                            rope_freq_base, rope_freq_scale,
+                                                                            yarn_ext_factor,
+                                                                            yarn_attn_factor,
+                                                                            yarn_beta_fast, yarn_beta_slow,
+                                                                            yarn_orig_ctx,
+                                                                            mul_mat_q,
+                                                                            logits_all, embedding, offload_kqv,
+                                                                            flash_attn,
+                                                                            last_n_tokens_size, lora_base, lora_path,
+                                                                            numa,
+                                                                            chat_format,
+                                                                            clip_model_path, cache, cache_type,
+                                                                            cache_size,
+                                                                            hf_tokenizer_config_path,
+                                                                            hf_pretrained_model_name_or_path,
+                                                                            hf_model_repo_id, draft_model,
+                                                                            draft_model_num_pred_tokens, type_k,
+                                                                            type_v, verbose, host, port, ssl_keyfile,
+                                                                            ssl_certfile,
+                                                                            api_key, interrupt_requests,
+                                                                            disable_ping_events,
+                                                                            root_path,
+                                                                            config_file))
 
-    server_thread = threading.Thread(target=run_llama_server, args=(model, model_alias, n_gpu_layers,
-                                                                    split_mode, main_gpu, tensor_split, vocab_only,
-                                                                    use_mmap,
-                                                                    use_mlock, kv_overrides, rpc_servers, seed, n_ctx,
-                                                                    n_batch,
-                                                                    n_ubatch, n_threads, n_threads_batch,
-                                                                    rope_scaling_type,
-                                                                    rope_freq_base, rope_freq_scale, yarn_ext_factor,
-                                                                    yarn_attn_factor,
-                                                                    yarn_beta_fast, yarn_beta_slow, yarn_orig_ctx,
-                                                                    mul_mat_q,
-                                                                    logits_all, embedding, offload_kqv, flash_attn,
-                                                                    last_n_tokens_size, lora_base, lora_path, numa,
-                                                                    chat_format,
-                                                                    clip_model_path, cache, cache_type, cache_size,
-                                                                    hf_tokenizer_config_path,
-                                                                    hf_pretrained_model_name_or_path,
-                                                                    hf_model_repo_id, draft_model,
-                                                                    draft_model_num_pred_tokens, type_k,
-                                                                    type_v, verbose, host, port, ssl_keyfile,
-                                                                    ssl_certfile,
-                                                                    api_key, interrupt_requests, disable_ping_events,
-                                                                    root_path,
-                                                                    config_file))
-
-    server_thread.start()
-    return server_thread
+    server_process.start()
 
 
-def run_llama_server(model: str, model_alias=None, n_gpu_layers=None,
+def run_llama_server(model=None, model_alias=None, n_gpu_layers=None,
                      split_mode=None, main_gpu=None, tensor_split=None, vocab_only=None, use_mmap=None,
                      use_mlock=None, kv_overrides=None, rpc_servers=None, seed=None, n_ctx=None, n_batch=None,
                      n_ubatch=None, n_threads=None, n_threads_batch=None, rope_scaling_type=None,
@@ -102,9 +113,6 @@ def run_llama_server(model: str, model_alias=None, n_gpu_layers=None,
                      type_v=None, verbose=None, host=None, port=None, ssl_keyfile=None, ssl_certfile=None,
                      api_key=None, interrupt_requests=None, disable_ping_events=None, root_path=None,
                      config_file=None):
-    global state
-    global server_port
-    server_port = port if port is not None else 8000
 
     description = "🦙 Llama.cpp python server. Host your own LLMs!🚀"
     parser = argparse.ArgumentParser(description=description)
@@ -179,7 +187,6 @@ def run_llama_server(model: str, model_alias=None, n_gpu_layers=None,
         server_settings=server_settings,
         model_settings=model_settings,
     )
-    state = "running"
     uvicorn.run(
         app,
         host=os.getenv("HOST", server_settings.host),
