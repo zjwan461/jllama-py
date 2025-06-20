@@ -651,7 +651,6 @@ class Api:
         finally:
             session.close()
 
-
     def show_covert(self, input_dir, output, q_type, script_file, window):
         if script_file == "convert_hf_to_gguf.py":
             cover_hf(model=input_dir, outfile=output, outtype=q_type)
@@ -660,14 +659,15 @@ class Api:
     def list_covert_model(self, params):
         page = params.get("page")
         limit = params.get("limit")
-        offset = (page -1) * limit
+        offset = (page - 1) * limit
 
         result = {}
         session = SqliteSqlalchemy().session
         try:
             total = session.query(ModelConvert).count()
             result["total"] = total
-            model_convert_list = session.query(ModelConvert).order_by(ModelConvert.create_time.desc()).offset(offset).limit(limit)
+            model_convert_list = session.query(ModelConvert).order_by(ModelConvert.create_time.desc()).offset(
+                offset).limit(limit)
             record = []
             for item in model_convert_list:
                 record.append(item.to_dic())
@@ -685,3 +685,12 @@ class Api:
 
     def save_setting(self, params):
         config.save_ai_config(params)
+
+    def get_llama_cpp_config(self):
+        with open("py/llama_cpp_config.json", "r", encoding="utf-8") as f:
+            conf = f.read()
+            return conf
+
+    def save_llama_cpp_config(self, content):
+        with open("py/llama_cpp_config.json", "w", encoding="utf-8") as f:
+            f.write(content)

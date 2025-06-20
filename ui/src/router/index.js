@@ -40,7 +40,7 @@ const routes = [{
       component: () => import('../components/bussiness/mgn/model-import.vue')
     }, {
       path: '/history',
-      name: 'watch',
+      name: 'history',
       component: () => import('../components/bussiness/history.vue')
     }, {
       path: '/tools/split-merge',

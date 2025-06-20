@@ -97,4 +97,10 @@ export default {
   saveSetting(params) {
     return window.pywebview.api.save_setting(params)
   },
+  getLlamaCppConfig() {
+    return window.pywebview.api.get_llama_cpp_config()
+  },
+  saveLlamaCppConfig(content) {
+    return window.pywebview.api.save_llama_cpp_config(content)
+  },
 }
