@@ -20,28 +20,27 @@
         style="width: 100%"
       >
         <el-table-column
-          prop="modelName"
+          prop="model_name"
           label="模型名称">
         </el-table-column>
         <el-table-column
-          prop="llamaCppDir"
-          label="执行目录">
+          width="60"
+          prop="model_type"
+          label="类型">
         </el-table-column>
         <el-table-column
-          width="120px"
-          prop="llamaCppCommand"
-          label="Command">
+          prop="file_path"
+          label="文件路径">
         </el-table-column>
         <el-table-column
-          prop="llamaCppArgs"
+          prop="reasoning_args"
           label="运行参数">
         </el-table-column>
         <el-table-column
           fixed="right"
           label="操作"
-          width="200">
+          width="80">
           <template slot-scope="scope">
-            <el-button @click="showLog(scope.row, scope.$index)" type="success" size="small">查看日志</el-button>
             <el-button @click="del(scope.row, scope.$index)" type="danger" size="small">删除</el-button>
           </template>
         </el-table-column>

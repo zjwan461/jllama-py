@@ -469,7 +469,7 @@ class Api:
         if total > 0:
             reason_exec_logs = query.order_by(ReasoningExecLog.create_time.desc()).offset(offset).limit(limit).all()
             record = [item.to_dic() for item in reason_exec_logs]
-            result["record", record]
+            result["record"] = record
         return orjson.dumps(result).decode("utf-8")
 
     def del_running_model(self, id):
