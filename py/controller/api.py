@@ -13,6 +13,7 @@ import py.util.systemInfo_util as sysInfoUtil
 import py.ai.reasoning as reasoning
 from py.tk import log_handler
 from py.ext.convert_hf_to_gguf import covert as cover_hf
+from py.util import common_util
 from py.util.logutil import Logger
 from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog, GgufSplitMerge, Quantize, \
     ModelConvert
@@ -716,3 +717,7 @@ class Api:
     def stop_llama_server(self):
         llama_server.stop_llama_server()
         time.sleep(10)
+
+    def open_llama_server_config(self):
+        current_dir = os.getcwd()
+        common_util.open_file(os.path.join(current_dir, "py/llama_cpp_config.json"))

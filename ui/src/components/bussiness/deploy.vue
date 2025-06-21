@@ -26,8 +26,14 @@
             <el-tag :type="llamaServer.server_status === 'running'?'success':'danger'">{{ llamaServer.server_status }}
             </el-tag>
           </div>
-          <el-button type="primary" size="mini" @click="startOrStopServer"
-                     v-text="llamaServer.server_status  === 'running'?'停止服务':'启动服务'"></el-button>
+          <div style="margin: 10px 0">
+            <el-button type="primary" size="mini" @click="startOrStopServer"
+                       v-text="llamaServer.server_status  === 'running'?'停止服务':'启动服务'"></el-button>
+
+            <el-button type="info" size="mini" @click="getLLamaServerInfo"
+                       icon="el-icon-refresh">刷新
+            </el-button>
+          </div>
         </el-collapse-item>
       </el-collapse>
 

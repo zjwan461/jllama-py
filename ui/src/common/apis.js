@@ -112,4 +112,7 @@ export default {
   stopLLamaServer() {
     return window.pywebview.api.stop_llama_server()
   },
+  openLlamaServerConfig() {
+    return window.pywebview.api.open_llama_server_config()
+  },
 }

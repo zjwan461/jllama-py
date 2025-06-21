@@ -139,6 +139,10 @@ class JsApi:
         self.controller.stop_llama_server()
         return "success"
 
+    def open_llama_server_config(self):
+        self.controller.open_llama_server_config()
+        return "success"
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

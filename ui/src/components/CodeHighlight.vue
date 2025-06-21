@@ -11,8 +11,9 @@
           :disabled="!code"
         >复制
         </el-button>
+        <el-button size="mini" type="text" @click="editSystem" icon="el-icon-edit">编辑器中打开</el-button>
         <el-button
-          size="small"
+          size="mini"
           :type="isEditing ? 'success' : 'info'"
           @click="toggleEditMode"
         >
@@ -55,6 +56,7 @@ import sql from 'highlight.js/lib/languages/sql';
 import json from 'highlight.js/lib/languages/json';
 import typescript from 'highlight.js/lib/languages/typescript';
 import bash from 'highlight.js/lib/languages/bash';
+import apis from "../common/apis";
 
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('python', python);
@@ -106,7 +108,7 @@ export default {
       originCode: this.code,
       editedCode: this.code,
       hightlight: false
-    };
+    }
   },
   computed: {
     formattedCode() {
@@ -159,6 +161,12 @@ export default {
 
   },
   methods: {
+    editSystem() {
+      apis.openLlamaServerConfig().then(res => {
+      }).catch(e => {
+        this.$message.error(e)
+      })
+    },
     highlightCode() {
       if (!this.$refs.codeBlock) return;
 
