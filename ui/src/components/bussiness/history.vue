@@ -36,6 +36,14 @@
           prop="reasoning_args"
           label="运行参数">
         </el-table-column>
+         <el-table-column
+          prop="start_time"
+          label="执行时间">
+        </el-table-column>
+         <el-table-column
+          prop="stop_time"
+          label="停止时间">
+        </el-table-column>
         <el-table-column
           fixed="right"
           label="操作"

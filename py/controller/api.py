@@ -132,15 +132,13 @@ class Api:
         if model is None:
             model = Model(name=params.get('name'), repo=params.get('repo'),
                           download_platform=params.get('download_platform'),
-                          save_dir=config.get_ai_config().get_model_save_dir(),
-                          import_dir=config.get_ai_config().get_model_import_dir(),
+                          save_dir=config.get_ai_config()["model_save_dir"],
                           type="gguf" if "gguf" in params.get("repo").lower() else "hf")
         else:
             model.name = params.get('name')
             model.repo = params.get('repo')
             model.download_platform = params.get('download_platform')
-            model.save_dir = config.get_ai_config().get_model_save_dir()
-            model.import_dir = config.get_ai_config().get_model_import_dir()
+            model.save_dir = config.get_ai_config()["model_save_dir"]
             model.type = "gguf" if "gguf" in params.get("repo").lower() else "hf"
             action = "update"
         try:

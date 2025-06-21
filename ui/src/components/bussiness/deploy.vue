@@ -7,6 +7,7 @@
     <el-card>
       <el-collapse v-model="activeNames" @change="handleChange" accordion>
         <el-collapse-item title="部署配置" name="1">
+          <a href="https://llama-cpp-python.readthedocs.io/en/latest/server" target="_blank">配置参考</a>
           <div v-if="loading">加载中...</div>
           <CodeHighlight v-else
                          @save="onSave"
