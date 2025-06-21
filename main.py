@@ -201,9 +201,6 @@ def chat_completions():
     if not messages:
         return jsonify({"error": {"message": "Missing messages"}}), 400
 
-    # 构建提示词
-    # prompt = messages_to_prompt(messages, model)
-
     # 准备生成参数
     generate_params = {
         "messages": messages,
@@ -215,18 +212,11 @@ def chat_completions():
         "top_p": data.get("top_p", 0.9),
         "stream": data.get("stream", False)
     }
+    # 如果模型还没启动，先启动
+    if model.id not in reasoning.running_llama or model.id not in reasoning.running_transformers:
+        reasoning.run_reasoning(model, gguf_file, **generate_params)
+
     if model.type == "gguf":
-        if model.id not in reasoning.running_llama:
-            reasoning.run_reasoning(model, gguf_file, **generate_params)
-            # file_path = gguf_file.file_path
-            # file_id = gguf_file.id
-            # if gguf_file is None:
-            #     file_path = os.path.join(model.save_dir, model.repo)
-            #
-            # reasoning_exec_log = ReasoningExecLog(model_id=model_id, model_name=model.name, model_type=model.type,
-            #                                       file_id=file_id, file_path=file_path,
-            #                                       reasoning_args=json.dumps(params),
-            #                                       start_time=datetime.now())
         if data.get("stream"):
             return Response(reasoning.running_llama[model.id].chat_stream(messages),
                             headers={
@@ -236,40 +226,18 @@ def chat_completions():
                             })
         else:
             return reasoning.running_llama[model.id].chat_blocking(messages), 200
+    elif model.type == "hf":
+        if data.get("stream"):
+            return Response(reasoning.running_transformers[model.id].chat_stream(messages),
+                            headers={
+                                'Content-Type': 'text/event-stream',
+                                'Cache-Control': 'no-cache',
+                                'Connection': 'keep-alive'
+                            })
+        else:
+            return reasoning.running_transformers[model.id].chat_blocking(messages), 200
     else:
-        print("not supported yet")
-        pass
-
-
-# 解析消息历史，转换为提示词
-def messages_to_prompt(messages: List[Dict[str, str]], model: str) -> str:
-    """将消息历史转换为模型特定的提示词格式"""
-    if "llama-2" in model:
-        # Llama 2 聊天格式
-        prompt = ""
-        for message in messages:
-            role = message["role"]
-            content = message["content"]
-
-            if role == "system":
-                prompt += f"<<SYS>>\n{content}\n<</SYS>>\n\n"
-            elif role == "user":
-                prompt += f"[INST] {content} [/INST]"
-            elif role == "assistant":
-                prompt += f" {content} "
-
-        # 如果最后一条消息是用户消息，添加助手响应前缀
-        if messages[-1]["role"] == "user":
-            prompt += " "
-        return prompt
-    else:
-        # 默认格式
-        prompt = ""
-        for message in messages:
-            role = message["role"]
-            content = message["content"]
-            prompt += f"{role}: {content}\n"
-        return prompt
+        return jsonify({"error": {"message": f"not supported model type {model.type}"}}), 400
 
 
 def start_dev_flask():
@@ -282,17 +250,18 @@ clean_count = 0
 def before_show():
     global clean_count
     print("before_show")
+    # 第一次加载窗口时，停止所有正在运行的模型
     if clean_count == 0:
         controller.stop_all_running_model()
     clean_count += 1
 
 
 if __name__ == '__main__':
-    # 添加关闭的监听
+    # 加载页面的监听
     window.events.loaded += before_show
 
     if config.is_dev():
-        threading.Thread(target=start_dev_flask).start()
+        threading.Thread(target=start_dev_flask, daemon=True).start()
         webview.start(debug=True)
     else:
         webview.start(http_server=True, debug=False)
