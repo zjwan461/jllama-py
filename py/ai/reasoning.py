@@ -1,7 +1,8 @@
 import os.path
 
 from py.ai.llama_reasoning import LlamaReasoning
-from py.util.db_util import Model, FileDownload, SqliteSqlalchemy
+from py.ai.transformers_reasoning import TransformersReasoning
+from py.util.db_util import Model, FileDownload
 
 running_llama = {}
 running_transformers = {}
@@ -24,14 +25,19 @@ def run_reasoning(model: Model, file_download: FileDownload = None, **kwargs):
                                              n_threads=kwargs["threads"], stream=kwargs["stream"])
         llama_cpp_reasoning.init_model()
         running_llama[model_id] = llama_cpp_reasoning
-    else:
+    elif model.type == "hf":
         file_path = os.path.join(model.save_dir, model.repo)
         if not os.path.exists(file_path):
             raise Exception(f"can not found model file path: {file_path}")
-
-        # todo transformers model reasoning
-        raise Exception("Not support yet")
-
+        transformers_reasoning = TransformersReasoning(model_name=file_path, torch_dtype=kwargs["torch_dtype"],
+                                                       max_new_tokens=kwargs["ctxSize"],
+                                                       stream=kwargs["stream"], temperature=kwargs["temperature"],
+                                                       top_k=kwargs["top_k"],
+                                                       top_p=kwargs["top_p"])
+        transformers_reasoning.init_model()
+        running_transformers[model_id] = transformers_reasoning
+    else:
+        raise Exception(f"model type: {model.type} is not supported")
 
 def stop_reasoning(model_id):
     global running_llama
@@ -41,7 +47,8 @@ def stop_reasoning(model_id):
         llama_cpp_reasoning.close_model()
         del running_llama[model_id]
     elif model_id in running_transformers:
-        # todo transformers model stop reasoning
+        running_transformers_reasoning = running_transformers[model_id]
+        running_transformers_reasoning.close_model()
         del running_transformers[model_id]
 
 
@@ -55,18 +62,5 @@ def stop_all_reasoning():
 
     for model_id in running_transformers:
         running_transformers_reasoning = running_transformers[model_id]
-        # todo transformers model stop reasoning
+        running_transformers_reasoning.close_model()
         del running_transformers[model_id]
-
-
-# def chat(params: dict):
-#     model = params["model"]
-#     if model.type == "gguf":
-#         if model.id not in running_llama:
-#             run_reasoning(model, params["file"], **params)
-#         if params["stream"]:
-#             return running_llama[model.id].chat_stream(params["messages"])
-#         else:
-#             return running_llama[model.id].chat_blocking(params["messages"])
-#     else:
-#         pass
