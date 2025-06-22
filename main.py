@@ -189,6 +189,7 @@ def chat_completions():
 
     session = SqliteSqlalchemy().session
     model = session.query(Model).filter(Model.name == model_name).first()
+    gguf_file = None
     if model is None:
         gguf_file = session.query(FileDownload).filter(FileDownload.file_path == model_name).first()
         if gguf_file is None:
@@ -196,7 +197,7 @@ def chat_completions():
         else:
             model = session.query(Model).get(gguf_file.model_id)
     else:
-        if data.get("fileId") is not None:
+        if data.get("fileId") is not None and isinstance(data.get("fileId"), int):
             gguf_file = session.query(FileDownload).get(data.get("fileId"))
     # 验证参数
     if not messages:
