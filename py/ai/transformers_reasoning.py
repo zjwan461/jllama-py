@@ -132,7 +132,10 @@ class TransformersReasoning(BaseReasoning):
     def close_model(self):
         # 使用完模型后，卸载并释放 GPU 内存
         del self.model  # 删除模型变量
-        torch.cuda.empty_cache()  # 清空 CUDA 缓存
+        del self.tokenizer
+        del self.generator
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()  # 清空 CUDA 缓存
 
 
 if __name__ == '__main__':
