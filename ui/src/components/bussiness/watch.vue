@@ -83,7 +83,7 @@
           >
           </el-input>
         </el-form-item>
-        <el-form-item label="-t" label-width="120px" prop="threads" v-if="selectedModel.type ==='gguf'">
+        <el-form-item label="threads" label-width="120px" prop="threads" v-if="selectedModel.type ==='gguf'">
           <el-input
             type="number"
             placeholder="生成期间使用的线程数（默认值：-1）"
@@ -92,10 +92,10 @@
           >
           </el-input>
         </el-form-item>
-        <el-form-item label="-c" label-width="120px" prop="ctxSize" v-if="selectedModel.type ==='gguf'">
+        <el-form-item label="ctxSize" label-width="120px" prop="ctxSize">
           <el-input
             type="number"
-            placeholder="提示上下文的大小（默认值：4096，0 = 从模型加载）"
+            placeholder="提示上下文的大小"
             v-model="modelForm.ctxSize"
             show-word-limit
           >
@@ -135,10 +135,23 @@
           >
           </el-input-number>
         </el-form-item>
+        <el-form-item label="torch_dtype" label-width="120px" prop="torch_dtype" v-if="selectedModel.type ==='hf'">
+          <el-select
+            v-model="modelForm.torch_dtype"
+            placeholder="量化参数"
+          >
+            <el-option value="auto">auto</el-option>
+            <el-option value="bfloat16">bfloat16</el-option>
+            <el-option value="float32">float32</el-option>
+            <el-option value="float16">float16</el-option>
+            <el-option value="int16">int16</el-option>
+            <el-option value="int8">int8</el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="流式输出" label-width="120px" prop="stream">
           <el-switch v-model="modelForm.stream"></el-switch>
           <i style="color: #909399;">
-            大模型流式输出即文本逐字实时生成显示，如果不开启则需要等待模型完成推理后再生产显示</i>
+            大模型流式输出即文本逐字实时生成显示，如果不开启则需要等待模型完成推理后才能响应</i>
         </el-form-item>
       </el-form>
 
@@ -164,12 +177,13 @@ export default {
         fileId: '',
         ngl: 99,
         threads: -1,
-        ctxSize: 0,
+        ctxSize: 4096,
         temperature: 0.8,
         top_p: 0.90,
         top_k: 40,
         memory: 5,
-        stream: true
+        stream: true,
+        torch_dtype: "auto"
       },
       selectedModel: {},
       modelList: [],

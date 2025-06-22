@@ -196,7 +196,8 @@ def chat_completions():
         else:
             model = session.query(Model).get(gguf_file.model_id)
     else:
-        gguf_file = session.query(FileDownload).get(data.get("fileId"))
+        if data.get("fileId") is not None:
+            gguf_file = session.query(FileDownload).get(data.get("fileId"))
     # 验证参数
     if not messages:
         return jsonify({"error": {"message": "Missing messages"}}), 400
@@ -213,7 +214,7 @@ def chat_completions():
         "stream": data.get("stream", False)
     }
     # 如果模型还没启动，先启动
-    if model.id not in reasoning.running_llama or model.id not in reasoning.running_transformers:
+    if model.id not in reasoning.running_llama and model.id not in reasoning.running_transformers:
         reasoning.run_reasoning(model, gguf_file, **generate_params)
 
     if model.type == "gguf":

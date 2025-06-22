@@ -7,6 +7,7 @@ import torch
 from transformers import pipeline, TextStreamer, TextIteratorStreamer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+
 # model_name = "E:\models\Qwen\Qwen3-4B"
 
 
@@ -114,11 +115,13 @@ class TransformersReasoning():
         id = str(uuid.uuid4())
         for new_text in streamer:
             token = {"id": id, "model": self.model_name, "created": int(time.time()), "object": "chat.completion.chunk",
-                     "choices": [{"index": 0, "delta": {"content": new_text}, "logprobs": None, "finish_reason": None}]}
+                     "choices": [{"index": 0, "delta": {"content": new_text, "role": "assistant"}, "logprobs": None,
+                                  "finish_reason": None}]}
             yield f"data: {json.dumps(token)}\n\n"
         else:
             token = {"id": id, "model": self.model_name, "created": int(time.time()), "object": "chat.completion.chunk",
-                     "choices": [{"index": 0, "delta": {}, "logprobs": None, "finish_reason": "stop"}]
+                     "choices": [{"index": 0, "delta": {"content": "", "role": "assistant"}, "logprobs": None,
+                                  "finish_reason": "stop"}]
                      }
             yield f"data: {json.dumps(token)}"
 

@@ -36,7 +36,12 @@
           </div>
         </div>
       </div>
+      <div>
+        <span style="color: #606266">深度思考:</span>
+        <el-switch v-model="think"></el-switch>
+      </div>
       <div class="chat-input">
+
         <el-input
           v-model="inputMessage"
           type="textarea"
@@ -69,7 +74,9 @@ export default {
       reasoningArgs: '',
       model: {},
       memory: 5,
-      stream: false
+      stream: false,
+      torch_dtype: 'auto',
+      think: true
     }
   },
   created() {
@@ -79,6 +86,7 @@ export default {
     this.reasoningArgs = JSON.parse(this.$route.query.reasoningArgs)
     this.memory = this.reasoningArgs.memory
     this.stream = this.reasoningArgs.stream
+    this.torch_dtype = this.reasoningArgs.torch_dtype
     if (this.modelId) {
       const loading = startLoading("加载模型...");
       apis.getModel(this.modelId).then(res => {
@@ -102,11 +110,16 @@ export default {
     async sendMessage() {
       if (!this.inputMessage.trim()) return;
 
+      if (this.think === true) {
+        // this.inputMessage += "/think"
+      } else {
+        this.inputMessage += "/no_think"
+      }
       // 添加用户消息到对话
       const userMessage = {
         role: 'user',
         content: this.inputMessage
-      }
+      };
 
       if (this.messages.length >= this.memory) {
         this.messages.shift()
@@ -272,6 +285,7 @@ export default {
 
 .message-content {
   flex: 1;
+
   .assistant {
     max-width: 90%;
   }

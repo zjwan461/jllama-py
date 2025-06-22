@@ -363,7 +363,7 @@ class Api:
             session.close()
 
     def run_model(self, params):
-        global file_download
+        file_download = None
         model_id = params.get("modelId")
         session = SqliteSqlalchemy().session
         try:
@@ -379,10 +379,13 @@ class Api:
                     raise Exception(f"file_id={file_id} is not belong to model_id={model_id}")
 
             reasoning.run_reasoning(model, file_download, **params)
-            file_path = file_download.file_path
-            file_id = file_download.id
+
+            file_id = None
             if file_download is None:
                 file_path = os.path.join(model.save_dir, model.repo)
+            else:
+                file_path = file_download.file_path
+                file_id = file_download.id
 
             reasoning_exec_log = ReasoningExecLog(model_id=model_id, model_name=model.name, model_type=model.type,
                                                   file_id=file_id, file_path=file_path,
