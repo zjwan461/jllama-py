@@ -138,7 +138,7 @@
         <el-form-item label="torch_dtype" label-width="120px" prop="torch_dtype" v-if="selectedModel.type ==='hf'">
           <el-select
             v-model="modelForm.torch_dtype"
-            placeholder="量化参数"
+            placeholder="模型数据类型"
           >
             <el-option value="auto">auto</el-option>
             <el-option value="bfloat16">bfloat16</el-option>
@@ -262,7 +262,7 @@ export default {
         fileId: '',
         ngl: 99,
         threads: -1,
-        ctxSize: 0,
+        ctxSize: 4096,
         temperature: '0.8',
         top_p: 0.90,
         top_k: 40,

@@ -194,7 +194,7 @@ class Api:
         if file_name == '.gitattributes':
             return "skip"
         file_size = params.get('fileSize')
-        save_dir = config.get_ai_config().get_model_save_dir()
+        save_dir = config.get_ai_config()["model_save_dir"]
         full_file_name = save_dir + "/" + model_name + "/" + file_name
         file_entity = FileDownload(model_id=model_id, model_name=model_name, file_name=file_name,
                                    file_path=full_file_name,
@@ -221,7 +221,7 @@ class Api:
 
         process = threading.Thread(target=modelscope_download,
                                    name="download",
-                                   args=(model_name, config.get_ai_config().get_model_save_dir(), file_list, window))
+                                   args=(model_name, config.get_ai_config()["model_save_dir"], file_list, window))
         process.start()
         return file_list
 
@@ -232,7 +232,7 @@ class Api:
         for item in file_list:
             if item["fileName"] == '.gitattributes':
                 file_list.remove(item)
-        save_dir = config.get_ai_config().get_model_save_dir()
+        save_dir = config.get_ai_config()["model_save_dir"]
         file_name_list = []
         for file in file_list:
             file_name = file.get('fileName')
@@ -263,7 +263,7 @@ class Api:
 
         process = threading.Thread(target=modelscope_download,
                                    name="download",
-                                   args=(model_name, config.get_ai_config().get_model_save_dir(), file_name_list,
+                                   args=(model_name, config.get_ai_config()["model_save_dir"], file_name_list,
                                          window))
         process.start()
         return file_name_list
