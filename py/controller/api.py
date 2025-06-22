@@ -128,18 +128,21 @@ class Api:
         session = SqliteSqlalchemy().session
 
         model = session.query(Model).get(params.get("id"))
+        model_type = params.get("type")
+        if model_type is None or len(model_type) == 0:
+            model_type = "gguf" if "gguf" in params.get("repo").lower() else "hf"
         action = "insert"
         if model is None:
             model = Model(name=params.get('name'), repo=params.get('repo'),
                           download_platform=params.get('download_platform'),
                           save_dir=config.get_ai_config()["model_save_dir"],
-                          type="gguf" if "gguf" in params.get("repo").lower() else "hf")
+                          type=model_type)
         else:
             model.name = params.get('name')
             model.repo = params.get('repo')
             model.download_platform = params.get('download_platform')
             model.save_dir = config.get_ai_config()["model_save_dir"]
-            model.type = "gguf" if "gguf" in params.get("repo").lower() else "hf"
+            model.type = model_type
             action = "update"
         try:
             if action == "insert":

@@ -83,6 +83,12 @@
         <el-form-item label="root" label-width="120px">
           <el-input v-model="modelForm.root" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item label="类型" label-width="120px">
+          <el-select v-model="modelForm.type">
+            <el-option label="gguf" value="gguf"></el-option>
+            <el-option label="hf" value="hf"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="模型文件" label-width="120px">
           <el-table v-show="showModelFiles" :data="modelFiles" @selection-change="handleSelectionChange"
                     style="width: 100%">
@@ -138,7 +144,8 @@ export default {
       modelForm: {
         download_platform: 'modelscope',
         revision: '',
-        root: ''
+        root: '',
+        type: 'gguf'
       },
       dialogTitle: '新增模型',
       showDialog: false,
