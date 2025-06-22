@@ -135,13 +135,13 @@ class Api:
         if model is None:
             model = Model(name=params.get('name'), repo=params.get('repo'),
                           download_platform=params.get('download_platform'),
-                          save_dir=config.get_ai_config()["model_save_dir"],
+                          save_dir=config.get_ai_config()["model_save_dir"] + "/" + params.get('repo'),
                           type=model_type)
         else:
             model.name = params.get('name')
             model.repo = params.get('repo')
             model.download_platform = params.get('download_platform')
-            model.save_dir = config.get_ai_config()["model_save_dir"]
+            # model.save_dir = config.get_ai_config()["model_save_dir"] + "/" + params.get('repo')
             model.type = model_type
             action = "update"
         try:

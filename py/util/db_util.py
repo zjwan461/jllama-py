@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP, Text, text
+from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 import py.config as config
 
@@ -39,7 +39,6 @@ class Model(BaseEntity):
     repo = Column(String(50), nullable=False)
     download_platform = Column(String(50))
     type = Column(String(10), default="gguf")
-    files = Column(Text)
     save_dir = Column(String(255))
     import_dir = Column(String(255))
 

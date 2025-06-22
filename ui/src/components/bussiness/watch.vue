@@ -289,7 +289,7 @@ export default {
             endLoading(loading)
             if (res) {
               this.$message.success('运行成功')
-
+              this.showDialog = false
             }
           }).catch(e => {
             endLoading(loading)

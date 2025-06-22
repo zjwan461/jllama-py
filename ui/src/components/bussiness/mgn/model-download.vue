@@ -21,7 +21,7 @@
             <el-form label-position="left" inline class="demo-table-expand">
               <el-form-item label="模型文件列表">
                 <ul>
-                  <li v-for="(item, index) in props.row.files" :key="index">{{ item.file_name }} &nbsp;&nbsp;&nbsp;&nbsp;
+                  <li v-for="(item, index) in props.row.files" :key="item.id">{{ item.file_name }} &nbsp;&nbsp;&nbsp;&nbsp;
                     {{ item.type }} &nbsp;&nbsp;&nbsp;&nbsp;
                     {{ item.percent }} &nbsp;&nbsp;&nbsp;&nbsp;
                     <el-button type="text" size="small"
@@ -227,13 +227,11 @@ export default {
       })
     },
     loadExpandData(row) {
-      if (!row.files) {
-        this.reloadFiles(row.id)
-      }
+      this.reloadFiles(row.id)
     },
-    reloadFiles(moel_id) {
-      apis.getDownloadFiles(moel_id).then(res => {
-        let line = this.tableData.find(item => item.id === moel_id)
+    reloadFiles(model_id) {
+      apis.getDownloadFiles(model_id).then(res => {
+        const line = this.tableData.find(item => item.id === model_id)
         line.files = JSON.parse(res)
       }).catch(e => {
         this.$message.error(e)
@@ -279,6 +277,7 @@ export default {
             endLoading(load)
             if (res === "success") {
               this.$message.success("开始下载所选文件")
+              this.showDialog = false
             }
           }).catch(e => {
             endLoading(load)

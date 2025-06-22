@@ -26,7 +26,7 @@ def run_reasoning(model: Model, file_download: FileDownload = None, **kwargs):
         llama_cpp_reasoning.init_model()
         running_llama[model_id] = llama_cpp_reasoning
     elif model.type == "hf":
-        file_path = os.path.join(model.save_dir, model.repo)
+        file_path = model.save_dir
         if not os.path.exists(file_path):
             raise Exception(f"can not found model file path: {file_path}")
         transformers_reasoning = TransformersReasoning(model_name=file_path, torch_dtype=kwargs["torch_dtype"],
