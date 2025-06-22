@@ -3,9 +3,10 @@ import json
 import time
 
 from llama_cpp import Llama
+from py.ai.base_reasoning import BaseReasoning
 
 
-class LlamaReasoning:
+class LlamaReasoning(BaseReasoning):
 
     def __init__(self, model_path, n_gpu_layers=-1, n_ctx=1024, temperature=0.8, top_k=30, top_p=0.9, n_threads=-1,
                  stream=False):

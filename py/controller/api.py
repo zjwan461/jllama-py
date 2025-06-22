@@ -10,7 +10,7 @@ import py.ai.llama_server as llama_server
 
 import py.util.systemInfo_util as sysInfoUtil
 
-import py.ai.reasoning as reasoning
+import py.ai.reasoning_service as reasoning
 from py.tk import log_handler
 from py.ext.convert_hf_to_gguf import covert as cover_hf
 from py.util import common_util

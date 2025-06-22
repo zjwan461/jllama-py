@@ -9,7 +9,7 @@ from flask import Flask, send_from_directory, request, jsonify, Response, stream
 import py.config as config
 from py.controller import api
 from py.util.db_util import SqliteSqlalchemy, Model, FileDownload
-import py.ai.reasoning as reasoning
+import py.ai.reasoning_service as reasoning
 
 controller = api.Api()
 app_name = config.get_app_name()

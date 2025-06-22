@@ -6,6 +6,7 @@ import uuid
 import torch
 from transformers import pipeline, TextStreamer, TextIteratorStreamer
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from py.ai.base_reasoning import BaseReasoning
 
 
 # model_name = "E:\models\Qwen\Qwen3-4B"
@@ -77,7 +78,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 #     print(token, end="")
 
 
-class TransformersReasoning():
+class TransformersReasoning(BaseReasoning):
     def __init__(self, model_name: str, torch_dtype: str or torch.dtype, max_new_tokens: int, stream: bool = False,
                  temperature=0.8,
                  top_k=40, top_p=0.9):
@@ -139,7 +140,7 @@ if __name__ == '__main__':
         {"role": "system", "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."},
         {"role": "user", "content": "天为什么是蓝色的"}
     ]
-    reasoning = TransformersReasoning("E:\models\Qwen\Qwen3-0.6B", torch.float, 2048)
+    reasoning = TransformersReasoning("E:\models\Qwen\Qwen3-0.6B", torch.bfloat16, 2048)
     reasoning.init_model()
     # response = reasoning.chat_blocking(messages=messages)
     # print(response)
