@@ -16,6 +16,12 @@
             <el-form-item label="LlamaFactory服务端口">
               <el-input-number v-model="settings.llama_factory_port"></el-input-number>
             </el-form-item>
+            <el-form-item label="http网络代理" prop="http_proxy">
+              <el-input v-model="proxy.http_proxy" placeholder="http代理"></el-input>
+            </el-form-item>
+            <el-form-item label="https网络代理" prop="http_proxy">
+              <el-input v-model="proxy.https_proxy" placeholder="https代理"></el-input>
+            </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="save">提交</el-button>
             </el-form-item>
@@ -45,6 +51,10 @@ export default {
         llama_cpp_dir: '',
         model_save_dir: '',
         llama_factory_port: ''
+      },
+      proxy: {
+        http_proxy: '',
+        https_proxy: ''
       }
     }
   },
@@ -53,7 +63,8 @@ export default {
   },
   methods: {
     save() {
-      apis.saveSetting(this.settings).then(res => {
+      const req = {"ai_config": this.settings, "proxy": this.proxy}
+      apis.saveSetting(req).then(res => {
         if (res === 'success') {
           this.$message.success("更新成功")
         }
@@ -65,7 +76,8 @@ export default {
       const loading = startLoading()
       apis.getSetting().then(res => {
         endLoading(loading)
-        this.settings = res
+        this.settings = res.ai_config
+        this.proxy = res.proxy
       }).catch(e => {
         endLoading(loading)
         this.$message.error(e)

@@ -76,3 +76,11 @@ def save_ai_config(config: dict):
 
 def get_proxy_config() -> dict:
     return dic.get("proxy")
+
+
+def save_proxy_config(config: dict):
+    dic["proxy"] = config
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(dic, f, ensure_ascii=False, indent=4)
+    # reload config
+    read_config()

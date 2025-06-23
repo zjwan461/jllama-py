@@ -714,10 +714,13 @@ class Api:
             session.close()
 
     def get_setting(self):
-        return config.get_ai_config()
+        return {"ai_config": config.get_ai_config(), "proxy": config.get_proxy_config()}
 
     def save_setting(self, params):
-        config.save_ai_config(params)
+        ai_config = params.get("ai_config")
+        config.save_ai_config(ai_config)
+        proxy = params.get("proxy")
+        config.save_proxy_config(proxy)
 
     def get_llama_cpp_config(self):
         with open("py/llama_cpp_config.json", "r", encoding="utf-8") as f:
