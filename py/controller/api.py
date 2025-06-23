@@ -20,7 +20,7 @@ from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, Reas
 import py.config as config
 import orjson
 import py.util.model_file_util as model_file_util
-from py.util.download import modelscope_download
+from py.util.download import modelscope_download, huggingface_download
 import py.tk.log_viewer as log_viewer
 import py.util.llama_cpp_origin_util as cpp_origin_util
 
@@ -131,11 +131,19 @@ class Api:
         model_type = params.get("type")
         if model_type is None or len(model_type) == 0:
             model_type = "gguf" if "gguf" in params.get("repo").lower() else "hf"
+
+        download_platform = params.get('download_platform')
+        save_dir = ""
+        repo = params.get('repo')
+        if download_platform == "modelscope":
+            save_dir = config.get_ai_config()["model_save_dir"] + "/" + repo
+        elif download_platform == "huggingface":
+            save_dir = config.get_ai_config()["model_save_dir"] + "/models--" + repo.replace("/", "--")
         action = "insert"
         if model is None:
-            model = Model(name=params.get('name'), repo=params.get('repo'),
-                          download_platform=params.get('download_platform'),
-                          save_dir=config.get_ai_config()["model_save_dir"] + "/" + params.get('repo'),
+            model = Model(name=params.get('name'), repo=repo,
+                          download_platform=download_platform,
+                          save_dir=save_dir,
                           type=model_type)
         else:
             model.name = params.get('name')
@@ -158,8 +166,13 @@ class Api:
             session.close()
 
     def search_model_file(self, params):
-        return model_file_util.get_model_file(repo=params.get("repo"), revision=params.get("revision"),
-                                              root=params.get("root"))
+        download_platform = params.get("download_platform")
+        if download_platform == "modelscope":
+            return model_file_util.get_modelscope_model_file(repo=params.get("repo"))
+        elif download_platform == "huggingface":
+            return model_file_util.get_huggingface_model_file(repo=params.get("repo"))
+        else:
+            raise Exception("not supported download platform")
 
     def delete_model(self, params):
         model_id = params.get("model_id")
@@ -190,15 +203,17 @@ class Api:
     def create_download(self, params, window=None):
         model_id = params.get("modelId")
         model_name = params.get("modelName")
+        model_repo = params.get("modelRepo")
         file_name = params.get('fileName')
+        download_platform = params.get("download_platform")
         if file_name == '.gitattributes':
             return "skip"
         file_size = params.get('fileSize')
         save_dir = config.get_ai_config()["model_save_dir"]
         full_file_name = save_dir + "/" + model_name + "/" + file_name
-        file_entity = FileDownload(model_id=model_id, model_name=model_name, file_name=file_name,
+        file_entity = FileDownload(model_id=model_id, model_name=model_name, model_repo=model_repo, file_name=file_name,
                                    file_path=full_file_name,
-                                   file_size=file_size, type="下载")
+                                   file_size=file_size, type="下载", download_platform=download_platform)
         session = SqliteSqlalchemy().session
         try:
             old = session.query(FileDownload).filter(FileDownload.file_name == file_name).filter(
@@ -219,16 +234,23 @@ class Api:
 
         file_list = [file_name]
 
-        process = threading.Thread(target=modelscope_download,
+        target = modelscope_download
+        if download_platform == "huggingface":
+            target = huggingface_download
+
+        process = threading.Thread(target=target,
                                    name="download",
-                                   args=(model_name, config.get_ai_config()["model_save_dir"], file_list, window))
+                                   args=(model_id, model_repo, config.get_ai_config()["model_save_dir"], file_list,
+                                         window))
         process.start()
         return file_list
 
     def create_batch_download(self, params, window=None):
         model_id = params.get("modelId")
         model_name = params.get("modelName")
+        model_repo = params.get("modelRepo")
         file_list = params.get('fileList')
+        download_platform = params.get("download_platform")
         for item in file_list:
             if item["fileName"] == '.gitattributes':
                 file_list.remove(item)
@@ -238,9 +260,10 @@ class Api:
             file_name = file.get('fileName')
             file_size = file.get('fileSize')
             full_file_name = save_dir + "/" + model_name + "/" + file_name
-            file_entity = FileDownload(model_id=model_id, model_name=model_name, file_name=file_name,
+            file_entity = FileDownload(model_id=model_id, model_name=model_name, model_repo=model_repo,
+                                       file_name=file_name,
                                        file_path=full_file_name,
-                                       file_size=file_size, type="下载")
+                                       file_size=file_size, type="下载", download_platform=download_platform)
             session = SqliteSqlalchemy().session
             try:
                 old = session.query(FileDownload).filter(FileDownload.file_name == file_name).filter(
@@ -261,9 +284,13 @@ class Api:
 
             file_name_list.append(file_name)
 
-        process = threading.Thread(target=modelscope_download,
+        target = modelscope_download
+        if download_platform == "huggingface":
+            target = huggingface_download
+
+        process = threading.Thread(target=target,
                                    name="download",
-                                   args=(model_name, config.get_ai_config()["model_save_dir"], file_name_list,
+                                   args=(model_id, model_repo, config.get_ai_config()["model_save_dir"], file_name_list,
                                          window))
         process.start()
         return file_name_list
@@ -280,7 +307,7 @@ class Api:
             percent = "0%"
             if os.path.exists(item.file_path):
                 current_size = os.path.getsize(item.file_path)
-                percent = current_size / item.file_size
+                percent = current_size / (item.file_size if item.file_size is not None else current_size)
                 percent = f"{percent * 100:.2f}%"
             dic_item = item.to_dic()
             dic_item["percent"] = percent

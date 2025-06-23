@@ -72,3 +72,7 @@ def save_ai_config(config: dict):
         json.dump(dic, f, ensure_ascii=False, indent=4)
     # reload config
     read_config()
+
+
+def get_proxy_config() -> dict:
+    return dic.get("proxy")

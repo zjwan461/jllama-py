@@ -68,7 +68,7 @@
         <el-form-item label="下载平台" label-width="120px" prop="download_platform">
           <el-select v-model="modelForm.download_platform" placeholder="下载平台">
             <el-option label="modelscope" value="modelscope"></el-option>
-            <el-option label="huggingface" value="huggingface" :disabled="true"></el-option>
+            <el-option label="huggingface" value="huggingface"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="模型名称" label-width="120px" prop="name">
@@ -77,19 +77,13 @@
         <el-form-item label="repo" label-width="120px" prop="repo">
           <el-input v-model="modelForm.repo" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="revision" label-width="120px">
-          <el-input v-model="modelForm.revision" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="root" label-width="120px">
-          <el-input v-model="modelForm.root" autocomplete="off"></el-input>
-        </el-form-item>
         <el-form-item label="类型" label-width="120px">
           <el-select v-model="modelForm.type">
             <el-option label="gguf" value="gguf"></el-option>
             <el-option label="hf" value="hf"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="模型文件" label-width="120px">
+        <el-form-item label="模型文件" label-width="120px" v-if="this.modelFiles.length >0">
           <el-table v-show="showModelFiles" :data="modelFiles" @selection-change="handleSelectionChange"
                     style="width: 100%">
             <el-table-column type="selection" width="55">
@@ -143,8 +137,6 @@ export default {
       },
       modelForm: {
         download_platform: 'modelscope',
-        revision: '',
-        root: '',
         type: 'gguf'
       },
       dialogTitle: '新增模型',
@@ -246,8 +238,10 @@ export default {
         apis.createDownload({
           modelId: this.model.id,
           modelName: this.model.name,
+          modelRepo: this.model.repo,
           fileName: row.Name,
           fileSize: row.Size,
+          download_platform: this.modelForm.download_platform
         }).then(res => {
           endLoading(load)
           if (res === "success") {
@@ -272,6 +266,8 @@ export default {
           apis.createBatchDownload({
             modelId: this.model.id,
             modelName: this.model.name,
+            modelRepo: this.model.repo,
+            download_platform: this.modelForm.download_platform,
             fileList: fileList,
           }).then(res => {
             endLoading(load)
@@ -297,7 +293,7 @@ export default {
               this.model = JSON.parse(res)
               apis.searchModelFile(this.modelForm).then(res => {
                 endLoading(loading)
-                // console.log(res)
+                console.log(res)
                 this.modelFiles = res
                 this.showModelFiles = true
                 this.showDownload = true
