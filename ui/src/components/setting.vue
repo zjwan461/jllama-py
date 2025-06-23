@@ -77,7 +77,7 @@ export default {
       apis.getSetting().then(res => {
         endLoading(loading)
         this.settings = res.ai_config
-        this.proxy = res.proxy
+        this.proxy = res.proxy? res.proxy: {}
       }).catch(e => {
         endLoading(loading)
         this.$message.error(e)
