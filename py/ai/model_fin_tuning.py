@@ -173,8 +173,7 @@ class SimpleTrainerCallback(TrainerCallback):
         max_steps = state.max_steps
         history = state.log_history[-1]
         step = history["step"]
-        logger.info(f"训练进度: {step}/{max_steps}")
-        logger.info(history)
+        logger.info(f"训练进度: {step}/{max_steps} {history}")
 
 
 if __name__ == '__main__':
