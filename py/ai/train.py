@@ -2,9 +2,9 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 model_path = r"E:\models\Qwen\Qwen3-0.6B"
-# 使用bf16加载原始模型，降低显存占用
-model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16).to(
-    "cuda")
+# 加载原始模型。如果需要使用bnb量化策略可忽略，在加载bnb量化模型时再进行模型加载，只需要加载tokenizer。
+model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16).to(  # 使用bf16加载原始模型，降低显存占用
+    "cuda", use_flash_attention_2=True)
 # 启用梯度检查点，节省激活值显存
 model.gradient_checkpointing_enable()
 tokenizer = AutoTokenizer.from_pretrained(model_path)
@@ -26,7 +26,8 @@ print(f"验证集的样本数：{len(eval_dataset)}")
 
 
 def tokenizer_function(samples):
-    texts = [f"{instruction}\n{output}" for instruction, output in zip(samples["instruction"], samples["output"])]
+    texts = [f"{instruction}\n{input}\n{output}" for instruction, input, output in
+             zip(samples["instruction"], samples["input"], samples["output"])]
     # print(texts)
     # max_length输入序列分词后的最大长度。==截断长度cutoff_len
     tokens = tokenizer(texts, truncation=True, padding="longest", max_length=512)  # 使用批次中数据集的最大长度进行填充--显著减少显存占用
@@ -102,7 +103,7 @@ training_args = TrainingArguments(
     eval_steps=10,
     logging_dir="./logs",
     max_grad_norm=1.0,  # 用于梯度裁剪的范数
-    lr_scheduler_type="cosine",  # 学习率调度器
+    lr_scheduler_type="linear",  # 学习率调度器
 )
 
 trainer = Trainer(
@@ -121,8 +122,8 @@ tokenizer.save_pretrained("./lora")
 print("保存lora结束")
 
 print("开始合并lora到原始模型")
-origin_model = AutoModelForCausalLM.from_pretrained(model_path)
-model = PeftModel.from_pretrained(origin_model, "./lora")
+model = AutoModelForCausalLM.from_pretrained(model_path)
+model = PeftModel.from_pretrained(model, "./lora")
 model = model.merge_and_unload()
 model.save_pretrained("./final")
 tokenizer.save_pretrained("./final")
