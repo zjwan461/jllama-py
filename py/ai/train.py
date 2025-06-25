@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, TrainerCallback, TrainerState, TrainerControl
 
 model_path = r"E:\models\Qwen\Qwen3-0.6B"
 # 加载原始模型。如果需要使用bnb量化策略可忽略，在加载bnb量化模型时再进行模型加载，只需要加载tokenizer。
@@ -106,11 +106,41 @@ training_args = TrainingArguments(
     lr_scheduler_type="linear",  # 学习率调度器
 )
 
+
+class SimpleTrainerCallback(TrainerCallback):
+
+    def on_epoch_begin(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        print("开始epoch")
+        pass
+
+    def on_epoch_end(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        print("结束epoch")
+        pass
+
+    def on_step_begin(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        print("step start")
+        pass
+
+    def on_step_end(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        print("step end")
+        pass
+
+    def on_log(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        max_steps = state.max_steps
+        history = state.log_history[-1]
+        step = history["step"]
+        print(f"训练进度: {step}/{max_steps}")
+        print(history)
+
+
+train_callback = SimpleTrainerCallback()
+
 trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=tokenized_train_dataset,
     # eval_dataset=tokenized_eval_dataset,
+    callbacks=[train_callback]
 )
 print("开始训练")
 trainer.train()
