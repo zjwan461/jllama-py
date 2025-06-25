@@ -1,13 +1,13 @@
 # 模型微调
-import logging
-
 import torch
 from datasets import load_dataset
-from transformers import AutoTokenizer, BitsAndBytesConfig, AutoModelForCausalLM, TrainingArguments, Trainer
+from transformers import AutoTokenizer, BitsAndBytesConfig, AutoModelForCausalLM, TrainingArguments, Trainer, \
+    TrainerCallback, TrainerState, TrainerControl
 from peft import get_peft_model, LoraConfig, TaskType, PeftModel
 import torch.nn as nn
+from py.util.logutil import Logger
 
-logger = logging.Logger("model_fin_tuning.py")
+logger = Logger("model_fin_tuning.py")
 
 
 def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, train_output_dir: str,
@@ -17,7 +17,8 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
           lora_target: str or list = "all", lora_dropout: float = 0.0, learning_rate: float = 5e-5,
           num_train_epochs: int = 3, per_device_train_batch_size: int = 2, gradient_accumulation_steps: int = 8,
           bf16: bool = True, fp16: bool = False, max_grad_norm: float = 1.0, lr_scheduler_type: str = "cosine",
-          logging_steps: int = 5, warmup_steps: int = 0, save_steps: int = 100, eval_steps: int = 10):
+          logging_steps: int = 5, warmup_steps: int = 0, save_steps: int = 100, eval_steps: int = 10,
+          save_strategy: str = "steps"):
     # 1. tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     logger.info("已加载分词器")
@@ -52,7 +53,8 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
     logger.info("开始加载模型")
     model = AutoModelForCausalLM.from_pretrained(model_path, quantization_config=bnb_config,
                                                  device_map="auto", torch_dtype=torch_dtype,
-                                                 attn_implementation="flash_attention_2")
+                                                 # attn_implementation="flash_attention_2"
+                                                 )
 
     # 启用梯度检查点，节省激活值显存
     model.gradient_checkpointing_enable()
@@ -90,19 +92,23 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
         fp16=fp16,
         logging_steps=logging_steps,
         warmup_steps=warmup_steps,
+        save_strategy=save_strategy,
         save_steps=save_steps,
-        eval_strategy=eval_strategy,  # step or epoch or no
+        eval_strategy=eval_strategy,  # steps or epoch or no
         eval_steps=eval_steps,
         logging_dir="./logs",
         max_grad_norm=max_grad_norm,  # 用于梯度裁剪的范数
         lr_scheduler_type=lr_scheduler_type,  # 学习率调度器
+        label_names=["labels"],  # 指定label名称
     )
 
+    train_callback = SimpleTrainerCallback()
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=tokenized_train_dataset,
         eval_dataset=tokenized_eval_dataset,
+        callbacks=[train_callback]
     )
 
     logger.info("开始训练")
@@ -144,11 +150,34 @@ def get_all_linear_layers(model):
         if isinstance(module, nn.Linear):
             # 提取模块名称（不含父级路径）
             module_name = name.split(".")[-1]
-            if module_name not in target_modules:
+            if module_name not in target_modules and module_name != "lm_head":
                 target_modules.append(module_name)
     return target_modules
 
 
+class SimpleTrainerCallback(TrainerCallback):
+
+    def on_epoch_begin(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        pass
+
+    def on_epoch_end(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        pass
+
+    def on_step_begin(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        pass
+
+    def on_step_end(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        pass
+
+    def on_log(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        max_steps = state.max_steps
+        history = state.log_history[-1]
+        step = history["step"]
+        logger.info(f"训练进度: {step}/{max_steps}")
+        logger.info(history)
+
+
 if __name__ == '__main__':
-    train(model_path="", torch_dtype=torch.bfloat16, dataset_path="", train_output_dir="./result",
-          lora_save_dir="./lora", fin_tuning_merge_dir="./final")
+    train(model_path=r"E:\models\Qwen\Qwen3-1___7B", torch_dtype=torch.bfloat16,
+          dataset_path=r"E:\datasets\Brain_teasers\data.json", train_output_dir="./result",
+          lora_save_dir="./lora", fin_tuning_merge_dir="./final", num_train_epochs=30, logging_steps=5)

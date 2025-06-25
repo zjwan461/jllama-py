@@ -1,10 +1,10 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainerCallback, TrainerState, TrainerControl
 
-model_path = r"E:\models\Qwen\Qwen3-0.6B"
+model_path = r"E:\models\Qwen\Qwen3-1___7B"
 # 加载原始模型。如果需要使用bnb量化策略可忽略，在加载bnb量化模型时再进行模型加载，只需要加载tokenizer。
 model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16).to(  # 使用bf16加载原始模型，降低显存占用
-    "cuda", attn_implementation="flash_attention_2")
+    "cuda")
 # 启用梯度检查点，节省激活值显存
 model.gradient_checkpointing_enable()
 tokenizer = AutoTokenizer.from_pretrained(model_path)
@@ -64,20 +64,20 @@ def get_all_linear_layers(model):
         if isinstance(module, nn.Linear):
             # 提取模块名称（不含父级路径）
             module_name = name.split(".")[-1]
-            if module_name not in target_modules:
+            if module_name not in target_modules and module_name != "lm_head":
                 target_modules.append(module_name)
     return target_modules
 
 
 target_modules = get_all_linear_layers(model)
-
+print(target_modules)
 lora_config = LoraConfig(
     task_type=TaskType.CAUSAL_LM,
     r=8,
     lora_alpha=16,
     # target_modules=["q_proj", "v_proj"],
     target_modules=target_modules,
-    lora_dropout=0.05
+    lora_dropout=0.05,
 )
 
 model = get_peft_model(model, lora_config)
@@ -104,6 +104,7 @@ training_args = TrainingArguments(
     logging_dir="./logs",
     max_grad_norm=1.0,  # 用于梯度裁剪的范数
     lr_scheduler_type="linear",  # 学习率调度器
+    label_names=["labels"]  # 指定label名称
 )
 
 
