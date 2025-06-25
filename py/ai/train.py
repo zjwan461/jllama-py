@@ -4,7 +4,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 model_path = r"E:\models\Qwen\Qwen3-0.6B"
 # 加载原始模型。如果需要使用bnb量化策略可忽略，在加载bnb量化模型时再进行模型加载，只需要加载tokenizer。
 model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16).to(  # 使用bf16加载原始模型，降低显存占用
-    "cuda", use_flash_attention_2=True)
+    "cuda", attn_implementation="flash_attention_2")
 # 启用梯度检查点，节省激活值显存
 model.gradient_checkpointing_enable()
 tokenizer = AutoTokenizer.from_pretrained(model_path)

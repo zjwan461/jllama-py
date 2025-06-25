@@ -51,7 +51,8 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
         )
     logger.info("开始加载模型")
     model = AutoModelForCausalLM.from_pretrained(model_path, quantization_config=bnb_config,
-                                                 device_map="auto", torch_dtype=torch_dtype, use_flash_attention_2=True)
+                                                 device_map="auto", torch_dtype=torch_dtype,
+                                                 attn_implementation="flash_attention_2")
 
     # 启用梯度检查点，节省激活值显存
     model.gradient_checkpointing_enable()
