@@ -2,9 +2,9 @@
   <div>
     <!-- Form -->
     <el-dialog :title="title" :visible.sync="visible">
-      <el-form :model="form">
-        <el-form-item label="" :label-width="formLabelWidth">
-          <textarea v-model="form.log" autocomplete="off"></textarea>
+      <el-form :model="form" >
+        <el-form-item label="">
+          <el-input type="textarea" v-model="form.log" autocomplete="off" rows="25" @input="autoScroll"></el-input>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -29,11 +29,19 @@ export default {
       form: {
         log: ''
       },
-      formLabelWidth: '120px'
     }
   },
   methods: {
+    autoScroll() {
+      this.$nextTick(() => {
+        const textarea = this.$refs.messageInput.$el.querySelector('textarea');
+        if (textarea) {
+          textarea.scrollTop = textarea.scrollHeight;
+        }
+      });
+    },
     appendInfo(line) {
+      this.visible = true
       this.form.log += "\n" + line
     },
   }

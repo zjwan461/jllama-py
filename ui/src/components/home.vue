@@ -23,6 +23,9 @@
           <el-dropdown-item command="setting">
             设 置
           </el-dropdown-item>
+          <el-dropdown-item command="messageBoard">
+            面 板
+          </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
       <!-- <el-button >退出</el-button> -->
@@ -107,8 +110,11 @@
 import apis from '@/common/apis'
 
 export default {
+  name: 'Home',
   data() {
     return {
+      log: '',
+      messageBoardVisible: false,
       collapse: true,
       asideWidth: '64px',
       menuData: [],
@@ -135,6 +141,8 @@ export default {
     handleCommand(command) {
       if (command === 'setting') {
         this.$router.push({path: '/setting'})
+      } else if (command === 'messageBoard') {
+        apis.showTk()
       }
     },
     getMenuTree() {
@@ -146,9 +154,9 @@ export default {
     toggoleCollapse() {
       this.collapse = !this.collapse
       this.asideWidth = this.collapse ? '64px' : '200px'
-    }
+    },
   }
-}
+};
 </script>
 
 <style lang="less" scoped>

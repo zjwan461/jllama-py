@@ -757,4 +757,4 @@ class Api:
         common_util.open_file(os.path.join(current_dir, "py/llama_cpp_config.json"))
 
     def msg_append(self, msg, window):
-        window.evaluate_js("vue.msgAppend(true)")
+        window.evaluate_js("vue.msgAppend('" + msg + "')")

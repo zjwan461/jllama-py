@@ -8,8 +8,18 @@ class TextViewer:
     def __init__(self, root):
         self.root = root
         self.root.title("系统输出")
-        self.root.geometry("1000x600")
-        self.root.minsize(800, 400)
+        # 获取屏幕宽度和高度
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+        width = 1200
+        height = 800
+        # 计算窗口左上角坐标
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+
+        # 设置窗口大小和位置
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
+        self.root.minsize(width, height)
 
         # 设置中文字体支持
         self.font = ('微软雅黑', 12)
