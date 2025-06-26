@@ -1,4 +1,7 @@
 # 模型微调
+import os.path
+import shutil
+
 import torch
 from datasets import load_dataset
 from transformers import AutoTokenizer, BitsAndBytesConfig, AutoModelForCausalLM, TrainingArguments, Trainer, \
@@ -7,7 +10,7 @@ from peft import get_peft_model, LoraConfig, TaskType, PeftModel
 import torch.nn as nn
 from py.util.logutil import Logger
 
-logger = Logger("model_fin_tuning.py")
+logger = Logger("model_finetuning.py")
 
 
 def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, train_output_dir: str,
@@ -18,7 +21,7 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
           num_train_epochs: int = 3, per_device_train_batch_size: int = 2, gradient_accumulation_steps: int = 8,
           bf16: bool = True, fp16: bool = False, max_grad_norm: float = 1.0, lr_scheduler_type: str = "cosine",
           logging_steps: int = 5, warmup_steps: int = 0, save_steps: int = 100, eval_steps: int = 10,
-          save_strategy: str = "steps"):
+          save_strategy: str = "steps", offload_folder: str = "./tmp"):
     # 1. tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     logger.info("已加载分词器")
@@ -53,7 +56,7 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
     logger.info("开始加载模型")
     model = AutoModelForCausalLM.from_pretrained(model_path, quantization_config=bnb_config,
                                                  device_map="auto", torch_dtype=torch_dtype,
-                                                 # attn_implementation="flash_attention_2"
+                                                 # attn_implementation="flash_attention_2" # 能加速推理，需要安装flash_attn, 也可以考虑unsloth
                                                  )
 
     # 启用梯度检查点，节省激活值显存
@@ -122,7 +125,11 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
 
     logger.info("开始合并lora到原始模型")
     model = AutoModelForCausalLM.from_pretrained(model_path, device_map="auto")
-    model = PeftModel.from_pretrained(model, lora_save_dir)
+    model = PeftModel.from_pretrained(model,  # 原始模型目录
+                                      lora_save_dir,  # lora保存目录
+                                      offload_folder=offload_folder,  # 模型临时卸载磁盘的目录，在显存和内存都占满的情况下会卸载模型到磁盘做临时缓存，可以在训练后删除
+                                      low_cpu_mem_usage=True, # Create empty adapter weights on meta device before loading the saved weights. Useful to speed up the process.-简言之可以加速
+                                      )
     model = model.merge_and_unload()
     model.save_pretrained(fin_tuning_merge_dir)
     tokenizer.save_pretrained(fin_tuning_merge_dir)
@@ -132,7 +139,11 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
     del tokenizer
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
-    logger.info("已卸载卸载模型")
+    logger.info("已卸载模型")
+
+    if os.path.exists(offload_folder):
+        shutil.rmtree(offload_folder)
+        logger.info("已删除临时文件夹")
 
 
 def tokenizer_function(samples, tokenizer, dataset_padding, dataset_max_length):
