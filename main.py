@@ -143,6 +143,9 @@ class JsApi:
         self.controller.open_llama_server_config()
         return "success"
 
+    def msg_append(self, msg):
+        self.controller.msg_append(msg, window)
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

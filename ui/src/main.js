@@ -18,7 +18,10 @@ window.addEventListener('pywebviewready', function () {
     methods: {
       messageArrive(title, msg, type) {
         showNotice(title, msg, type)
-      }
+      },
+      msgAppend(msg) {
+        App.methods.appendMsg(msg)
+      },
     },
     render: h => h(App)
   }).$mount('#app')
