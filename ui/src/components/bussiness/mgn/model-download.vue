@@ -83,6 +83,9 @@
             <el-option label="hf" value="hf"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="在线下载" label-width="120px">
+          <el-switch v-model="modelForm.download"></el-switch>
+        </el-form-item>
         <el-form-item label="模型文件" label-width="120px" v-if="this.modelFiles.length >0">
           <el-table v-show="showModelFiles" :data="modelFiles" @selection-change="handleSelectionChange"
                     style="width: 100%">
@@ -137,7 +140,8 @@ export default {
       },
       modelForm: {
         download_platform: 'modelscope',
-        type: 'gguf'
+        type: 'gguf',
+        download: true
       },
       dialogTitle: '新增模型',
       showDialog: false,
@@ -162,7 +166,8 @@ export default {
           endLoading(loading)
           if (res === "success") {
             this.$message.success(item.file_name + "已删除")
-            this.reloadFiles(item.model_id)
+            // this.reloadFiles(item.model_id)
+            this.getTableData()
           }
         }).catch(e => {
           endLoading(loading)
@@ -174,7 +179,8 @@ export default {
       this.modelForm = {
         download_platform: 'modelscope',
         revision: '',
-        root: ''
+        root: '',
+        download: true
       }
       this.getTableData()
       this.modelFiles = [];
@@ -218,8 +224,10 @@ export default {
         this.$message.error(e)
       })
     },
-    loadExpandData(row) {
-      this.reloadFiles(row.id)
+    loadExpandData(row, expandedRows) {
+      if (expandedRows.length > 0) {
+        this.reloadFiles(row.id);
+      }
     },
     reloadFiles(model_id) {
       apis.getDownloadFiles(model_id).then(res => {
@@ -289,19 +297,23 @@ export default {
           const loading = startLoading()
           apis.createModel(this.modelForm)
             .then(res => {
-              // console.log(res)
+              endLoading(loading)
               this.model = JSON.parse(res)
-              apis.searchModelFile(this.modelForm).then(res => {
-                endLoading(loading)
-                console.log(res)
-                this.modelFiles = res
-                this.showModelFiles = true
-                this.showDownload = true
-                this.showSubmit = false
-              }).catch(e => {
-                this.$message.error(e)
-                endLoading(loading)
-              })
+              this.$message.success("创建成功")
+              if (this.modelForm.download) {
+                const loading = startLoading()
+                apis.searchModelFile(this.modelForm).then(res => {
+                  endLoading(loading)
+                  console.log(res)
+                  this.modelFiles = res
+                  this.showModelFiles = true
+                  this.showDownload = true
+                  this.showSubmit = false
+                }).catch(e => {
+                  this.$message.error(e)
+                  endLoading(loading)
+                });
+              }
 
             }).catch(e => {
             this.$message.error(e)

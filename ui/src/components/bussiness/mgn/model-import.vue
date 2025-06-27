@@ -15,6 +15,7 @@
         </el-form-item>
         <el-form-item label="输入文件">
           <el-button size="small" type="primary" :disabled="import_state" @click="doFileUpload()">点击上传</el-button>
+          &nbsp;&nbsp;<i>支持多选</i>
         </el-form-item>
       </el-form>
     </el-card>

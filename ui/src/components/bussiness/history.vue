@@ -65,26 +65,6 @@
         </el-pagination>
       </div>
     </el-card>
-
-    <el-dialog :title="log.logFilePath"
-               :visible.sync="showDialog"
-               :close-on-press-escape=false
-               :close-on-click-modal=false
-               :destroy-on-close=true
-               @close="resetDialog"
-    >
-      <el-card>
-        <div slot="header">
-          <el-button style="float: right; padding: 3px 0" type="text" @click="copyLogPath">复制文件地址</el-button>
-        </div>
-        <div ref="scrollableDiv" id="scrollableDiv" class="logDialog">
-          {{ log.logContent }}
-        </div>
-        <div>
-          <el-button style="float: right; padding: 3px 0" type="text" @click="loadLog(-1)">加载更多</el-button>
-        </div>
-      </el-card>
-    </el-dialog>
   </div>
 </template>
 
@@ -118,16 +98,6 @@ export default {
     this.getTableData()
   },
   methods: {
-    resetDialog() {
-      this.showDialog = false
-      this.log = {
-        logFilePath: '',
-        logContent: '',
-        id: -1
-      }
-      this.logIndex = 1
-    },
-
     del(item) {
       this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
         confirmButtonText: '确定',

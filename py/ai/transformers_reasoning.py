@@ -83,10 +83,10 @@ class TransformersReasoning(BaseReasoning):
                  temperature=0.8,
                  top_k=40, top_p=0.9):
         self.stream = stream
-        self.max_new_tokens = max_new_tokens
-        self.temperature = temperature
-        self.top_k = top_k
-        self.top_p = top_p
+        self.max_new_tokens = int(max_new_tokens)
+        self.temperature = float(temperature)
+        self.top_k = int(top_k)
+        self.top_p = float(top_p)
         self.model_name = model_name
         self.torch_dtype = torch_dtype
 
@@ -141,14 +141,14 @@ class TransformersReasoning(BaseReasoning):
 if __name__ == '__main__':
     messages = [
         {"role": "system", "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."},
-        {"role": "user", "content": "天为什么是蓝色的"}
+        {"role": "user", "content": "什么东西越生气，它就越大？"}
     ]
-    reasoning = TransformersReasoning("E:\models\Qwen\Qwen3-0.6B", torch.bfloat16, 2048)
+    reasoning = TransformersReasoning(r"F:\workspaces\jllama-py\final", torch.bfloat16, 2024, temperature=0.6)
     reasoning.init_model()
-    # response = reasoning.chat_blocking(messages=messages)
-    # print(response)
+    response = reasoning.chat_blocking(messages=messages)
+    print(response)
 
-    for chunk in reasoning.chat_stream(messages=messages):
-        print(chunk)
+    # for chunk in reasoning.chat_stream(messages=messages):
+    #     print(chunk)
 
     reasoning.close_model()

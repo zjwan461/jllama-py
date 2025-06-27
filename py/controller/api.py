@@ -351,11 +351,15 @@ class Api:
             for full_file_path in file_path:
                 file_name = os.path.basename(full_file_path)
                 file_size = os.path.getsize(full_file_path)
-                file_entity = FileDownload(model_id=model_id, model_name=model.name, file_path=full_file_path,
+                file_entity = FileDownload(model_id=model_id, model_name=model.name, model_repo=model.repo,
+                                           file_path=full_file_path,
                                            file_name=file_name,
                                            file_size=file_size,
                                            type="导入")
                 session.add(file_entity)
+
+            if len(file_path) >0:
+                model.save_dir = os.path.dirname(file_path[0])
             session.commit()
         except Exception as e:
             logger.error(e)
