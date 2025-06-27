@@ -6,6 +6,8 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import filedialog
 
+import torch
+
 import py.ai.llama_server as llama_server
 
 import py.util.systemInfo_util as sysInfoUtil
@@ -23,6 +25,7 @@ import py.util.model_file_util as model_file_util
 from py.util.download import modelscope_download, huggingface_download
 import py.tk.log_viewer as log_viewer
 import py.util.llama_cpp_origin_util as cpp_origin_util
+from py.ai.model_finetuning import train
 
 logger = Logger("Api.py")
 
@@ -782,22 +785,85 @@ class Api:
             raise ValueError("找不到数据集文件")
 
         datestr = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-        if not os.path.exists(train_output_dir):
+        if train_output_dir is None or len(train_output_dir) == 0:
             train_output_dir = "./train_" + datestr
 
-        if not os.path.exists(lora_save_dir):
+        if lora_save_dir is None or len(lora_save_dir) == 0:
             lora_save_dir = "./lora_" + datestr
 
-        if not os.path.exists(fin_tuning_merge_dir):
+        if fin_tuning_merge_dir is None or len(fin_tuning_merge_dir) == 0:
             fin_tuning_merge_dir = "./final_" + datestr
 
+        bnb_4bit = False
+        bnb_8bit = False
+        if bnb_config == "4bit":
+            bnb_4bit = True
+        elif bnb_config == "8bit":
+            bnb_8bit = True
+
+        log_handler.textViewer = self.get_log_viewer()
+        result = "失败"
+        try:
+            train(model_path=model_path, torch_dtype=torch_dtype, dataset_path=dataset_path,
+                  train_output_dir=train_output_dir,
+                  lora_save_dir=lora_save_dir, fin_tuning_merge_dir=fin_tuning_merge_dir,
+                  dataset_test_size=dataset_test_size, dataset_max_length=dataset_max_length,
+                  num_train_epochs=num_train_epochs, per_device_train_batch_size=per_device_train_batch_size,
+                  learning_rate=learning_rate, lora_target=lora_target, lora_dropout=lora_dropout, bnb_4bit=bnb_4bit,
+                  bnb_8bit=bnb_8bit
+                  )
+            result = "成功"
+        except Exception as e:
+            logger.error(e)
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            raise e
+        finally:
+            self.save_train_result(result, params)
+
+    def save_train_result(self, result, params):
         session = SqliteSqlalchemy().session
         try:
-            train_lora = TrainLora(train_args=json.dumps(params))
+            train_lora = TrainLora(train_args=json.dumps(params), result=result)
             session.add(train_lora)
             session.commit()
             return orjson.dumps(train_lora.to_dic()).decode("utf-8")
         except Exception as e:
             logger.error(e)
             session.rollback()
+        finally:
+            session.close()
+
+    def get_train_list(self, page, limit):
+        session = SqliteSqlalchemy().session
+        result = {}
+        try:
+            total = session.query(TrainLora).count()
+            trainLoraList = session.query(TrainLora).order_by(TrainLora.create_time.desc()).offset(
+                (page - 1) * limit).limit(limit).all()
+            record = []
+            for item in trainLoraList:
+                record.append(item.to_dic())
+            result["total"] = total
+            result["record"] = record
+            return orjson.dumps(result).decode("utf-8")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
             raise e
+        finally:
+            session.close()
+
+    def delete_train_record(self, id):
+        session = SqliteSqlalchemy().session
+        try:
+            train_lora = session.query(TrainLora).get(id)
+            if train_lora is not None:
+                session.delete(train_lora)
+                session.commit()
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()

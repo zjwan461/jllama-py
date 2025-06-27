@@ -71,6 +71,11 @@
         "title": "模型微调",
         "icon": "el-icon-edit-outline",
         "href": "/tools/train"
+      }, {
+        "id": 35,
+        "title": "微调历史",
+        "icon": "el-icon-data-line",
+        "href": "/tools/train-history"
       }
     ]
   }

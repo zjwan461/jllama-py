@@ -80,7 +80,8 @@
           </el-row>
         </el-tab-pane>
         <el-tab-pane label="原生模式" name="origin">
-          <el-button type="text" @click="openOrigin()">打开LlamaFactory原生网页</el-button>
+          <h2>to-do 还没做😊</h2>
+<!--          <el-button type="text" @click="openOrigin()">打开LlamaFactory原生网页</el-button>-->
         </el-tab-pane>
       </el-tabs>
     </el-card>

@@ -10,7 +10,7 @@ from peft import get_peft_model, LoraConfig, TaskType, PeftModel
 import torch.nn as nn
 from py.util.logutil import Logger
 
-logger = Logger("model_finetuning.py")
+logger = Logger("model_finetuning")
 
 
 def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, train_output_dir: str,
@@ -65,8 +65,10 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
 
     if lora_target == 'all':
         target_modules = get_all_linear_layers(model)
+        logger.info(f"成功获取所有线性层{target_modules}")
     else:
         target_modules = lora_target
+        logger.info(f"成功获取目标层{target_modules}")
 
     lora_config = LoraConfig(
         task_type=TaskType.CAUSAL_LM,
@@ -118,12 +120,12 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
     trainer.train()
     logger.info("训练完成")
 
-    logger.info("开始保存lora")
+    logger.info(f"开始保存lora到{lora_save_dir}")
     model.save_pretrained(lora_save_dir)
     tokenizer.save_pretrained(lora_save_dir)
     logger.info("保存lora结束")
 
-    logger.info("开始合并lora到原始模型")
+    logger.info(f"开始合并lora到原始模型{fin_tuning_merge_dir}")
     model = AutoModelForCausalLM.from_pretrained(model_path, device_map="auto")
     model = PeftModel.from_pretrained(model,  # 原始模型目录
                                       lora_save_dir,  # lora保存目录

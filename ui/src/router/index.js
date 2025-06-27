@@ -58,12 +58,15 @@ const routes = [{
       path: '/tools/train',
       name: 'train',
       component: () => import('../components/bussiness/tools/train.vue')
+    }, {
+      path: '/ai/chat',
+      name: 'AIChat',
+      component: () => import('../components/bussiness/ai-chat.vue')
+    }, {
+      path: '/tools/train-history',
+      name: 'train',
+      component: () => import('../components/bussiness/tools/train-history.vue')
     },
-      {
-        path: '/ai/chat',
-        name: 'AIChat',
-        component: () => import('../components/bussiness/ai-chat.vue')
-      }
     ]
   }]
 

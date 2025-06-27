@@ -99,6 +99,7 @@ class ModelConvert(BaseEntity):
 class TrainLora(BaseEntity):
     __tablename__ = "train_lora"
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    result = Column(String(10), nullable=False)
     train_args = Column(String(2000), nullable=False)
 
 

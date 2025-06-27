@@ -146,6 +146,12 @@ class JsApi:
     def train(self, params):
         return self.controller.train(params, window)
 
+    def get_train_list(self, page, limit):
+        return self.controller.get_train_list(page, limit)
+
+    def delete_train_record(self,id):
+        self.controller.delete_train_record(id)
+        return "success"
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

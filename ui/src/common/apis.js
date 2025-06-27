@@ -118,4 +118,10 @@ export default {
   train(params) {
     return window.pywebview.api.train(params)
   },
+  getTrainList(page, limit) {
+    return window.pywebview.api.get_train_list(page, limit)
+  },
+  deleteTrainRecord(id) {
+    return window.pywebview.api.delete_train_record(id)
+  },
 }
