@@ -1,6 +1,9 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainerCallback, TrainerState, TrainerControl
 
+import warnings
+warnings.warn("这个文件已经被废弃，请使用model_finetuning.py", DeprecationWarning)
+
 model_path = r"E:\models\Qwen\Qwen3-1___7B"
 # 加载原始模型。如果需要使用bnb量化策略可忽略，在加载bnb量化模型时再进行模型加载，只需要加载tokenizer。
 model = AutoModelForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16).to(  # 使用bf16加载原始模型，降低显存占用

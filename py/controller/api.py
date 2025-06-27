@@ -16,7 +16,7 @@ from py.ext.convert_hf_to_gguf import covert as cover_hf
 from py.util import common_util
 from py.util.logutil import Logger
 from py.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog, GgufSplitMerge, Quantize, \
-    ModelConvert
+    ModelConvert, TrainLora
 import py.config as config
 import orjson
 import py.util.model_file_util as model_file_util
@@ -758,3 +758,46 @@ class Api:
 
     def msg_append(self, msg, window):
         window.evaluate_js("vue.msgAppend('" + msg + "')")
+
+    def train(self, params, window):
+        model_path = params.get("modelPath")
+        torch_dtype = params.get("torchDtype")
+        train_output_dir = params.get("trainOutputDir")
+        lora_save_dir = params.get("loraSaveDir")
+        fin_tuning_merge_dir = params.get("finTuningMergeDir")
+        dataset_path = params.get("datasetPath")
+        dataset_test_size = params.get("datasetTestSize")
+        dataset_max_length = params.get("datasetMaxLength")
+        num_train_epochs = params.get("numTrainEpochs")
+        per_device_train_batch_size = params.get("perDeviceTrainBatchSize")
+        learning_rate = params.get("learningRate")
+        lora_target = params.get("loraTarget")
+        lora_dropout = params.get("loraDropout")
+        bnb_config = params.get("bnbConfig")
+
+        if not os.path.exists(model_path):
+            raise ValueError("找不到模型目录")
+
+        if not os.path.exists(dataset_path):
+            raise ValueError("找不到数据集文件")
+
+        datestr = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+        if not os.path.exists(train_output_dir):
+            train_output_dir = "./train_" + datestr
+
+        if not os.path.exists(lora_save_dir):
+            lora_save_dir = "./lora_" + datestr
+
+        if not os.path.exists(fin_tuning_merge_dir):
+            fin_tuning_merge_dir = "./final_" + datestr
+
+        session = SqliteSqlalchemy().session
+        try:
+            train_lora = TrainLora(train_args=json.dumps(params))
+            session.add(train_lora)
+            session.commit()
+            return orjson.dumps(train_lora.to_dic()).decode("utf-8")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e

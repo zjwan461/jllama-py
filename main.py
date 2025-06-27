@@ -143,6 +143,9 @@ class JsApi:
         self.controller.open_llama_server_config()
         return "success"
 
+    def train(self, params):
+        return self.controller.train(params, window)
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

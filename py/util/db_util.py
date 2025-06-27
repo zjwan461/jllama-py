@@ -96,6 +96,12 @@ class ModelConvert(BaseEntity):
     script_file = Column(String(255))
 
 
+class TrainLora(BaseEntity):
+    __tablename__ = "train_lora"
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    train_args = Column(String(2000), nullable=False)
+
+
 class SqliteSqlalchemy(object):
     def __init__(self):
         # 创建Sqlite连接引擎

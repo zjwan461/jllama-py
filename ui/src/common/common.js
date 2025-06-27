@@ -78,3 +78,19 @@ export function showNotice(title, msg, type) {
     duration: 5000
   })
 }
+
+export function getDateString() {
+  const now = new Date();
+
+// 获取各个时间组件
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0'); // 月份从0开始
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+
+// 格式1：YYYY-MM-DD-HH:MM:SS
+//   return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`
+  return year + '-' + month + '-' + day + '-' + hours + '-' + minutes + '-' + seconds
+}

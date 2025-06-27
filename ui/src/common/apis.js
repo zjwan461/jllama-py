@@ -115,4 +115,7 @@ export default {
   openLlamaServerConfig() {
     return window.pywebview.api.open_llama_server_config()
   },
+  train(params) {
+    return window.pywebview.api.train(params)
+  },
 }
