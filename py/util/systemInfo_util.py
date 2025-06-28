@@ -4,7 +4,6 @@ import platform
 import GPUtil
 import psutil
 from py.util.db_util import SqliteSqlalchemy, SysInfo
-import wmi
 
 
 def get_cpu_info():
@@ -53,20 +52,22 @@ def get_gpu_info():
             # 显存使用率
             result.append(item)
     else:
-        try:
-            c = wmi.WMI()
-            for gpu in c.Win32_VideoController():
-                gpu_info = {
-                    "name": gpu.Name,
-                    "driver": gpu.DriverVersion,
-                }
-                memory = round(gpu.AdapterRAM / (1024 ** 3), 2) if gpu.AdapterRAM else "N/A"
-                memory = "N/A" if memory < 0 else memory
-                gpu_info["memory"] = memory
-                result.append(gpu_info)
+        if platform.system() == 'Windows':
+            import wmi
+            try:
+                c = wmi.WMI()
+                for gpu in c.Win32_VideoController():
+                    gpu_info = {
+                        "name": gpu.Name,
+                        "driver": gpu.DriverVersion,
+                    }
+                    memory = round(gpu.AdapterRAM / (1024 ** 3), 2) if gpu.AdapterRAM else "N/A"
+                    memory = "N/A" if memory < 0 else memory
+                    gpu_info["memory"] = memory
+                    result.append(gpu_info)
 
-        except Exception as e:
-            print(f"获取AMD GPU信息失败: {e}")
+            except Exception as e:
+                print(f"获取非NVIDIA GPU信息失败: {e}")
     return result
 
 
