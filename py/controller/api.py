@@ -1,5 +1,6 @@
 import json
 import os.path
+import tempfile
 import threading
 import time
 import tkinter as tk
@@ -27,6 +28,7 @@ import py.tk.log_viewer as log_viewer
 import py.util.llama_cpp_origin_util as cpp_origin_util
 from py.ai.model_finetuning import train
 from jinja2 import Template
+from py.util.ssh_util import check_connection, upload_and_exec
 
 logger = Logger("Api.py")
 
@@ -799,7 +801,7 @@ class Api:
         if not os.path.exists(dataset_path):
             raise ValueError("找不到数据集文件")
 
-        datestr = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+        datestr = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
         if train_output_dir is None or len(train_output_dir) == 0:
             train_output_dir = "./train_" + datestr
 
@@ -904,3 +906,29 @@ class Api:
         with open("py/ai/model_finetuning.jinja", "r", encoding="utf-8") as f:
             template = Template(f.read())
             return template.render(params)
+
+    def check_ssh_connection(self, hostname, port, username, password):
+        return check_connection(hostname, int(port), username, password)
+
+    def remote_train(self, params):
+        if not self.check_ssh_connection(params.get("remoteIp"), params.get("remotePort"), params.get("remoteUser"),
+                                         params.get("remotePassword")):
+            raise ValueError("SSH连接失败")
+
+        train_code = self.generate_train_code(params)
+        temp_dir = tempfile.gettempdir()
+        date_str = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        local_code_path = os.path.join(temp_dir, f"train_{date_str}.py")
+        with open(local_code_path, "w", encoding="utf-8") as f:
+            f.write(train_code)
+            f.flush()
+
+        start_time = time.time()
+        result = upload_and_exec(params.get("remoteIp"), int(params.get("remotePort")), params.get("remoteUser"),
+                                 params.get("remotePassword"), local_code_path,
+                                 params.get("remotePath"), params.get("execPath"))
+        end_time = time.time()
+
+        self.save_train_result("成功" if result == True else "失败", "remote", end_time - start_time, None, params)
+
+        return result

@@ -127,4 +127,10 @@ export default {
   generateTrainCode(params) {
     return window.pywebview.api.generate_train_code(params)
   },
+  checkSshConnection(hostname, port, username, password) {
+    return window.pywebview.api.check_ssh_connection(hostname, port, username, password)
+  },
+  remoteTrain(params) {
+    return window.pywebview.api.remote_train(params)
+  },
 }

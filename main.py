@@ -156,6 +156,12 @@ class JsApi:
     def generate_train_code(self, params):
         return self.controller.generate_train_code(params)
 
+    def check_ssh_connection(self, hostname, port, username, password):
+        return self.controller.check_ssh_connection(hostname, port, username, password)
+
+    def remote_train(self, params):
+        return self.controller.remote_train(params)
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

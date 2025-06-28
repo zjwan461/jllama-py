@@ -69,6 +69,7 @@
                 <el-form-item>
                   <el-button type="info" @click="onPreview('trainArgs')">预览代码</el-button>
                   <el-button type="primary" @click="onSubmit('trainArgs')">开始训练</el-button>
+                  <el-button type="success" @click="onRemote('trainArgs')">远程训练</el-button>
                 </el-form-item>
               </el-form>
             </el-col>
@@ -94,6 +95,38 @@
       <div v-if="showDialog===false"></div>
       <CodeHighlight v-else :code="trainCode" language="python" max-height="600px"></CodeHighlight>
     </el-dialog>
+
+    <el-dialog title="远程训练"
+               :visible.sync="showRemoteDialog"
+               width="800px"
+               @close="resetRemoteDialog"
+    >
+      <el-form :model="remoteInfo" ref="remote" label-width="120px" :rules="remoteRules">
+        <el-form-item label="远程ssh IP" prop="remoteIp">
+          <el-input v-model="remoteInfo.remoteIp" placeholder="远程IP"></el-input>
+        </el-form-item>
+        <el-form-item label="远程ssh端口" prop="remotePort">
+          <el-input v-model="remoteInfo.remotePort" placeholder="远程端口"></el-input>
+        </el-form-item>
+        <el-form-item label="远程ssh用户" prop="remoteUser">
+          <el-input v-model="remoteInfo.remoteUser" placeholder="远程用户"></el-input>
+        </el-form-item>
+        <el-form-item label="远程ssh密码" prop="remotePassword">
+          <el-input type="password" v-model="remoteInfo.remotePassword" placeholder="远程密码"></el-input>
+        </el-form-item>
+        <el-form-item label="远程训练目录" prop="remotePath">
+          <el-input v-model="remoteInfo.remotePath" placeholder="远程训练目录"></el-input>
+        </el-form-item>
+        <el-form-item label="python目录" prop="execPath">
+          <el-input v-model="remoteInfo.execPath" placeholder="python目录"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="info" @click="onRemoteCheck('remote')">检查连接</el-button>
+          <el-button type="primary" @click="onRemoteSubmit('remote')">开始训练</el-button>
+        </el-form-item>
+      </el-form>
+
+    </el-dialog>
   </div>
 
 </template>
@@ -103,7 +136,7 @@ import VueMarkdown from 'vue-markdown';
 import CodeHighlight from "../../CodeHighlight.vue";
 
 import apis from "../../../common/apis";
-import {endLoading, getDateString, startLoading, getRequestBodyJson} from "../../../common/common";
+import {endLoading, getDateString, startLoading} from "../../../common/common";
 
 export default {
   name: "train",
@@ -113,6 +146,35 @@ export default {
   },
   data() {
     return {
+      showRemoteDialog: false,
+      remoteInfo: {
+        remoteIp: '',
+        remotePort: 22,
+        remoteUser: 'root',
+        remotePassword: '',
+        remotePath: '~/train',
+        execPath: '/usr/bin/python3'
+      },
+      remoteRules: {
+        remoteIp: [
+          {required: true, message: '请输入远程IP', trigger: 'blur'}
+        ],
+        remotePort: [
+          {required: true, message: '请输入远程端口', trigger: 'blur'}
+        ],
+        remoteUser: [
+          {required: true, message: '请输入远程用户', trigger: 'blur'}
+        ],
+        remotePassword: [
+          {required: true, message: '请输入远程密码', trigger: 'blur'}
+        ],
+        remotePath: [
+          {required: true, message: '请输入远程训练目录', trigger: 'blur'}
+        ],
+        execPath: [
+          {required: true, message: '请输入python目录', trigger: 'blur'}
+        ]
+      },
       showDialog: false,
       trainCode: '',
       trainArgs: {
@@ -238,6 +300,13 @@ export default {
         }
       })
     },
+    onRemote(form) {
+      this.$refs[form].validate((valid) => {
+        if (valid) {
+          this.showRemoteDialog = true
+        }
+      })
+    },
     openOrigin() {
       if (this.llamaFactoryUrl.length > 0) {
         window.open(this.llamaFactoryUrl, '_blank')
@@ -249,6 +318,53 @@ export default {
     resetDialog() {
       this.trainCode = ''
     },
+    resetRemoteDialog() {
+      this.remoteInfo = {
+        remoteIp: '',
+        remotePort: 22,
+        remoteUser: 'root',
+        remotePassword: '',
+        remotePath: '~/train',
+        execPath: '/usr/bin/python3'
+      }
+    },
+    onRemoteSubmit(form) {
+      this.$refs[form].validate((valid) => {
+        if (valid) {
+          const req = {...this.trainArgs, ...this.remoteInfo}
+          apis.remoteTrain(req).then(res => {
+            console.log(res)
+            if (res === true) {
+              this.$message.info("执行成功")
+            } else {
+              this.$message.error("执行失败")
+            }
+          }).catch(e => {
+            this.$message.error(e)
+          })
+        }
+      })
+    },
+    onRemoteCheck(form) {
+      this.$refs[form].validate((valid) => {
+        if (valid) {
+          const loading = startLoading("检查中...")
+          apis.checkSshConnection(this.remoteInfo.remoteIp, this.remoteInfo.remotePort, this.remoteInfo.remoteUser, this.remoteInfo.remotePassword)
+            .then(res => {
+              endLoading(loading)
+              if (res === true) {
+                this.$message.success("连接成功");
+              } else {
+                this.$message.error("连接失败");
+              }
+            }).catch(e => {
+            endLoading(loading)
+            this.$message.error(e)
+          })
+        }
+      })
+    },
+
   }
 }
 </script>
