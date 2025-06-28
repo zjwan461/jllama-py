@@ -26,6 +26,7 @@ from py.util.download import modelscope_download, huggingface_download
 import py.tk.log_viewer as log_viewer
 import py.util.llama_cpp_origin_util as cpp_origin_util
 from py.ai.model_finetuning import train
+from jinja2 import Template
 
 logger = Logger("Api.py")
 
@@ -882,3 +883,17 @@ class Api:
             raise e
         finally:
             session.close()
+
+    def generate_train_code(self, params):
+        bnb_config = params.get("bnbConfig")
+        bnb_4bit = False
+        bnb_8bit = False
+        if bnb_config == "4bit":
+            bnb_4bit = True
+        elif bnb_config == "8bit":
+            bnb_8bit = True
+        params["bnb_4bit"] = bnb_4bit
+        params["bnb_8bit"] = bnb_8bit
+        with open("py/ai/model_finetuning.jinja", "r", encoding="utf-8") as f:
+            template = Template(f.read())
+            return template.render(params)

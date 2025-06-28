@@ -67,7 +67,8 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item>
-                  <el-button type="primary" @click="onSubmit('trainArgs')">提交</el-button>
+                  <el-button type="info" @click="onPreview('trainArgs')">预览代码</el-button>
+                  <el-button type="primary" @click="onSubmit('trainArgs')">开始训练</el-button>
                 </el-form-item>
               </el-form>
             </el-col>
@@ -79,17 +80,27 @@
             </el-col>
           </el-row>
         </el-tab-pane>
-        <el-tab-pane label="原生模式" name="origin">
+        <el-tab-pane label="llamafactory模式" name="origin">
           <h2>to-do 还没做😊</h2>
-<!--          <el-button type="text" @click="openOrigin()">打开LlamaFactory原生网页</el-button>-->
+          <!--          <el-button type="text" @click="openOrigin()">打开LlamaFactory原生网页</el-button>-->
         </el-tab-pane>
       </el-tabs>
     </el-card>
+    <el-dialog title="训练代码预览"
+               :visible.sync="showDialog"
+               width="800px"
+               @close="resetDialog"
+    >
+      <div v-if="showDialog===false"></div>
+      <CodeHighlight v-else :code="trainCode" language="python" max-height="600px"></CodeHighlight>
+    </el-dialog>
   </div>
+
 </template>
 
 <script>
 import VueMarkdown from 'vue-markdown';
+import CodeHighlight from "../../CodeHighlight.vue";
 
 import apis from "../../../common/apis";
 import {endLoading, getDateString, startLoading, getRequestBodyJson} from "../../../common/common";
@@ -97,10 +108,13 @@ import {endLoading, getDateString, startLoading, getRequestBodyJson} from "../..
 export default {
   name: "train",
   components: {
-    VueMarkdown
+    VueMarkdown,
+    CodeHighlight
   },
   data() {
     return {
+      showDialog: false,
+      trainCode: '',
       trainArgs: {
         modelPath: '',
         torchDtype: 'auto',
@@ -125,7 +139,7 @@ export default {
         "**训练批量大小**: 训练中每一个step训练的batch size。理论上越高的batch size训练速度越快，但也会加倍增加显存和算力的占用\n\n" +
         "**学习率**: AdamW 优化器的初始学习率。学习率即每一个训练的step调整的梯度 \n\n **lora_dropout**: lora微调过程中每次过滤掉一部分比例的参数量不参与训练。用于减少模型对某些参数的过渡依赖\n\n" +
         "**lora_target**: lora微调目标模型线性层集合。比如[\"q_proj\",\"v_proj\"]。all则表示将模型的所有线性层进行微调 \n\n **bnb量化**: bitAndByte量化策略，不选则不进行量化。可选4bit量化和8bit量化，可降低显存占用",
-      tips: '可进行简单的lora微调，复杂的微调任务请使用llamafactory原生模式',
+      tips: '可进行简单的lora微调，复杂的微调任务请使用llamafactory模式',
       activeName: 'simple',
       rules: {
         modelPath: [
@@ -209,6 +223,21 @@ export default {
         }
       })
     },
+    onPreview(form) {
+      this.$refs[form].validate((valid) => {
+        if (valid) {
+          const loading = startLoading("生成中...")
+          apis.generateTrainCode(this.trainArgs).then(res => {
+            endLoading(loading)
+            this.showDialog = true
+            this.trainCode = res
+          }).catch(e => {
+            endLoading(loading)
+            this.$message.error(e)
+          })
+        }
+      })
+    },
     openOrigin() {
       if (this.llamaFactoryUrl.length > 0) {
         window.open(this.llamaFactoryUrl, '_blank')
@@ -216,7 +245,10 @@ export default {
     },
     getLlamaFactoryUrl() {
 
-    }
+    },
+    resetDialog() {
+      this.trainCode = ''
+    },
   }
 }
 </script>

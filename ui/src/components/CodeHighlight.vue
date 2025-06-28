@@ -11,7 +11,7 @@
           :disabled="!code"
         >复制
         </el-button>
-        <el-button size="mini" type="text" @click="editSystem" icon="el-icon-edit">编辑器中打开</el-button>
+        <el-button size="mini" type="text" @click="editSystem" icon="el-icon-edit" v-if="showEditSys">编辑器中打开</el-button>
         <el-button
           size="mini"
           :type="isEditing ? 'success' : 'info'"
@@ -99,6 +99,10 @@ export default {
       type: Boolean,
       default: true
     },
+    showEditSys: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {

@@ -124,4 +124,7 @@ export default {
   deleteTrainRecord(id) {
     return window.pywebview.api.delete_train_record(id)
   },
+  generateTrainCode(params) {
+    return window.pywebview.api.generate_train_code(params)
+  },
 }

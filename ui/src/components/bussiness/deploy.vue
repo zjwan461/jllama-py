@@ -10,6 +10,7 @@
           <a href="https://llama-cpp-python.readthedocs.io/en/latest/server" target="_blank">配置参考</a>
           <div v-if="loading">加载中...</div>
           <CodeHighlight v-else
+                         :show-edit-sys="true"
                          @save="onSave"
                          @change="onChange"
                          ref="codeHighlight"
