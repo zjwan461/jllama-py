@@ -734,9 +734,13 @@ class Api:
         config.save_proxy_config(proxy)
 
     def get_llama_cpp_config(self):
+        current_dir = os.getcwd()
+        file_path = os.path.join(current_dir, "py/llama_cpp_config.json")
+        result = {"file_path": file_path}
         with open("py/llama_cpp_config.json", "r", encoding="utf-8") as f:
             conf = f.read()
-            return conf
+            result["conf"] = conf
+            return result
 
     def save_llama_cpp_config(self, content):
         with open("py/llama_cpp_config.json", "w", encoding="utf-8") as f:
@@ -751,7 +755,7 @@ class Api:
         except Exception as e:
             logger.info("llama server is not running")
 
-        config = json.loads(self.get_llama_cpp_config())
+        config = json.loads(self.get_llama_cpp_config()["conf"])
         result = {"server_port": config["port"], "server_status": state}
         return result
 
@@ -763,9 +767,12 @@ class Api:
         llama_server.stop_llama_server()
         time.sleep(10)
 
-    def open_llama_server_config(self):
-        current_dir = os.getcwd()
-        common_util.open_file(os.path.join(current_dir, "py/llama_cpp_config.json"))
+    def open_file_in_sys_edit(self, file_path):
+        # current_dir = os.getcwd()
+        # common_util.open_file(os.path.join(current_dir, "py/llama_cpp_config.json"))
+        if not os.path.exists(file_path):
+            raise ValueError(f"找不到文件: {file_path}")
+        common_util.open_file(file_path)
 
     def msg_append(self, msg, window):
         window.evaluate_js("vue.msgAppend('" + msg + "')")
@@ -804,9 +811,9 @@ class Api:
 
         bnb_4bit = False
         bnb_8bit = False
-        if bnb_config == "4bit":
+        if bnb_config == "bnb_4bit":
             bnb_4bit = True
-        elif bnb_config == "8bit":
+        elif bnb_config == "bnb_8bit":
             bnb_8bit = True
 
         log_handler.textViewer = self.get_log_viewer()
@@ -888,9 +895,9 @@ class Api:
         bnb_config = params.get("bnbConfig")
         bnb_4bit = False
         bnb_8bit = False
-        if bnb_config == "4bit":
+        if bnb_config == "bnb_4bit":
             bnb_4bit = True
-        elif bnb_config == "8bit":
+        elif bnb_config == "bnb_8bit":
             bnb_8bit = True
         params["bnb_4bit"] = bnb_4bit
         params["bnb_8bit"] = bnb_8bit

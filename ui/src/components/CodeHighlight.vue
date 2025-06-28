@@ -87,10 +87,6 @@ export default {
       type: Boolean,
       default: true
     },
-    showThemeSelector: {
-      type: Boolean,
-      default: true
-    },
     maxHeight: {
       type: String,
       default: '500px'
@@ -102,6 +98,10 @@ export default {
     showEditSys: {
       type: Boolean,
       default: false
+    },
+    filePath: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -166,7 +166,7 @@ export default {
   },
   methods: {
     editSystem() {
-      apis.openLlamaServerConfig().then(res => {
+      apis.openFileInSysEdit(this.filePath).then(res => {
       }).catch(e => {
         this.$message.error(e)
       })
@@ -191,7 +191,7 @@ export default {
       } catch (error) {
         // 备选方案：使用 textarea
         const textarea = document.createElement('textarea');
-        textarea.value = this.formattedCode;
+        textarea.value = this.editedCode;
         textarea.style.position = 'fixed';
         textarea.style.opacity = '0';
         document.body.appendChild(textarea);

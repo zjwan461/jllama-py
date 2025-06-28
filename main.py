@@ -139,8 +139,8 @@ class JsApi:
         self.controller.stop_llama_server()
         return "success"
 
-    def open_llama_server_config(self):
-        self.controller.open_llama_server_config()
+    def open_file_in_sys_edit(self, file_path):
+        self.controller.open_file_in_sys_edit(file_path)
         return "success"
 
     def train(self, params):

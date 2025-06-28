@@ -15,9 +15,9 @@
                          @change="onChange"
                          ref="codeHighlight"
                          :code="config.code"
+                         :file-path="config.filePath"
                          :language="config.language"
                          :showHeader="true"
-                         :showThemeSelector="true"
                          :maxHeight="isFullscreen ? 'none' : '500px'"
           />
         </el-collapse-item>
@@ -63,7 +63,8 @@ export default {
       llamaServer: {},
       config: {
         code: '',
-        language: 'json'
+        language: 'json',
+          filePath: '',
       }
     }
   },
@@ -115,7 +116,9 @@ export default {
     },
     getLlamaCppConfig() {
       apis.getLlamaCppConfig().then(res => {
-        this.config.code = res
+        // alert(typeof res)
+        this.config.filePath = res.file_path
+        this.config.code = res.conf
         this.config.language = "json"
         this.loading = false
       }).catch(e => {

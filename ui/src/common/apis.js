@@ -112,8 +112,8 @@ export default {
   stopLLamaServer() {
     return window.pywebview.api.stop_llama_server()
   },
-  openLlamaServerConfig() {
-    return window.pywebview.api.open_llama_server_config()
+  openFileInSysEdit(filePath) {
+    return window.pywebview.api.open_file_in_sys_edit(filePath)
   },
   train(params) {
     return window.pywebview.api.train(params)
