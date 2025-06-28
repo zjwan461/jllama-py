@@ -185,7 +185,7 @@ export default {
 
       try {
         // 使用 Clipboard API
-        await navigator.clipboard.writeText(this.formattedCode);
+        await navigator.clipboard.writeText(this.editedCode);
         // this.copyMessage = '复制成功';
         this.$message.success("复制成功")
       } catch (error) {
