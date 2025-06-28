@@ -166,8 +166,8 @@ export default {
           endLoading(loading)
           if (res === "success") {
             this.$message.success(item.file_name + "已删除")
-            // this.reloadFiles(item.model_id)
-            this.getTableData()
+            this.reloadFiles(item.model_id)
+            // this.getTableData()
           }
         }).catch(e => {
           endLoading(loading)

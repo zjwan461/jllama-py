@@ -110,7 +110,10 @@ class Api:
                     offset).limit(limit).all()
                 r_list = []
                 for item in record:
-                    r_list.append(item.to_dic())
+                    tmp = item.to_dic()
+                    if item.files is not None:
+                        tmp["files"] = [x.to_dic() for x in item.files]
+                    r_list.append(tmp)
                 result["record"] = r_list
             else:
                 total = session.query(Model).filter(Model.name.like('%' + search + '%')).count()
@@ -358,7 +361,7 @@ class Api:
                                            type="导入")
                 session.add(file_entity)
 
-            if len(file_path) >0:
+            if len(file_path) > 0:
                 model.save_dir = os.path.dirname(file_path[0])
             session.commit()
         except Exception as e:
@@ -807,15 +810,21 @@ class Api:
 
         log_handler.textViewer = self.get_log_viewer()
         result = "失败"
+        train_use_time, merge_use_time = None, None
         try:
-            train(model_path=model_path, torch_dtype=torch_dtype, dataset_path=dataset_path,
-                  train_output_dir=train_output_dir,
-                  lora_save_dir=lora_save_dir, fin_tuning_merge_dir=fin_tuning_merge_dir,
-                  dataset_test_size=dataset_test_size, dataset_max_length=dataset_max_length,
-                  num_train_epochs=num_train_epochs, per_device_train_batch_size=per_device_train_batch_size,
-                  learning_rate=learning_rate, lora_target=lora_target, lora_dropout=lora_dropout, bnb_4bit=bnb_4bit,
-                  bnb_8bit=bnb_8bit
-                  )
+            train_use_time, merge_use_time = train(model_path=model_path, torch_dtype=torch_dtype,
+                                                   dataset_path=dataset_path,
+                                                   train_output_dir=train_output_dir,
+                                                   lora_save_dir=lora_save_dir,
+                                                   fin_tuning_merge_dir=fin_tuning_merge_dir,
+                                                   dataset_test_size=dataset_test_size,
+                                                   dataset_max_length=dataset_max_length,
+                                                   num_train_epochs=num_train_epochs,
+                                                   per_device_train_batch_size=per_device_train_batch_size,
+                                                   learning_rate=learning_rate, lora_target=lora_target,
+                                                   lora_dropout=lora_dropout, bnb_4bit=bnb_4bit,
+                                                   bnb_8bit=bnb_8bit
+                                                   )
             result = "成功"
         except Exception as e:
             logger.error(e)
@@ -823,12 +832,14 @@ class Api:
                 torch.cuda.empty_cache()
             raise e
         finally:
-            self.save_train_result(result, params)
+            self.save_train_result(result, "local", train_use_time, merge_use_time, params)
 
-    def save_train_result(self, result, params):
+    def save_train_result(self, result, type, train_use_time, merge_use_time, params):
         session = SqliteSqlalchemy().session
         try:
-            train_lora = TrainLora(train_args=json.dumps(params), result=result)
+            train_lora = TrainLora(train_args=json.dumps(params), result=result, type=type,
+                                   train_use_time=train_use_time,
+                                   merge_use_time=merge_use_time)
             session.add(train_lora)
             session.commit()
             return orjson.dumps(train_lora.to_dic()).decode("utf-8")

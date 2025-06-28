@@ -1,6 +1,7 @@
 # 模型微调
 import os.path
 import shutil
+import time
 
 import torch
 from datasets import load_dataset
@@ -116,26 +117,33 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
         callbacks=[train_callback]
     )
 
+    train_start = time.time()
     logger.info("开始训练")
     trainer.train()
-    logger.info("训练完成")
+    train_end = time.time()
+    train_use = train_end - train_start
+    logger.info(f"训练完成,用时{train_use}s")
 
     logger.info(f"开始保存lora到{lora_save_dir}")
     model.save_pretrained(lora_save_dir)
     tokenizer.save_pretrained(lora_save_dir)
     logger.info("保存lora结束")
 
+    merge_start = time.time()
     logger.info(f"开始合并lora到原始模型{fin_tuning_merge_dir}")
     model = AutoModelForCausalLM.from_pretrained(model_path, device_map="auto")
     model = PeftModel.from_pretrained(model,  # 原始模型目录
                                       lora_save_dir,  # lora保存目录
                                       offload_folder=offload_folder,  # 模型临时卸载磁盘的目录，在显存和内存都占满的情况下会卸载模型到磁盘做临时缓存，可以在训练后删除
-                                      low_cpu_mem_usage=True, # Create empty adapter weights on meta device before loading the saved weights. Useful to speed up the process.-简言之可以加速
+                                      low_cpu_mem_usage=True,
+                                      # Create empty adapter weights on meta device before loading the saved weights. Useful to speed up the process.-简言之可以加速
                                       )
     model = model.merge_and_unload()
     model.save_pretrained(fin_tuning_merge_dir)
     tokenizer.save_pretrained(fin_tuning_merge_dir)
-    logger.info("合并结束")
+    merge_end = time.time()
+    merge_use = merge_end - merge_start
+    logger.info(f"合并结束,用时{merge_use}s")
 
     del model
     del tokenizer
@@ -146,6 +154,8 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
     if os.path.exists(offload_folder):
         shutil.rmtree(offload_folder)
         logger.info("已删除临时文件夹")
+
+    return train_use, merge_use
 
 
 def tokenizer_function(samples, tokenizer, dataset_padding, dataset_max_length):

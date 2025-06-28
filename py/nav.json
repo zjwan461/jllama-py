@@ -57,7 +57,7 @@
       },
       {
         "id": 32,
-        "title": "模型量化",
+        "title": "gguf模型量化",
         "icon": "el-icon-edit",
         "href": "/tools/quantization"
       },

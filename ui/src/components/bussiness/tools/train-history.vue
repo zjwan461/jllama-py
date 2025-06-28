@@ -20,6 +20,10 @@
         style="width: 100%"
       >
         <el-table-column
+          prop="type"
+          label="微调模式">
+        </el-table-column>
+        <el-table-column
           prop="result"
           label="微调结果">
         </el-table-column>

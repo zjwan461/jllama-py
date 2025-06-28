@@ -1,5 +1,6 @@
-from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP, text
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy import create_engine, Column, Integer, String, TIMESTAMP, text, ForeignKey
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship
+
 import py.config as config
 
 Base = declarative_base()
@@ -41,12 +42,13 @@ class Model(BaseEntity):
     type = Column(String(10), default="gguf")
     save_dir = Column(String(255))
     import_dir = Column(String(255))
+    files = relationship("FileDownload", backref="model")
 
 
 class FileDownload(BaseEntity):
     __tablename__ = "file_download"
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
-    model_id = Column(Integer, nullable=False)
+    model_id = Column(Integer, ForeignKey('model.id'), nullable=False)
     model_name = Column(String(50), nullable=False)
     model_repo = Column(String(50), nullable=False)
     file_path = Column(String(1000), nullable=False)
@@ -100,6 +102,9 @@ class TrainLora(BaseEntity):
     __tablename__ = "train_lora"
     id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     result = Column(String(10), nullable=False)
+    type = Column(String(50), nullable=False, default="local")
+    train_use_time = Column(Integer)
+    merge_use_time = Column(Integer)
     train_args = Column(String(2000), nullable=False)
 
 
