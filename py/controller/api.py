@@ -63,10 +63,10 @@ class Api:
         return "today is a good day"
 
     def get_nav(self):
-        f = open("py/nav.json", "r", encoding="utf-8")
-        conf = f.read()
-        json_data = json.loads(conf)
-        return json_data
+        with open("py/nav.json", "r", encoding="utf-8") as f:
+            conf = f.read()
+            json_data = json.loads(conf)
+            return json_data
 
     def get_sys_info(self):
         result = {"cpu": sysInfoUtil.get_cpu_info(), "memory": sysInfoUtil.get_memory_info(),
