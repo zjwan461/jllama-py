@@ -1,7 +1,6 @@
 import subprocess
 from flask_cors import CORS
 import threading
-from typing import List, Dict
 
 import webview
 from flask import Flask, send_from_directory, request, jsonify, Response, stream_with_context
@@ -10,9 +9,6 @@ import py.config as config
 from py.controller import api
 from py.util.db_util import SqliteSqlalchemy, Model, FileDownload
 import py.ai.reasoning_service as reasoning
-
-controller = api.Api()
-app_name = config.get_app_name()
 
 
 class JsApi:
@@ -174,40 +170,10 @@ class JsApi:
     def reload_install_state(self):
         return self.controller.reload_install_state()
 
-js_api = JsApi(controller)
+
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 
 CORS(server)
-
-
-def start_dev_server():
-    commands = 'cd ui && npm run serve'
-    result = subprocess.Popen(commands, shell=True)
-    print(f"输出:\n{result.stdout}")
-    return True
-
-
-if config.is_dev():
-    print("dev")
-    if config.get_value("auto_start_dev_server"):
-        start_dev_server()
-    window = webview.create_window(app_name, url="http://localhost:8001/", js_api=js_api,
-                                   width=config.get_app_width(), height=config.get_app_height(),
-                                   confirm_close=True,
-                                   text_select=True)
-elif config.is_prd():
-    print("prd")
-    window = webview.create_window(app_name, server, js_api=js_api, width=config.get_app_width(),
-                                   height=config.get_app_height(),
-                                   confirm_close=True,
-                                   text_select=True)
-
-
-    @server.route("/")
-    def index():
-        return send_from_directory("ui/dist", "index.html")
-else:
-    raise RuntimeError("不支持的运行模式类型:" + config.get_model())
 
 
 @server.route("/v1/chat/completions", methods=["POST"])
@@ -289,6 +255,40 @@ def before_show():
 
 
 if __name__ == '__main__':
+    controller = api.Api()
+    app_name = config.get_app_name()
+    js_api = JsApi(controller)
+
+
+    def start_dev_server():
+        commands = 'cd ui && npm run serve'
+        result = subprocess.Popen(commands, shell=True)
+        print(f"输出:\n{result.stdout}")
+        return True
+
+
+    if config.is_dev():
+        print("dev")
+        if config.get_value("auto_start_dev_server"):
+            start_dev_server()
+        window = webview.create_window(app_name, url="http://localhost:8001/", js_api=js_api,
+                                       width=config.get_app_width(), height=config.get_app_height(),
+                                       confirm_close=True,
+                                       text_select=True)
+    elif config.is_prd():
+        print("prd")
+        window = webview.create_window(app_name, server, js_api=js_api, width=config.get_app_width(),
+                                       height=config.get_app_height(),
+                                       confirm_close=True,
+                                       text_select=True)
+
+
+        @server.route("/")
+        def index():
+            return send_from_directory("ui/dist", "index.html")
+    else:
+        raise RuntimeError("不支持的运行模式类型:" + config.get_model())
+
     # 加载页面的监听
     window.events.loaded += before_show
 
