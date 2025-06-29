@@ -197,16 +197,17 @@ class SimpleTrainerCallback(TrainerCallback):
 
 
 if __name__ == '__main__':
-    train(model_path={{ modelPath }}, torch_dtype={{ torchDtype }},
-                                                   dataset_path={{ datasetPath }},
-                                                   train_output_dir={{ trainOutputDir }},
-                                                   lora_save_dir={{ loraSaveDir }},
-                                                   fin_tuning_merge_dir={{ finTuningMergeDir }},
+    train(model_path='{{ modelPath }}', torch_dtype='{{ torchDtype }}',
+                                                   dataset_path='{{ datasetPath }}',
+                                                   train_output_dir='{{ trainOutputDir }}',
+                                                   lora_save_dir='{{ loraSaveDir }}',
+                                                   fin_tuning_merge_dir='{{ finTuningMergeDir }}',
                                                    dataset_test_size={{ datasetTestSize }},
                                                    dataset_max_length={{ datasetMaxLength }},
                                                    num_train_epochs={{ numTrainEpochs }},
                                                    per_device_train_batch_size={{ perDeviceTrainBatchSize }},
-                                                   learning_rate={{ learningRate }}, lora_target={{ loraTarget }},
+                                                   learning_rate={{ learningRate }},
+                                                   {% if loraTarget =='all' %}lora_target='all',{% else %}lora_target={{ loraTarget }},{% endif %}
                                                    lora_dropout={{ loraDropout }}, bnb_4bit={{ bnb_4bit }},
                                                    bnb_8bit={{ bnb_8bit }}
                                                    )

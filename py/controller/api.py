@@ -790,7 +790,7 @@ class Api:
         dataset_max_length = params.get("datasetMaxLength")
         num_train_epochs = params.get("numTrainEpochs")
         per_device_train_batch_size = params.get("perDeviceTrainBatchSize")
-        learning_rate = params.get("learningRate")
+        learning_rate = float(params.get("learningRate"))
         lora_target = params.get("loraTarget")
         lora_dropout = params.get("loraDropout")
         bnb_config = params.get("bnbConfig")
@@ -817,6 +817,14 @@ class Api:
             bnb_4bit = True
         elif bnb_config == "bnb_8bit":
             bnb_8bit = True
+
+        if lora_target is not None and lora_target != '':
+            if lora_target != 'all':
+                try:
+                    lora_target = json.loads(lora_target)
+                except Exception as e:
+                    logger.error(e)
+                    raise ValueError("指定lora_target参数为具体layer层数格式错误,应为例: [\"q_proj\", \"v_proj\"]")
 
         log_handler.textViewer = self.get_log_viewer()
         result = "失败"
@@ -903,6 +911,21 @@ class Api:
             bnb_8bit = True
         params["bnb_4bit"] = bnb_4bit
         params["bnb_8bit"] = bnb_8bit
+
+        lora_target = params.get("loraTarget")
+        if lora_target is not None and lora_target != '':
+            if lora_target != 'all':
+                try:
+                    lora_target = json.loads(lora_target)
+                    params["lora_target"] = lora_target
+                except Exception as e:
+                    logger.error(e)
+                    raise ValueError("指定lora_target参数为具体layer层数格式错误,应为例: [\"q_proj\", \"v_proj\"]")
+            else:
+                params["lora_target"] = "\'all\'"
+
+        params["learningRate"] = float(params.get("learningRate"))
+
         with open("py/ai/model_finetuning.jinja", "r", encoding="utf-8") as f:
             template = Template(f.read())
             return template.render(params)

@@ -34,7 +34,7 @@
                             placeholder="微调模型保存目录"></el-input>
                 </el-form-item>
                 <el-form-item label="数据集文件" prop="datasetPath">
-                  <el-input type="text" disabled v-model="trainArgs.datasetPath" placeholder="数据集所在的文件目录">
+                  <el-input type="text" v-model="trainArgs.datasetPath" placeholder="数据集所在的文件目录">
                   </el-input>
                   <el-button size="small" type="primary" @click="openFileSelect('datasetPath')">选择文件</el-button>
                 </el-form-item>
@@ -188,7 +188,7 @@ export default {
         datasetMaxLength: 2048,
         numTrainEpochs: 3,
         perDeviceTrainBatchSize: 2,
-        learningRate: 5e-5,
+        learningRate: '5e-5',
         loraTarget: 'all',
         loraDropout: 0.05
       },
