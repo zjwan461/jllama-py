@@ -396,6 +396,7 @@ export default {
         endLoading(loading)
         if (res === true) {
           this.$message.success("安装成功")
+          this.getLlamaFactoryInfo()
         } else {
           this.$message.error("安装失败")
         }
