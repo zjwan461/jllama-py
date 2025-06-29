@@ -14,7 +14,7 @@ gguf==0.17.0
 WMI==1.5.1
 hf_xet==1.1.5
 torch~=2.7.1
-numpy~=2.3.0
+numpy~=1.26.4
 tqdm~=4.67.1
 sentencepiece~=0.2.0
 pyyaml~=6.0.2
