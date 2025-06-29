@@ -139,4 +139,10 @@ export default {
   installLlamaFactory() {
     return window.pywebview.api.install_llamafactory()
   },
+  installLlamafactoryManual() {
+    return window.pywebview.api.install_llamafactory_manual()
+  },
+  reloadInstallState() {
+    return window.pywebview.api.reload_install_state()
+  },
 }

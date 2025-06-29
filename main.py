@@ -168,6 +168,11 @@ class JsApi:
     def install_llamafactory(self):
         return self.controller.install_llamafactory()
 
+    def install_llamafactory_manual(self):
+        return self.controller.install_llamafactory_manual()
+
+    def reload_install_state(self):
+        return self.controller.reload_install_state()
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

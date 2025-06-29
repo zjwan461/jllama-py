@@ -67,9 +67,15 @@
                   </el-select>
                 </el-form-item>
                 <el-form-item>
-                  <el-button type="info" @click="onPreview('trainArgs')">预览代码</el-button>
-                  <el-button type="primary" @click="onSubmit('trainArgs')">开始训练</el-button>
-                  <el-button type="success" @click="onRemote('trainArgs')">远程训练</el-button>
+                  <el-tooltip content="预览根据你的配置生成的微调Python代码" placement="top">
+                    <el-button type="info" @click="onPreview('trainArgs')">预览代码</el-button>
+                  </el-tooltip>
+                  <el-tooltip content="在你的本地电脑执行微调任务，需要本地电脑有较强的性能和较大的显存" placement="top">
+                    <el-button type="primary" @click="onSubmit('trainArgs')">开始训练</el-button>
+                  </el-tooltip>
+                  <el-tooltip content="连接到远程Linux GPU服务器执行微调任务" placement="top">
+                    <el-button type="success" @click="onRemote('trainArgs')">远程训练</el-button>
+                  </el-tooltip>
                 </el-form-item>
               </el-form>
             </el-col>
@@ -89,19 +95,22 @@
               </el-tag>
             </div>
           </el-row>
+          <el-button type="text" icon="el-icon-refresh" style="float: right" @click="reloadInstallState">
+            reload安装状态
+          </el-button>
           <div v-if="llamaFactoryInfo.factory_install==='已安装'">
             <el-button type="text" @click="openOrigin()">
               打开LlamaFactory原生网页
             </el-button>
           </div>
           <div v-else>
-            你可以
+            你可以选择
             <el-button type="text" @click="installAuto()">
-              点击自动安装
+              自动安装
             </el-button>
             或者
             <el-button type="text" @click="installManual()">
-              点击手动安装
+              手动安装
             </el-button>
           </div>
 
@@ -149,6 +158,14 @@
       </el-form>
 
     </el-dialog>
+
+    <el-dialog title="手动安装llamafactory"
+               :visible.sync="showInstallLlamafactory"
+               width="800px"
+               @close="resetInstallLlamafactory"
+    >
+      <div v-html="installLlamafactoryInfo"></div>
+    </el-dialog>
   </div>
 
 </template>
@@ -168,6 +185,8 @@ export default {
   },
   data() {
     return {
+      showInstallLlamafactory: false,
+      installLlamafactoryInfo: "",
       showRemoteDialog: false,
       remoteInfo: {
         remoteIp: '',
@@ -404,6 +423,26 @@ export default {
         endLoading(loading)
         this.$message.error(e)
       })
+    },
+    installManual() {
+      apis.installLlamafactoryManual().then(res => {
+        this.installLlamafactoryInfo = res
+        this.showInstallLlamafactory = true
+      }).catch(e => {
+        this.$message.error(e)
+      })
+    },
+    resetInstallLlamafactory() {
+    },
+    reloadInstallState() {
+      const loading = startLoading()
+      apis.reloadInstallState().then(res => {
+        endLoading(loading)
+        this.getLlamaFactoryInfo()
+      }).catch(e => {
+        endLoading(loading)
+        this.$message.error(e)
+      });
     },
   }
 }

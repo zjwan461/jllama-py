@@ -85,7 +85,7 @@ class Api:
                 os_info = sysInfoUtil.get_os_info()
                 gpu_platform = "cuda" if sysInfoUtil.is_cuda_available() else "cpu"
                 sys_info = SysInfo(id=999, os_arch=os_info['arch'], platform=os_info['os'], gpu_platform=gpu_platform,
-                                   cpp_version="0.3.9", factory_version="v0.9.2", self_version="v1.0")
+                                   cpp_version="0.3.9", factory_version="v0.9.3", self_version="v1.0")
                 session.add(sys_info)
                 session.commit()
                 return "success"
@@ -983,3 +983,22 @@ class Api:
             return True
         else:
             return False
+
+    def install_llamafactory_manual(self):
+        current_dir = os.getcwd()
+        llama_factory_install_package = os.path.join(current_dir, "py/ext/llamafactory-0.9.3-py3-none-any.whl")
+        install_content = (
+            f"<p>进入终端，cd到项目根目录下，并执行以下命令安装llamafactory</p>"
+            f"<p><strong>pip install {llama_factory_install_package}</strong></p>"
+        )
+        return install_content
+
+    def reload_install_state(self):
+        session = SqliteSqlalchemy().session
+        sys_info = session.query(SysInfo).get(999)
+        if common_util.check_llamafactory_install():
+            sys_info.factory_install = "已安装"
+        else:
+            sys_info.factory_install = "未安装"
+        session.commit()
+        session.close()
