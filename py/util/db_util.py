@@ -105,6 +105,7 @@ class TrainLora(BaseEntity):
     type = Column(String(50), nullable=False, default="local")
     train_use_time = Column(Integer)
     merge_use_time = Column(Integer)
+    err_msg = Column(String(2000))
     train_args = Column(String(2000), nullable=False)
 
 

@@ -32,6 +32,10 @@
           prop="train_args"
           label="微调参数">
         </el-table-column>
+        <el-table-column
+          prop="err_msg"
+          label="失败信息">
+        </el-table-column>
          <el-table-column
           prop="create_time"
           label="执行时间">

@@ -32,15 +32,15 @@ def upload_and_exec(hostname: str, port: int, username: str, password: str, loca
         err_output = stderr.read().decode()
         logger.info(f"执行结果： {info_output}")
         logger.info(f"错误输出： {err_output}")
-        if err_output != "" :
+        if err_output != "":
             e = ValueError(f"远程执行错误,{err_output}")
             logger.error(e)
-            return False
+            return False, err_output
         else:
-            return True
+            return True, ''
     except Exception as e:
         logger.error(e)
-        return False
+        return False, str(e)
     finally:
         ssh.close()
 

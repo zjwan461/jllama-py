@@ -828,7 +828,7 @@ class Api:
 
         log_handler.textViewer = self.get_log_viewer()
         result = "失败"
-        train_use_time, merge_use_time = None, None
+        train_use_time, merge_use_time, err_msg = None, None, None
         try:
             train_use_time, merge_use_time = train(model_path=model_path, torch_dtype=torch_dtype,
                                                    dataset_path=dataset_path,
@@ -845,17 +845,18 @@ class Api:
                                                    )
             result = "成功"
         except Exception as e:
+            err_msg = str(e)
             logger.error(e)
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
             raise e
         finally:
-            self.save_train_result(result, "local", train_use_time, merge_use_time, params)
+            self.save_train_result(result, "local", train_use_time, merge_use_time, err_msg, params)
 
-    def save_train_result(self, result, type, train_use_time, merge_use_time, params):
+    def save_train_result(self, result, type, train_use_time, merge_use_time, err_msg, params):
         session = SqliteSqlalchemy().session
         try:
-            train_lora = TrainLora(train_args=json.dumps(params), result=result, type=type,
+            train_lora = TrainLora(train_args=json.dumps(params), result=result, type=type, err_msg=err_msg,
                                    train_use_time=train_use_time,
                                    merge_use_time=merge_use_time)
             session.add(train_lora)
@@ -947,11 +948,13 @@ class Api:
             f.flush()
 
         start_time = time.time()
-        result = upload_and_exec(params.get("remoteIp"), int(params.get("remotePort")), params.get("remoteUser"),
-                                 params.get("remotePassword"), local_code_path,
-                                 params.get("remotePath"), params.get("execPath"))
+        result, err_msg = upload_and_exec(params.get("remoteIp"), int(params.get("remotePort")),
+                                          params.get("remoteUser"),
+                                          params.get("remotePassword"), local_code_path,
+                                          params.get("remotePath"), params.get("execPath"))
         end_time = time.time()
 
-        self.save_train_result("成功" if result == True else "失败", "remote", end_time - start_time, None, params)
+        self.save_train_result("成功" if result == True else "失败", "remote", end_time - start_time, None, err_msg,
+                               params)
 
         return result
