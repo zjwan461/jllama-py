@@ -233,7 +233,7 @@ export default {
         loraTarget: 'all',
         loraDropout: 0.05
       },
-      llamaFactoryInfo: undefined,
+      llamaFactoryInfo: {},
       markdownItContent: "**模型路径**: 加载模型的绝度路径地址\n\n **torch_dtype**: 加载模型的数据格式，使用bf16混合精度理论上会减少现存占用\n\n" +
         "**训练输出目录**: 本次训练结果输出保存的目录\n\n **lora保存目录**: 保存lora的目录\n\n **微调模型保存目录**: 原始模型合并lora之后的保存目录\n\n" +
         "**数据集文件**: 用于训练的数据集文件，只支持<a href='https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/data_preparation.html#alpaca' target='_blank'>alpaca</a>格式\n\n" +
@@ -349,7 +349,7 @@ export default {
       })
     },
     openOrigin() {
-      if (this.llamaFactoryInfo && this.llamaFactoryInfo.factory_install === '已安装') {
+      if (this.llamaFactoryInfo.factory_install === '已安装') {
         window.open("http://127.0.0.1:" + this.llamaFactoryInfo.factory_port, '_blank')
       }
     },

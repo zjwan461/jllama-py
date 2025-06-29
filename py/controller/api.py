@@ -26,7 +26,7 @@ import py.util.model_file_util as model_file_util
 from py.util.download import modelscope_download, huggingface_download
 import py.tk.log_viewer as log_viewer
 import py.util.llama_cpp_origin_util as cpp_origin_util
-from py.ai.model_finetuning import train
+from py.ai.model_finetuning import train, torch_gc
 from jinja2 import Template
 from py.util.ssh_util import check_connection, upload_and_exec
 import py.util.pip_util as pip_util
@@ -848,8 +848,7 @@ class Api:
         except Exception as e:
             err_msg = str(e)
             logger.error(e)
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
+            torch_gc()
             raise e
         finally:
             self.save_train_result(result, "local", train_use_time, merge_use_time, err_msg, params)

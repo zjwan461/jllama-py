@@ -62,7 +62,7 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
                                                  )
 
     # 启用梯度检查点，节省激活值显存
-    model.gradient_checkpointing_enable()
+    # model.gradient_checkpointing_enable()
     logger.info("成功加载模型")
 
     if lora_target == 'all':
