@@ -162,6 +162,12 @@ class JsApi:
     def remote_train(self, params):
         return self.controller.remote_train(params)
 
+    def get_llamafactory_info(self):
+        return self.controller.get_llamafactory_info()
+
+    def install_llamafactory(self):
+        return self.controller.install_llamafactory()
+
 
 js_api = JsApi(controller)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")

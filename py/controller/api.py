@@ -29,6 +29,7 @@ import py.util.llama_cpp_origin_util as cpp_origin_util
 from py.ai.model_finetuning import train
 from jinja2 import Template
 from py.util.ssh_util import check_connection, upload_and_exec
+import py.util.pip_util as pip_util
 
 logger = Logger("Api.py")
 
@@ -958,3 +959,27 @@ class Api:
                                params)
 
         return result
+
+    def get_llamafactory_info(self):
+        factory_install = sysInfoUtil.get_jllama_info()["factory_install"]
+        factory_port = config.get_ai_config()["llama_factory_port"]
+        return {"factory_install": factory_install, "factory_port": factory_port}
+
+    def install_llamafactory(self):
+        session = SqliteSqlalchemy().session
+        sys_info = session.query(SysInfo).get(999)
+        if sys_info.factory_install == "已安装":
+            raise ValueError("LLamaFactory已安装")
+        current_dir = os.getcwd()
+        llama_factory_install_package = os.path.join(current_dir, "py/ext/llamafactory-0.9.3-py3-none-any.whl")
+
+        for log in pip_util.install_package(llama_factory_install_package):
+            self.log_viewer.append_text(log)
+
+        if common_util.check_llamafactory_install():
+            sys_info.factory_install = "已安装"
+            session.commit()
+            session.close()
+            return True
+        else:
+            return False

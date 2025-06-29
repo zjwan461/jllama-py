@@ -133,4 +133,10 @@ export default {
   remoteTrain(params) {
     return window.pywebview.api.remote_train(params)
   },
+  getLlamaFactoryInfo() {
+    return window.pywebview.api.get_llamafactory_info()
+  },
+  installLlamaFactory() {
+    return window.pywebview.api.install_llamafactory()
+  },
 }

@@ -82,8 +82,30 @@
           </el-row>
         </el-tab-pane>
         <el-tab-pane label="llamafactory模式" name="origin">
-          <h2>to-do 还没做😊</h2>
-          <!--          <el-button type="text" @click="openOrigin()">打开LlamaFactory原生网页</el-button>-->
+          <el-row>
+            <div>LlamaFactory安装状态:
+              <el-tag :type="llamaFactoryInfo.factory_install === '已安装'?'success':'danger'">
+                {{ llamaFactoryInfo.factory_install }}
+              </el-tag>
+            </div>
+          </el-row>
+          <div v-if="llamaFactoryInfo.factory_install==='已安装'">
+            <el-button type="text" @click="openOrigin()">
+              打开LlamaFactory原生网页
+            </el-button>
+          </div>
+          <div v-else>
+            你可以
+            <el-button type="text" @click="installAuto()">
+              点击自动安装
+            </el-button>
+            或者
+            <el-button type="text" @click="installManual()">
+              点击手动安装
+            </el-button>
+          </div>
+
+
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -192,7 +214,7 @@ export default {
         loraTarget: 'all',
         loraDropout: 0.05
       },
-      llamaFactoryUrl: '',
+      llamaFactoryInfo: undefined,
       markdownItContent: "**模型路径**: 加载模型的绝度路径地址\n\n **torch_dtype**: 加载模型的数据格式，使用bf16混合精度理论上会减少现存占用\n\n" +
         "**训练输出目录**: 本次训练结果输出保存的目录\n\n **lora保存目录**: 保存lora的目录\n\n **微调模型保存目录**: 原始模型合并lora之后的保存目录\n\n" +
         "**数据集文件**: 用于训练的数据集文件，只支持<a href='https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/data_preparation.html#alpaca' target='_blank'>alpaca</a>格式\n\n" +
@@ -250,7 +272,7 @@ export default {
   },
   created() {
     this.initDir()
-    this.getLlamaFactoryUrl()
+    this.getLlamaFactoryInfo()
   },
   methods: {
     initDir() {
@@ -308,12 +330,16 @@ export default {
       })
     },
     openOrigin() {
-      if (this.llamaFactoryUrl.length > 0) {
-        window.open(this.llamaFactoryUrl, '_blank')
+      if (this.llamaFactoryInfo && this.llamaFactoryInfo.factory_install === '已安装') {
+        window.open("http://127.0.0.1:" + this.llamaFactoryInfo.factory_port, '_blank')
       }
     },
-    getLlamaFactoryUrl() {
-
+    getLlamaFactoryInfo() {
+      apis.getLlamaFactoryInfo().then(res => {
+        this.llamaFactoryInfo = res
+      }).catch(e => {
+        this.$message.error(e)
+      })
     },
     resetDialog() {
       this.trainCode = ''
@@ -364,7 +390,20 @@ export default {
         }
       })
     },
-
+    installAuto() {
+      const loading = startLoading("安装中...")
+      apis.installLlamaFactory().then(res => {
+        endLoading(loading)
+        if (res === true) {
+          this.$message.success("安装成功")
+        } else {
+          this.$message.error("安装失败")
+        }
+      }).catch(e => {
+        endLoading(loading)
+        this.$message.error(e)
+      })
+    },
   }
 }
 </script>
