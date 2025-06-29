@@ -1,4 +1,5 @@
 # 模型微调
+import gc
 import os.path
 import shutil
 import time
@@ -147,8 +148,7 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
 
     del model
     del tokenizer
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
+    torch_gc()
     logger.info("已卸载模型")
 
     if os.path.exists(offload_folder):
@@ -156,6 +156,17 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
         logger.info("已删除临时文件夹")
 
     return train_use, merge_use
+
+
+def torch_gc() -> None:
+    r"""Collect the device memory."""
+    gc.collect()
+    if torch.xpu.is_available():
+        torch.xpu.empty_cache()
+    elif torch.mps.is_available():
+        torch.mps.empty_cache()
+    elif torch.cuda.is_available():
+        torch.cuda.empty_cache()
 
 
 def tokenizer_function(samples, tokenizer, dataset_padding, dataset_max_length):
