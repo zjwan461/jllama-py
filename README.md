@@ -239,13 +239,58 @@ yarl==1.20.1
 
 #### llamafactory微调
 
-jllama-py默认并没有安装llamafactory,如有需要安装指引进行安装。
+jllama-py默认并没有安装llamafactory,使用此功能需要单独安装llamafactory。jllama-py内置了llamafactory-0.9.3版本的whl安装包，并提供了自动安装功能。如果自动安装出现问题，也可以使用点击手动安装查看安装命令。
 
 ![image-20250630232241763](https://gitee.com/zjwan461/images/raw/master/img/image-20250630232241763.png) 
 
 ![image-20250630232343995](https://gitee.com/zjwan461/images/raw/master/img/image-20250630232343995.png) 
 
- 
+![image-20250630233802818](https://gitee.com/zjwan461/images/raw/master/img/image-20250630233802818.png) 
+
+ ## 开发接入
+
+修改py/config.json中的model为dev，修改ai_config配置项中本地保存模型的目录。如果需要设置网络代理，请修改proxy配置项中的代理地址（使用huggingface下载模型时需要配置此项）。
+
+```json
+{
+    "db_url": "sqlite:///db/jllama.db",
+    "log": {
+        "path": "log"
+    },
+    "server": {
+        "host": "127.0.0.1",
+        "port": 5000
+    },
+    "model": "dev",
+    "auto_start_dev_server": false,
+    "app_name": "jllama",
+    "app_width": 1366,
+    "app_height": 768,
+    "ai_config": {
+        "model_save_dir": "E:/models",
+        "model_import_dir": "E:/models/import",
+        "llama_factory_port": 7860
+    },
+    "proxy": {
+        "http_proxy": "",
+        "https_proxy": ""
+    }
+}
+```
+
+进入ui目录，并执行npm构建命令
+
+```shell
+cd ui
+npm install
+npm run serve
+```
+
+运行主程序
+
+```python
+python main.py
+```
 
 
 
