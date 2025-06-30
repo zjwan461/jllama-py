@@ -1012,3 +1012,7 @@ class Api:
 
     def stop_train(self):
         return stop_train()
+
+    def get_ai_chat_url(self):
+        port = config.get_server_config().get("port", 5000)
+        return f"http://127.0.0.1:{port}/v1/chat/completions"

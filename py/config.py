@@ -56,6 +56,8 @@ def get_app_width():
 def get_db_url():
     return dic.get("db_url")
 
+def get_server_config():
+    return dic.get("server")
 
 class LogConfig:
 

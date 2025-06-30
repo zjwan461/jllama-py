@@ -56,7 +56,7 @@
 </template>
 
 <script>
-import apis from "@/common/apis";
+staimport apis from '../../common/apis';
 import {endLoading, startLoading} from "@/common/common";
 
 export default {
@@ -80,6 +80,7 @@ export default {
     }
   },
   created() {
+    this.getUrl()
     this.modelId = this.$route.query.modelId
     this.modelName = this.$route.query.modelName
     this.modelType = this.$route.query.modelType
@@ -212,7 +213,7 @@ export default {
 
         // 处理每一块数据（Uint8Array）
         const chunk = decoder.decode(value)
-        // console.log('接收到数据块:', chunk);
+        console.log('接收到数据块:', chunk);
         const dataStr = chunk.replace('data:', '').trim()
         // console.log(chunk.substring(6, chunk.length))
         const data = JSON.parse(dataStr)
@@ -235,6 +236,13 @@ export default {
         this.toEnd()
         index++;
       }
+    },
+    getUrl() {
+      apis.getAiChatUrl().then(res => {
+        this.apiUrl = res
+      }).catch(e => {
+        this.$message.error(e)
+      })
     }
   }
 }

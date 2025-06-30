@@ -176,9 +176,15 @@ class JsApi:
     def stop_train(self):
         return self.controller.stop_train()
 
+    def get_ai_chat_url(self):
+        return self.controller.get_ai_chat_url()
+
+
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 
 CORS(server)
+
+server_config = config.get_server_config()
 
 
 @server.route("/v1/chat/completions", methods=["POST"])
@@ -200,6 +206,8 @@ def chat_completions():
     else:
         if data.get("fileId") is not None and isinstance(data.get("fileId"), int):
             gguf_file = session.query(FileDownload).get(data.get("fileId"))
+
+    session.close()
     # 验证参数
     if not messages:
         return jsonify({"error": {"message": "Missing messages"}}), 400
@@ -225,7 +233,6 @@ def chat_completions():
                             headers={
                                 'Content-Type': 'text/event-stream',
                                 'Cache-Control': 'no-cache',
-                                'Connection': 'keep-alive'
                             })
         else:
             return reasoning.running_llama[model.id].chat_blocking(messages), 200
@@ -235,7 +242,6 @@ def chat_completions():
                             headers={
                                 'Content-Type': 'text/event-stream',
                                 'Cache-Control': 'no-cache',
-                                'Connection': 'keep-alive'
                             })
         else:
             return reasoning.running_transformers[model.id].chat_blocking(messages), 200
@@ -244,7 +250,7 @@ def chat_completions():
 
 
 def start_dev_flask():
-    server.run(port=5000)
+    server.run(port=server_config.get("port", 5000))
 
 
 clean_count = 0
@@ -301,4 +307,4 @@ if __name__ == '__main__':
         threading.Thread(target=start_dev_flask, daemon=True).start()
         webview.start(debug=True)
     else:
-        webview.start(http_server=True, debug=False)
+        webview.start(http_server=True, debug=False, http_port=server_config.get("port", 5000))

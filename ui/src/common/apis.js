@@ -159,4 +159,7 @@ export default {
   stopTrain() {
     return window.pywebview.api.stop_train()
   },
+  getAiChatUrl() {
+    return window.pywebview.api.get_ai_chat_url()
+  },
 }

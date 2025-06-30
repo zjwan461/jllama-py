@@ -254,6 +254,6 @@ def reset_train_state() -> None:
 
 
 if __name__ == '__main__':
-    train(model_path=r"E:\models\Qwen\Qwen3-1___7B", torch_dtype=torch.bfloat16,
+    train(model_path=r"E:\models\Qwen\Qwen3-0.6B", torch_dtype=torch.bfloat16,
           dataset_path=r"E:\datasets\Brain_teasers\data.json", train_output_dir="./result",
           lora_save_dir="./lora", fin_tuning_merge_dir="./final", num_train_epochs=30, logging_steps=5)
