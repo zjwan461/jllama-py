@@ -74,8 +74,9 @@ class TextViewer:
     def append_text(self, text):
         if not text.endswith('\n'):
             text += '\n'
-
-        self.root.deiconify()
+        """如果不是可见状态则显示控制台面板"""
+        if not self.root.winfo_viewable():
+            self.root.deiconify()
         """设置文本内容"""
         self.text_area.config(state=tk.NORMAL)  # 启用编辑
         self.text_area.insert(tk.END, text)  # 插入新文本

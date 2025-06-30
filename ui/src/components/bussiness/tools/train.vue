@@ -12,6 +12,13 @@
         <el-tab-pane label="简单模式" name="simple">
           <el-row>
             <el-col :span="12">
+              <div v-if="trainging_state ===false" class="control">
+                <el-alert type="info">当前没有正在训练的任务</el-alert>
+              </div>
+              <div v-else class="control">
+                <el-alert type="warning">当前存在正在训练的任务</el-alert>
+                <el-button type="text" @click="stopTrain">停止任务</el-button>
+              </div>
               <el-form ref="trainArgs" :rules="rules" :model="trainArgs" label-width="135px">
                 <el-form-item label="模型路径" prop="modelPath">
                   <el-input v-model="trainArgs.modelPath" type="text" placeholder="模型路径"></el-input>
@@ -185,6 +192,7 @@ export default {
   },
   data() {
     return {
+      trainging_state: false,
       showInstallLlamafactory: false,
       installLlamafactoryInfo: "",
       showRemoteDialog: false,
@@ -291,6 +299,7 @@ export default {
   },
   created() {
     this.initDir()
+    this.getTrainState()
     this.getLlamaFactoryInfo()
   },
   methods: {
@@ -315,14 +324,17 @@ export default {
     onSubmit(form) {
       this.$refs[form].validate((valid) => {
         if (valid) {
-          const loading = startLoading("训练中...")
+          this.$message.success('开始训练')
+          this.trainging_state = true
           apis.train(this.trainArgs).then(res => {
             console.log(res)
-            endLoading(loading)
+            this.trainging_state = false
           }).catch(e => {
-            endLoading(loading)
             this.$message.error(e)
           })
+          setTimeout(() => {
+            this.getTrainState()
+          }, 5000)
         }
       })
     },
@@ -444,6 +456,22 @@ export default {
         this.$message.error(e)
       });
     },
+    stopTrain() {
+      apis.stopTrain().then(res => {
+        this.$message.success("停止成功")
+        this.trainging_state = false
+        setTimeout(() => {
+          this.getTrainState()
+        }, 5000)
+      }).catch(e => {
+        this.$message.error(e)
+      })
+    },
+    getTrainState() {
+      apis.isTraining().then(res => {
+        this.trainging_state = res
+      })
+    },
   }
 }
 </script>
@@ -455,5 +483,8 @@ export default {
 
 .logBox {
   margin: auto 20px;
+}
+.control{
+  margin-bottom: 10px;
 }
 </style>

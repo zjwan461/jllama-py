@@ -170,6 +170,11 @@ class JsApi:
     def reload_install_state(self):
         return self.controller.reload_install_state()
 
+    def is_training(self):
+        return self.controller.is_training()
+
+    def stop_train(self):
+        return self.controller.stop_train()
 
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 

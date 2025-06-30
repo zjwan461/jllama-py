@@ -1,15 +1,20 @@
 {
-  "db_url": "sqlite:///db/jllama.db",
-  "log": {
-    "path": "log"
-  },
-  "model": "dev",
-  "auto_start_dev_server": false,
-  "app_name": "jllama",
-  "app_width": 1366,
-  "app_height": 768,
-  "ai_config": {
-    "model_save_dir": "E:/models",
-    "model_import_dir": "E:/models/import"
-  }
+    "db_url": "sqlite:///db/jllama.db",
+    "log": {
+        "path": "log"
+    },
+    "model": "dev",
+    "auto_start_dev_server": false,
+    "app_name": "jllama",
+    "app_width": 1366,
+    "app_height": 768,
+    "ai_config": {
+        "model_save_dir": "E:/models",
+        "model_import_dir": "E:/models/import",
+        "llama_factory_port": 7860
+    },
+    "proxy": {
+        "http_proxy": "",
+        "https_proxy": ""
+    }
 }

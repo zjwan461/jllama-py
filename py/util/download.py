@@ -48,10 +48,10 @@ def huggingface_download(model_id, model_repo: str, cache_dir, file_pattern, win
     proxy_config = get_proxy_config()
     if proxy_config is not None:
         http_proxy = proxy_config.get("http_proxy")
-        if http_proxy:
+        if http_proxy and len(http_proxy) > 0:
             os.environ["http_proxy"] = http_proxy
         https_proxy = proxy_config.get("https_proxy")
-        if https_proxy:
+        if https_proxy and len(https_proxy) > 0:
             os.environ["https_proxy"] = https_proxy
 
     try:

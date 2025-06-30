@@ -15,6 +15,47 @@ from py.util.logutil import Logger
 logger = Logger("model_finetuning")
 
 
+class SimpleTrainerCallback(TrainerCallback):
+
+    def __init__(self):
+        # 训练状态，初始为false表示未开始训练
+        self.train_state = False
+
+    def on_train_begin(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        # 标记开始训练
+        self.train_state = True
+        pass
+
+    def on_epoch_begin(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        pass
+
+    def on_epoch_end(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        pass
+
+    def on_step_begin(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        if not self.train_state:
+            control.should_training_stop = True
+
+    def on_step_end(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        pass
+
+    def on_log(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
+        max_steps = state.max_steps
+        history = state.log_history[-1]
+        step = history["step"]
+        logger.info(f"训练进度: {step}/{max_steps} {history}")
+
+
+# 模型对象
+model = None
+# 分词器对象
+tokenizer = None
+# 训练器callback
+train_callback = SimpleTrainerCallback()
+# 训练器
+trainer = None
+
+
 def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, train_output_dir: str,
           lora_save_dir: str, fin_tuning_merge_dir: str,
           dataset_test_size: float = 0.0, dataset_padding: str = "longest", dataset_max_length: int = 512,
@@ -24,6 +65,7 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
           bf16: bool = True, fp16: bool = False, max_grad_norm: float = 1.0, lr_scheduler_type: str = "cosine",
           logging_steps: int = 5, warmup_steps: int = 0, save_steps: int = 100, eval_steps: int = 10,
           save_strategy: str = "steps", offload_folder: str = "./tmp"):
+    global model, tokenizer, train_callback, trainer
     # 1. tokenizer
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     logger.info("已加载分词器")
@@ -109,7 +151,6 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
         label_names=["labels"],  # 指定label名称
     )
 
-    train_callback = SimpleTrainerCallback()
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -125,41 +166,51 @@ def train(model_path: str, torch_dtype: str or torch.dtype, dataset_path: str, t
     train_use = train_end - train_start
     logger.info(f"训练完成,用时{train_use}s")
 
-    logger.info(f"开始保存lora到{lora_save_dir}")
-    model.save_pretrained(lora_save_dir)
-    tokenizer.save_pretrained(lora_save_dir)
-    logger.info("保存lora结束")
+    merge_use = None
+    break_train = False
+    # 如果此时train_state is true，则保存lora模型
+    if is_training():
+        logger.info(f"开始保存lora到{lora_save_dir}")
+        model.save_pretrained(lora_save_dir)
+        tokenizer.save_pretrained(lora_save_dir)
+        logger.info("保存lora结束")
 
-    merge_start = time.time()
-    logger.info(f"开始合并lora到原始模型{fin_tuning_merge_dir}")
-    model = AutoModelForCausalLM.from_pretrained(model_path, device_map="auto")
-    model = PeftModel.from_pretrained(model,  # 原始模型目录
-                                      lora_save_dir,  # lora保存目录
-                                      offload_folder=offload_folder,  # 模型临时卸载磁盘的目录，在显存和内存都占满的情况下会卸载模型到磁盘做临时缓存，可以在训练后删除
-                                      low_cpu_mem_usage=True,
-                                      # Create empty adapter weights on meta device before loading the saved weights. Useful to speed up the process.-简言之可以加速
-                                      )
-    model = model.merge_and_unload()
-    model.save_pretrained(fin_tuning_merge_dir)
-    tokenizer.save_pretrained(fin_tuning_merge_dir)
-    merge_end = time.time()
-    merge_use = merge_end - merge_start
-    logger.info(f"合并结束,用时{merge_use}s")
+        merge_start = time.time()
+        logger.info(f"开始合并lora到原始模型{fin_tuning_merge_dir}")
+        model = AutoModelForCausalLM.from_pretrained(model_path, device_map="auto")
+        model = PeftModel.from_pretrained(model,  # 原始模型目录
+                                          lora_save_dir,  # lora保存目录
+                                          offload_folder=offload_folder,
+                                          # 模型临时卸载磁盘的目录，在显存和内存都占满的情况下会卸载模型到磁盘做临时缓存，可以在训练后删除
+                                          # Create empty adapter weights on meta device before loading the saved weights. Useful to speed up the process.-简言之可以加速
+                                          low_cpu_mem_usage=True,
+                                          )
+        model = model.merge_and_unload()
+        model.save_pretrained(fin_tuning_merge_dir)
+        tokenizer.save_pretrained(fin_tuning_merge_dir)
+        merge_end = time.time()
+        merge_use = merge_end - merge_start
+        logger.info(f"合并结束,用时{merge_use}s")
+    else:
+        break_train = True
 
-    del model
-    del tokenizer
+    # 卸载模型，清空cuda显存
     torch_gc()
     logger.info("已卸载模型")
 
+    # 如果offload_folder存在，则删除
     if os.path.exists(offload_folder):
         shutil.rmtree(offload_folder)
-        logger.info("已删除临时文件夹")
+        logger.info("已删除临时offload文件夹")
 
-    return train_use, merge_use
+    reset_train_state()
+    return train_use, merge_use, break_train
 
 
 def torch_gc() -> None:
     r"""Collect the device memory."""
+    global model, tokenizer, trainer
+    del model, tokenizer, trainer
     gc.collect()
     if torch.xpu.is_available():
         torch.xpu.empty_cache()
@@ -178,7 +229,7 @@ def tokenizer_function(samples, tokenizer, dataset_padding, dataset_max_length):
     return tokens
 
 
-def get_all_linear_layers(model):
+def get_all_linear_layers(model) -> list:
     target_modules = []
     for name, module in model.named_modules():
         if isinstance(module, nn.Linear):
@@ -189,25 +240,17 @@ def get_all_linear_layers(model):
     return target_modules
 
 
-class SimpleTrainerCallback(TrainerCallback):
+def stop_train() -> None:
+    if is_training():
+        train_callback.train_state = False
 
-    def on_epoch_begin(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
-        pass
 
-    def on_epoch_end(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
-        pass
+def is_training() -> bool:
+    return train_callback.train_state
 
-    def on_step_begin(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
-        pass
 
-    def on_step_end(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
-        pass
-
-    def on_log(self, args: TrainingArguments, state: TrainerState, control: TrainerControl, **kwargs):
-        max_steps = state.max_steps
-        history = state.log_history[-1]
-        step = history["step"]
-        logger.info(f"训练进度: {step}/{max_steps} {history}")
+def reset_train_state() -> None:
+    train_callback.train_state = False
 
 
 if __name__ == '__main__':

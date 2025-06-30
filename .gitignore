@@ -5,3 +5,7 @@ ui/dist
 *.db
 **/__pycache__
 .venv*
+./tmp
+train*
+lora*
+final*

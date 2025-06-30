@@ -26,7 +26,7 @@ import py.util.model_file_util as model_file_util
 from py.util.download import modelscope_download, huggingface_download
 import py.tk.log_viewer as log_viewer
 import py.util.llama_cpp_origin_util as cpp_origin_util
-from py.ai.model_finetuning import train, torch_gc
+from py.ai.model_finetuning import train, torch_gc, is_training, reset_train_state, stop_train
 from jinja2 import Template
 from py.util.ssh_util import check_connection, upload_and_exec
 import py.util.pip_util as pip_util
@@ -781,6 +781,8 @@ class Api:
         window.evaluate_js("vue.msgAppend('" + msg + "')")
 
     def train(self, params, window):
+        if is_training():
+            raise ValueError("当前存在正在运行的训练任务")
         model_path = params.get("modelPath")
         torch_dtype = params.get("torchDtype")
         train_output_dir = params.get("trainOutputDir")
@@ -831,26 +833,29 @@ class Api:
         result = "失败"
         train_use_time, merge_use_time, err_msg = None, None, None
         try:
-            train_use_time, merge_use_time = train(model_path=model_path, torch_dtype=torch_dtype,
-                                                   dataset_path=dataset_path,
-                                                   train_output_dir=train_output_dir,
-                                                   lora_save_dir=lora_save_dir,
-                                                   fin_tuning_merge_dir=fin_tuning_merge_dir,
-                                                   dataset_test_size=dataset_test_size,
-                                                   dataset_max_length=dataset_max_length,
-                                                   num_train_epochs=num_train_epochs,
-                                                   per_device_train_batch_size=per_device_train_batch_size,
-                                                   learning_rate=learning_rate, lora_target=lora_target,
-                                                   lora_dropout=lora_dropout, bnb_4bit=bnb_4bit,
-                                                   bnb_8bit=bnb_8bit
-                                                   )
-            result = "成功"
+            train_use_time, merge_use_time, break_train = train(model_path=model_path, torch_dtype=torch_dtype,
+                                                                dataset_path=dataset_path,
+                                                                train_output_dir=train_output_dir,
+                                                                lora_save_dir=lora_save_dir,
+                                                                fin_tuning_merge_dir=fin_tuning_merge_dir,
+                                                                dataset_test_size=dataset_test_size,
+                                                                dataset_max_length=dataset_max_length,
+                                                                num_train_epochs=num_train_epochs,
+                                                                per_device_train_batch_size=per_device_train_batch_size,
+                                                                learning_rate=learning_rate, lora_target=lora_target,
+                                                                lora_dropout=lora_dropout, bnb_4bit=bnb_4bit,
+                                                                bnb_8bit=bnb_8bit
+                                                                )
+            result = "成功" if not break_train else "中断"
+            window.evaluate_js("vue.messageArrive('jllama提醒','训练任务执行成功','success')")
         except Exception as e:
             err_msg = str(e)
+            window.evaluate_js("vue.messageArrive('jllama提醒','训练任务执行失败，请在训练历史页查看具体原因','error')")
             logger.error(e)
             torch_gc()
             raise e
         finally:
+            reset_train_state()
             self.save_train_result(result, "local", train_use_time, merge_use_time, err_msg, params)
 
     def save_train_result(self, result, type, train_use_time, merge_use_time, err_msg, params):
@@ -1001,3 +1006,9 @@ class Api:
             sys_info.factory_install = "未安装"
         session.commit()
         session.close()
+
+    def is_training(self):
+        return is_training()
+
+    def stop_train(self):
+        return stop_train()

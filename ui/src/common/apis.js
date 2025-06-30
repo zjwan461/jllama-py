@@ -1,4 +1,5 @@
 import {Loading, Message} from 'element-ui'
+import {startLoading} from "./common";
 
 
 export default {
@@ -115,8 +116,15 @@ export default {
   openFileInSysEdit(filePath) {
     return window.pywebview.api.open_file_in_sys_edit(filePath)
   },
-  train(params) {
-    return window.pywebview.api.train(params)
+  async train(params) {
+    // window.pywebview.api.train(params)
+    return new Promise((resolve, reject) => {
+      window.pywebview.api.train(params).then(res => {
+        resolve(res)
+      }).catch(err => {
+        reject(err)
+      })
+    })
   },
   getTrainList(page, limit) {
     return window.pywebview.api.get_train_list(page, limit)
@@ -144,5 +152,11 @@ export default {
   },
   reloadInstallState() {
     return window.pywebview.api.reload_install_state()
+  },
+  isTraining() {
+    return window.pywebview.api.is_training()
+  },
+  stopTrain() {
+    return window.pywebview.api.stop_train()
   },
 }
