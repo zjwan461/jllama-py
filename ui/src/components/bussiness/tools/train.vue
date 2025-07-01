@@ -361,10 +361,13 @@ export default {
       })
     },
     openOrigin() {
+      const loading = startLoading()
       if (this.llamaFactoryInfo.factory_install === '已安装') {
         apis.startLlamafactory().then(res => {
+          endLoading(loading)
           this.$message.info("启动成功")
         }).catch(e => {
+          endLoading(loading)
           this.$message.error(e)
         })
       }

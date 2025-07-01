@@ -12,7 +12,7 @@ webui_process = multiprocessing.Process()
 def start_webui_process(host: str, port: int) -> None:
     global webui_process
     if webui_process.is_alive():
-        open_file(f"http://{host}:{port}")
+        open_file(f"http://127.0.0.1:{port}")
         raise Exception("llamafactory服务已在运行")
 
     webui_process = multiprocessing.Process(target=start_webui, args=(host, port))
