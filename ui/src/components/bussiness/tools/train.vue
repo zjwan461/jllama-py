@@ -107,7 +107,7 @@
           </el-button>
           <div v-if="llamaFactoryInfo.factory_install==='已安装'">
             <el-button type="text" @click="openOrigin()">
-              打开LlamaFactory原生网页
+              启动LlamaFactory
             </el-button>
           </div>
           <div v-else>
@@ -362,7 +362,11 @@ export default {
     },
     openOrigin() {
       if (this.llamaFactoryInfo.factory_install === '已安装') {
-        window.open("http://127.0.0.1:" + this.llamaFactoryInfo.factory_port, '_blank')
+        apis.startLlamafactory().then(res => {
+          this.$message.info("启动成功")
+        }).catch(e => {
+          this.$message.error(e)
+        })
       }
     },
     getLlamaFactoryInfo() {
@@ -484,7 +488,8 @@ export default {
 .logBox {
   margin: auto 20px;
 }
-.control{
+
+.control {
   margin-bottom: 10px;
 }
 </style>

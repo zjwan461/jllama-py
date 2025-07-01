@@ -5,6 +5,7 @@ import threading
 import time
 import tkinter as tk
 from datetime import datetime
+from time import sleep
 from tkinter import filedialog
 
 import torch
@@ -30,6 +31,7 @@ from py.ai.model_finetuning import train, torch_gc, is_training, reset_train_sta
 from jinja2 import Template
 from py.util.ssh_util import check_connection, upload_and_exec
 import py.util.pip_util as pip_util
+import py.ai.llamafactory_server as llamafactory_server
 
 logger = Logger("Api.py")
 
@@ -1016,3 +1018,13 @@ class Api:
     def get_ai_chat_url(self):
         port = config.get_server_config().get("port", 5000)
         return f"http://127.0.0.1:{port}/v1/chat/completions"
+
+    def start_lf_webui(self):
+        ai_config = config.get_ai_config()
+        llama_factory_host = ai_config.get("llama_factory_host", "0.0.0.0")
+        llama_factory_port = ai_config.get("llama_factory_port", 7860)
+        llamafactory_server.start_webui_process(llama_factory_host, llama_factory_port)
+        sleep(10)
+
+    def stop_lf_webui(self):
+        llamafactory_server.stop_webui_process()

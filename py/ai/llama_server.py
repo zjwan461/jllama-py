@@ -40,11 +40,11 @@ Then visit http://localhost:8000/docs to see the interactive API docs.
 
 """
 
-server_process: multiprocessing.Process
+server_process = multiprocessing.Process()
 
 
 def stop_llama_server():
-    if server_process is not None:
+    if server_process.is_alive():
         server_process.terminate()
 
 
@@ -61,8 +61,11 @@ def run_llama_server_async(model=None, model_alias=None, n_gpu_layers=None,
                            hf_model_repo_id=None, draft_model=None, draft_model_num_pred_tokens=None, type_k=None,
                            type_v=None, verbose=None, host=None, port=None, ssl_keyfile=None, ssl_certfile=None,
                            api_key=None, interrupt_requests=None, disable_ping_events=None, root_path=None,
-                           config_file= None):
+                           config_file=None):
     global server_process
+    if server_process.is_alive():
+        raise Exception("llama-cpp-python服务已在运行")
+
     server_process = multiprocessing.Process(target=run_llama_server, args=(model, model_alias, n_gpu_layers,
                                                                             split_mode, main_gpu, tensor_split,
                                                                             vocab_only,
@@ -113,7 +116,6 @@ def run_llama_server(model=None, model_alias=None, n_gpu_layers=None,
                      type_v=None, verbose=None, host=None, port=None, ssl_keyfile=None, ssl_certfile=None,
                      api_key=None, interrupt_requests=None, disable_ping_events=None, root_path=None,
                      config_file=None):
-
     description = "🦙 Llama.cpp python server. Host your own LLMs!🚀"
     parser = argparse.ArgumentParser(description=description)
 
@@ -180,7 +182,7 @@ def run_llama_server(model=None, model_alias=None, n_gpu_layers=None,
     except Exception as e:
         print(e, file=sys.stderr)
         parser.print_help()
-        sys.exit(1)  # todo 修改
+        server_process.terminate()
     assert server_settings is not None
     assert model_settings is not None
     app = create_app(

@@ -162,4 +162,10 @@ export default {
   getAiChatUrl() {
     return window.pywebview.api.get_ai_chat_url()
   },
+  startLlamafactory() {
+    return window.pywebview.api.start_lf_webui()
+  },
+  stopLlamafactory() {
+    return window.pywebview.api.stop_lf_webui()
+  },
 }

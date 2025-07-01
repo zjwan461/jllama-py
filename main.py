@@ -179,6 +179,11 @@ class JsApi:
     def get_ai_chat_url(self):
         return self.controller.get_ai_chat_url()
 
+    def start_lf_webui(self):
+        return self.controller.start_lf_webui()
+
+    def stop_lf_webui(self):
+        return self.controller.stop_lf_webui()
 
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 

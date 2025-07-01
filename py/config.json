@@ -13,12 +13,12 @@
     "app_width": 1366,
     "app_height": 768,
     "ai_config": {
-        "model_save_dir": "E:/models",
-        "model_import_dir": "E:/models/import",
-        "llama_factory_port": 7860
+        "model_save_dir": "D:/models",
+        "llama_factory_port": 7860,
+        "llama_factory_host": "0.0.0.0"
     },
     "proxy": {
-        "http_proxy": "http://192.168.31.67:1082",
-        "https_proxy": "http://192.168.31.67:1082"
+        "http_proxy": "",
+        "https_proxy": ""
     }
 }
