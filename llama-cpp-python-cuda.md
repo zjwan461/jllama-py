@@ -1,3 +1,5 @@
+## 本地构建安装
+
 如果之前安装过cpu版本的llama-cpp-python,请先执行 
 ```shell
 pip uninstall llama-cpp-python -y
@@ -16,3 +18,6 @@ pip cache purge
 $env:CMAKE_ARGS = "-DGGML_CUDA=ON -DCUDAToolkit_ROOT='F:\software\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\BuildCustomizations'"
 pip install llama-cpp-python[server]
 ```
+
+## 使用预编译whl文件安装
+目前llama-cpp-python官方提供的cuda版预编译whl版本只到[v0.3.4](https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.4-cu124/llama_cpp_python-0.3.4-cp311-cp311-win_amd64.whl), cuda版本最大支持到12.4
