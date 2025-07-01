@@ -1,5 +1,7 @@
 import os
 import subprocess
+import sys
+
 from py.util.logutil import Logger
 
 logger = Logger(__name__)
@@ -10,11 +12,12 @@ def open_file(file_path) -> None:
 
 
 def check_llamafactory_install() -> bool:
+    llamafactory_cli_path = os.path.join(sys.exec_prefix, "Scripts/llamafactory-cli")
     """
     Check if llamafactory is installed.
     """
     try:
-        result = subprocess.run(args="llamafactory-cli version", check=True,
+        result = subprocess.run(args=f"{llamafactory_cli_path} version", check=True,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE,
                                 text=True)
