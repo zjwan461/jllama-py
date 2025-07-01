@@ -365,7 +365,7 @@ export default {
       if (this.llamaFactoryInfo.factory_install === '已安装') {
         apis.startLlamafactory().then(res => {
           endLoading(loading)
-          this.$message.info("启动成功")
+          this.$message.info("启动成功,即将打开浏览器...")
         }).catch(e => {
           endLoading(loading)
           this.$message.error(e)
