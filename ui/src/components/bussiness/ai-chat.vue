@@ -56,7 +56,7 @@
 </template>
 
 <script>
-staimport apis from '../../common/apis';
+import apis from '../../common/apis';
 import {endLoading, startLoading} from "@/common/common";
 
 export default {
