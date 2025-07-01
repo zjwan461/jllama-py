@@ -168,4 +168,7 @@ export default {
   stopLlamafactory() {
     return window.pywebview.api.stop_lf_webui()
   },
+  isLlamafactoryRunning() {
+    return window.pywebview.api.is_lf_running()
+  },
 }

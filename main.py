@@ -185,6 +185,9 @@ class JsApi:
     def stop_lf_webui(self):
         return self.controller.stop_lf_webui()
 
+    def is_lf_running(self):
+        return self.controller.is_lf_running()
+
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 
 CORS(server)
