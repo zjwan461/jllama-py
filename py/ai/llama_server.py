@@ -66,38 +66,39 @@ def run_llama_server_async(model=None, model_alias=None, n_gpu_layers=None,
     if server_process.is_alive():
         raise Exception("llama-cpp-python服务已在运行")
 
-    server_process = multiprocessing.Process(target=run_llama_server, args=(model, model_alias, n_gpu_layers,
-                                                                            split_mode, main_gpu, tensor_split,
-                                                                            vocab_only,
-                                                                            use_mmap,
-                                                                            use_mlock, kv_overrides, rpc_servers, seed,
-                                                                            n_ctx,
-                                                                            n_batch,
-                                                                            n_ubatch, n_threads, n_threads_batch,
-                                                                            rope_scaling_type,
-                                                                            rope_freq_base, rope_freq_scale,
-                                                                            yarn_ext_factor,
-                                                                            yarn_attn_factor,
-                                                                            yarn_beta_fast, yarn_beta_slow,
-                                                                            yarn_orig_ctx,
-                                                                            mul_mat_q,
-                                                                            logits_all, embedding, offload_kqv,
-                                                                            flash_attn,
-                                                                            last_n_tokens_size, lora_base, lora_path,
-                                                                            numa,
-                                                                            chat_format,
-                                                                            clip_model_path, cache, cache_type,
-                                                                            cache_size,
-                                                                            hf_tokenizer_config_path,
-                                                                            hf_pretrained_model_name_or_path,
-                                                                            hf_model_repo_id, draft_model,
-                                                                            draft_model_num_pred_tokens, type_k,
-                                                                            type_v, verbose, host, port, ssl_keyfile,
-                                                                            ssl_certfile,
-                                                                            api_key, interrupt_requests,
-                                                                            disable_ping_events,
-                                                                            root_path,
-                                                                            config_file))
+    server_process = multiprocessing.Process(target=run_llama_server, daemon=True,
+                                             args=(model, model_alias, n_gpu_layers,
+                                                   split_mode, main_gpu, tensor_split,
+                                                   vocab_only,
+                                                   use_mmap,
+                                                   use_mlock, kv_overrides, rpc_servers, seed,
+                                                   n_ctx,
+                                                   n_batch,
+                                                   n_ubatch, n_threads, n_threads_batch,
+                                                   rope_scaling_type,
+                                                   rope_freq_base, rope_freq_scale,
+                                                   yarn_ext_factor,
+                                                   yarn_attn_factor,
+                                                   yarn_beta_fast, yarn_beta_slow,
+                                                   yarn_orig_ctx,
+                                                   mul_mat_q,
+                                                   logits_all, embedding, offload_kqv,
+                                                   flash_attn,
+                                                   last_n_tokens_size, lora_base, lora_path,
+                                                   numa,
+                                                   chat_format,
+                                                   clip_model_path, cache, cache_type,
+                                                   cache_size,
+                                                   hf_tokenizer_config_path,
+                                                   hf_pretrained_model_name_or_path,
+                                                   hf_model_repo_id, draft_model,
+                                                   draft_model_num_pred_tokens, type_k,
+                                                   type_v, verbose, host, port, ssl_keyfile,
+                                                   ssl_certfile,
+                                                   api_key, interrupt_requests,
+                                                   disable_ping_events,
+                                                   root_path,
+                                                   config_file))
 
     server_process.start()
 
@@ -182,7 +183,7 @@ def run_llama_server(model=None, model_alias=None, n_gpu_layers=None,
     except Exception as e:
         print(e, file=sys.stderr)
         parser.print_help()
-        server_process.terminate()
+        sys.exit(-1)
     assert server_settings is not None
     assert model_settings is not None
     app = create_app(

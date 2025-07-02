@@ -9,6 +9,8 @@ import py.config as config
 from py.controller import api
 from py.util.db_util import SqliteSqlalchemy, Model, FileDownload
 import py.ai.reasoning_service as reasoning
+import py.ai.llama_server as llama_server
+import py.ai.llamafactory_server as llamafactory_server
 
 
 class JsApi:
@@ -188,6 +190,7 @@ class JsApi:
     def is_lf_running(self):
         return self.controller.is_lf_running()
 
+
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 
 CORS(server)
@@ -273,6 +276,11 @@ def before_show():
     clean_count += 1
 
 
+def stop_process():
+    llama_server.stop_llama_server()
+    llamafactory_server.stop_webui_process()
+
+
 if __name__ == '__main__':
     controller = api.Api()
     app_name = config.get_app_name()
@@ -310,6 +318,7 @@ if __name__ == '__main__':
 
     # 加载页面的监听
     window.events.loaded += before_show
+    window.events.closed += stop_process
 
     if config.is_dev():
         threading.Thread(target=start_dev_flask, daemon=True).start()

@@ -1030,4 +1030,4 @@ class Api:
         llamafactory_server.stop_webui_process()
 
     def is_lf_running(self):
-        return llama_server.server_process.is_alive()
+        return llamafactory_server.webui_process.is_alive()
