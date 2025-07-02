@@ -22,7 +22,7 @@ class JsApi:
         return self.controller.show_tk()
 
     def open_file_select(self):
-        return self.controller.open_file_select()
+        return self.controller.open_file_select(window)
 
     def show_tips(self):
         return self.controller.show_tips()
