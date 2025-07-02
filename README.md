@@ -1,10 +1,10 @@
-# jllama-py
+# ![](static/logo.png) jllama-py
 
 ## 技术栈
 
 ###  前端
 
-Vue、elementui
+Vue、ElementUI
 
 ### 后端
 
