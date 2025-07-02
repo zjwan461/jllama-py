@@ -30,7 +30,13 @@ pip install -r requirements.txt
 
 CPU版本安装请参考[llama-cpp-python-cpu](llama-cpp-python-cpu.md)
 
-CUA版本安装请参考[llama-cpp-python-cuda](llama-cpp-python-cuda.md)
+CUDA版本安装请参考[llama-cpp-python-cuda](llama-cpp-python-cuda.md)
+
+默认情况下基础依赖安装会安装上CPU版本的pytorch包，如需要安装cuda版本请执行
+
+```shell
+pip install -r pytorch-cuda.txt
+```
 
 ## 功能介绍
 
