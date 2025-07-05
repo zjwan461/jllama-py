@@ -64,6 +64,7 @@
 
     <el-dialog :title="dialogTitle" :visible.sync="showDialog" :close-on-press-escape=false :close-on-click-modal=false
                :destroy-on-close=true @close="resetDialog">
+      <a href="https://www.modelscope.cn/models" target="_blank" style="">模型广场</a>
       <el-form :model="modelForm" :rules="rules" ref="modelForm">
         <el-form-item label="下载平台" label-width="120px" prop="download_platform">
           <el-select v-model="modelForm.download_platform" placeholder="下载平台">
