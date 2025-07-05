@@ -10,3 +10,7 @@ train*
 lora*
 final*
 cache
+jllama/ui/dist/**
+build
+jllama.egg-info
+dist

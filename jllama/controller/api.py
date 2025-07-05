@@ -941,7 +941,7 @@ class Api:
 
         params["learningRate"] = float(params.get("learningRate"))
 
-        with open("jllama/ai/model_finetuning.jinja", "r", encoding="utf-8") as f:
+        with open("jllama/templates/model_finetuning.jinja", "r", encoding="utf-8") as f:
             template = Template(f.read())
             return template.render(params)
 

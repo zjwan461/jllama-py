@@ -12,6 +12,9 @@ import jllama.ai.reasoning_service as reasoning
 import jllama.ai.llama_server as llama_server
 import jllama.ai.llamafactory_server as llamafactory_server
 
+controller = api.Api()
+app_name = config.get_app_name()
+
 
 class JsApi:
 
@@ -197,6 +200,36 @@ CORS(server)
 
 server_config = config.get_server_config()
 
+js_api = JsApi(controller)
+
+
+def start_dev_server():
+    commands = 'cd ui && npm run serve'
+    result = subprocess.Popen(commands, shell=True)
+    print(f"输出:\n{result.stdout}")
+    return True
+
+
+if config.is_dev():
+    print("dev")
+    window = webview.create_window(app_name, url="http://localhost:8001/", js_api=js_api,
+                                   width=config.get_app_width(), height=config.get_app_height(),
+                                   confirm_close=True,
+                                   text_select=True)
+elif config.is_prd():
+    print("prd")
+    window = webview.create_window(app_name, server, js_api=js_api, width=config.get_app_width(),
+                                   height=config.get_app_height(),
+                                   confirm_close=True,
+                                   text_select=True)
+
+
+    @server.route("/")
+    def index():
+        return send_from_directory("ui/dist", "index.html")
+else:
+    raise RuntimeError("不支持的运行模式类型:" + config.get_model())
+
 
 @server.route("/v1/chat/completions", methods=["POST"])
 def chat_completions():
@@ -281,39 +314,7 @@ def stop_process():
     llamafactory_server.stop_webui_process()
 
 
-if __name__ == '__main__':
-    controller = api.Api()
-    app_name = config.get_app_name()
-    js_api = JsApi(controller)
-
-
-    def start_dev_server():
-        commands = 'cd ui && npm run serve'
-        result = subprocess.Popen(commands, shell=True)
-        print(f"输出:\n{result.stdout}")
-        return True
-
-
-    if config.is_dev():
-        print("dev")
-        window = webview.create_window(app_name, url="http://localhost:8001/", js_api=js_api,
-                                       width=config.get_app_width(), height=config.get_app_height(),
-                                       confirm_close=True,
-                                       text_select=True)
-    elif config.is_prd():
-        print("prd")
-        window = webview.create_window(app_name, server, js_api=js_api, width=config.get_app_width(),
-                                       height=config.get_app_height(),
-                                       confirm_close=True,
-                                       text_select=True)
-
-
-        @server.route("/")
-        def index():
-            return send_from_directory("../ui/dist", "index.html")
-    else:
-        raise RuntimeError("不支持的运行模式类型:" + config.get_model())
-
+def main():
     # 加载页面的监听
     window.events.loaded += before_show
     window.events.closed += stop_process
@@ -323,3 +324,7 @@ if __name__ == '__main__':
         webview.start(debug=True)
     else:
         webview.start(http_server=True, debug=False, http_port=server_config.get("port", 5000))
+
+
+if __name__ == '__main__':
+    main()

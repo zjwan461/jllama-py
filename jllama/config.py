@@ -15,7 +15,7 @@ def get_default():
             "host": "127.0.0.1",
             "port": 5000
         },
-        "model": "dev",
+        "model": "prd",
         "app_name": "jllama",
         "app_width": 1366,
         "app_height": 768,

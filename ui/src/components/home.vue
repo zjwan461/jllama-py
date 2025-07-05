@@ -123,7 +123,6 @@ export default {
   },
   created() {
     this.initEnv()
-    this.getMenuTree()
     this.active = window.sessionStorage.getItem('menu-active-path') ? window.sessionStorage.getItem('menu-active-path') : '/home';
   },
   methods: {
@@ -132,6 +131,7 @@ export default {
         if (res !== "no_need") {
           res === "success" ? this.$message.success("初始化成功") : this.$message.error("初始化失败")
         }
+        this.getMenuTree()
       })
     },
     handleSelect(index, indexPath) {
