@@ -1,4 +1,3 @@
-import os
 import subprocess
 from flask_cors import CORS
 import threading
@@ -10,6 +9,9 @@ import jllama.config as config
 from jllama.controller import api
 from jllama.util.db_util import SqliteSqlalchemy, Model, FileDownload
 import jllama.ai.reasoning_service as reasoning
+import jllama.ai.llama_server as llama_server
+import jllama.ai.llamafactory_server as llamafactory_server
+
 
 class JsApi:
 
