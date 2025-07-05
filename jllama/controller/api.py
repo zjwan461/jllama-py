@@ -6,8 +6,7 @@ import time
 import tkinter as tk
 from datetime import datetime
 from time import sleep
-from tkinter import filedialog
-
+import webview
 import torch
 
 import jllama.ai.llama_server as llama_server
@@ -60,10 +59,11 @@ class Api:
     def show_tk(self):
         self.root.deiconify()
 
-    def open_file_select(self):
-        # 创建一个隐藏的主窗口（不需要显示完整的GUI）
-        files = filedialog.askopenfilenames(title="请选择文件", filetypes=[("所有文件", "*.*")])
-        return files
+    def open_file_select(self, window):
+        result = window.create_file_dialog(
+            webview.OPEN_DIALOG, allow_multiple=True, file_types=("所有文件 (*.*)",)
+        )
+        return result
 
     def show_tips(self):
         return "today is a good day"
@@ -1037,4 +1037,4 @@ class Api:
         llamafactory_server.stop_webui_process()
 
     def is_lf_running(self):
-        return llama_server.server_process.is_alive()
+        return llamafactory_server.webui_process.is_alive()

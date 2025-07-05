@@ -1,10 +1,10 @@
-# jllama-py
+# ![](static/logo.png) jllama-py
 
 ## 技术栈
 
 ###  前端
 
-Vue、elementui
+Vue、ElementUI
 
 ### 后端
 
@@ -12,7 +12,7 @@ python3.11、pywebview、llama-cpp-python、transformers、pytorch
 
 ## 介绍
 
-jllama-py是[jllama](https://gitee.com/zjwan461/jllama)的Python版本，并且得益于使用了python作为技术底座，在原本jllama的基础上做了一些功能增强。 是一个基于python构建的AI模型工具集。集成了 **模型下载**、**模型部署**、**服务监控**、**gguf模型量化**、**gguf拆分合并** 、**权重格式转换**、**模型微调**等工具合集。让使用者无需掌握各种AI相关技术就能快速在本地运行模型进行模型推理、量化等操作、模型微调工作。
+jllama-py是[jllama](https://github.com/zjwan461/jllama)的Python版本，并且得益于使用了python作为技术底座，在原本jllama的基础上做了一些功能增强。 是一个基于python构建的桌面端AI模型工具集。集成了 **模型下载**、**模型部署**、**服务监控**、**gguf模型量化**、**gguf拆分合并** 、**权重格式转换**、**模型微调**等工具合集。让使用者无需掌握各种AI相关技术就能快速在本地运行模型进行模型推理、量化等操作、模型微调工作。
 
 ##  限制
 
@@ -30,7 +30,13 @@ pip install -r requirements.txt
 
 CPU版本安装请参考[llama-cpp-python-cpu](llama-cpp-python-cpu.md)
 
-CUA版本安装请参考[llama-cpp-python-cuda](llama-cpp-python-cuda.md)
+CUDA版本安装请参考[llama-cpp-python-cuda](llama-cpp-python-cuda.md)
+
+默认情况下基础依赖安装会安装上CPU版本的pytorch包，如需要安装cuda版本请执行
+
+```shell
+pip install -r pytorch-cuda.txt
+```
 
 ## 功能介绍
 

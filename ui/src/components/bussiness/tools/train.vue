@@ -12,7 +12,7 @@
         <el-tab-pane label="简单模式" name="simple">
           <el-row>
             <el-col :span="12">
-              <div v-if="trainging_state ===false" class="control">
+              <div v-if="training_state ===false" class="control">
                 <el-alert type="info">当前没有正在训练的任务</el-alert>
               </div>
               <div v-else class="control">
@@ -96,30 +96,47 @@
         </el-tab-pane>
         <el-tab-pane label="llamafactory模式" name="origin">
           <el-row>
+            <el-button type="text" icon="el-icon-refresh" style="float: right" @click="reloadInstallState">
+              reload安装状态
+            </el-button>
+            <el-button type="text" icon="el-icon-refresh" style="float: right" @click="getLlamafactoryState">
+              reload运行状态
+            </el-button>
             <div>LlamaFactory安装状态:
               <el-tag :type="llamaFactoryInfo.factory_install === '已安装'?'success':'danger'">
                 {{ llamaFactoryInfo.factory_install }}
               </el-tag>
             </div>
+
+            <div v-if="llamaFactoryInfo.factory_install==='已安装'">
+              <div style="margin: 5px 0">
+                LlamaFactory运行状态：
+                <el-tag type="success" v-if="llamafactory_state===true">
+                  running
+                </el-tag>
+                <el-tag type="danger" v-if="llamafactory_state===false">
+                  stop
+                </el-tag>
+              </div>
+              <el-button type="text" @click="openOrigin()" v-if="llamafactory_state === false">
+                启动LlamaFactory
+              </el-button>
+              <el-button type="text" @click="stopLlamafactory()" v-if="llamafactory_state === true">
+                关闭LlamaFactory
+              </el-button>
+            </div>
+
+            <div v-else>
+              你可以选择
+              <el-button type="text" @click="installAuto()">
+                自动安装
+              </el-button>
+              或者
+              <el-button type="text" @click="installManual()">
+                手动安装
+              </el-button>
+            </div>
           </el-row>
-          <el-button type="text" icon="el-icon-refresh" style="float: right" @click="reloadInstallState">
-            reload安装状态
-          </el-button>
-          <div v-if="llamaFactoryInfo.factory_install==='已安装'">
-            <el-button type="text" @click="openOrigin()">
-              启动LlamaFactory
-            </el-button>
-          </div>
-          <div v-else>
-            你可以选择
-            <el-button type="text" @click="installAuto()">
-              自动安装
-            </el-button>
-            或者
-            <el-button type="text" @click="installManual()">
-              手动安装
-            </el-button>
-          </div>
 
 
         </el-tab-pane>
@@ -192,7 +209,8 @@ export default {
   },
   data() {
     return {
-      trainging_state: false,
+      training_state: false,
+      llamafactory_state: false,
       showInstallLlamafactory: false,
       installLlamafactoryInfo: "",
       showRemoteDialog: false,
@@ -301,6 +319,7 @@ export default {
     this.initDir()
     this.getTrainState()
     this.getLlamaFactoryInfo()
+    this.getLlamafactoryState()
   },
   methods: {
     initDir() {
@@ -325,10 +344,10 @@ export default {
       this.$refs[form].validate((valid) => {
         if (valid) {
           this.$message.success('开始训练')
-          this.trainging_state = true
+          this.training_state = true
           apis.train(this.trainArgs).then(res => {
             console.log(res)
-            this.trainging_state = false
+            this.training_state = false
           }).catch(e => {
             this.$message.error(e)
           })
@@ -365,7 +384,8 @@ export default {
       if (this.llamaFactoryInfo.factory_install === '已安装') {
         apis.startLlamafactory().then(res => {
           endLoading(loading)
-          this.$message.info("启动成功,即将打开浏览器...")
+          this.$message.success("启动成功,稍后将自动打开浏览器...")
+          this.getLlamafactoryState()
         }).catch(e => {
           endLoading(loading)
           this.$message.error(e)
@@ -466,7 +486,7 @@ export default {
     stopTrain() {
       apis.stopTrain().then(res => {
         this.$message.success("停止成功")
-        this.trainging_state = false
+        this.training_state = false
         setTimeout(() => {
           this.getTrainState()
         }, 5000)
@@ -476,8 +496,27 @@ export default {
     },
     getTrainState() {
       apis.isTraining().then(res => {
-        this.trainging_state = res
+        this.training_state = res
+      }).catch(e => {
+        this.$message.error(e)
       })
+    },
+    getLlamafactoryState() {
+      apis.isLlamafactoryRunning().then(res => {
+        this.llamafactory_state = res
+      }).catch(e => {
+        this.$message.error(e)
+      })
+    },
+    stopLlamafactory() {
+      const loading = startLoading("停止中")
+      apis.stopLlamafactory().then(res => {
+        endLoading(loading)
+        this.getLlamafactoryState()
+      }).catch(e => {
+        endLoading(loading)
+        this.$message.error(e)
+      });
     },
   }
 }

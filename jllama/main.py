@@ -20,7 +20,7 @@ class JsApi:
         return self.controller.show_tk()
 
     def open_file_select(self):
-        return self.controller.open_file_select()
+        return self.controller.open_file_select(window)
 
     def show_tips(self):
         return self.controller.show_tips()
@@ -274,6 +274,11 @@ def before_show():
     clean_count += 1
 
 
+def stop_process():
+    llama_server.stop_llama_server()
+    llamafactory_server.stop_webui_process()
+
+
 if __name__ == '__main__':
     controller = api.Api()
     app_name = config.get_app_name()
@@ -309,6 +314,7 @@ if __name__ == '__main__':
 
     # 加载页面的监听
     window.events.loaded += before_show
+    window.events.closed += stop_process
 
     if config.is_dev():
         threading.Thread(target=start_dev_flask, daemon=True).start()
