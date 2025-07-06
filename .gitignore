@@ -12,5 +12,5 @@ final*
 cache
 jllama/ui/dist/**
 build
-jllama.egg-info
+jllama_py.egg-info
 dist

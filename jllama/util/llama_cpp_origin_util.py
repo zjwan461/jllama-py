@@ -1,6 +1,6 @@
 import os
-import platform
 import subprocess
+from pathlib import Path
 
 
 def merge_gguf(input_file_path: str, output_file_path):
@@ -40,7 +40,7 @@ def split_gguf(input_file_path: str, output_file_path: str, options: dict):
 def check_cpp_dir():
     # work_dir = os.getcwd()
     # cpp_dir = os.path.join(work_dir, "jllama/ext/llama_cpp/" + platform.system())
-    cpp_dir = "ext/llama_cpp"
+    cpp_dir = str(Path(__file__).parent.parent / "ext/llama_cpp")
     if not os.path.exists(cpp_dir):
         raise Exception("can not found ext llama_cpp path")
     return cpp_dir

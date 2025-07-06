@@ -5,6 +5,7 @@ import threading
 import time
 import tkinter as tk
 from datetime import datetime
+from pathlib import Path
 from time import sleep
 import webview
 import torch
@@ -69,7 +70,8 @@ class Api:
         return "today is a good day"
 
     def get_nav(self):
-        with open("nav.json", "r", encoding="utf-8") as f:
+        nav_path = str(Path(__file__).parent.parent / "nav.json")
+        with open(nav_path, "r", encoding="utf-8") as f:
             conf = f.read()
             json_data = json.loads(conf)
             return json_data
@@ -941,7 +943,8 @@ class Api:
 
         params["learningRate"] = float(params.get("learningRate"))
 
-        with open("templates/model_finetuning.jinja", "r", encoding="utf-8") as f:
+        temp_file_path = str(Path(__file__).parent.parent / "templates/model_finetuning.jinja")
+        with open(temp_file_path, "r", encoding="utf-8") as f:
             template = Template(f.read())
             return template.render(params)
 

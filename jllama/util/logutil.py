@@ -1,11 +1,13 @@
 import logging
 import logging.config
 import os
+from pathlib import Path
 
 if not os.path.exists("log"):
     os.mkdir("log")
 
-logging.config.fileConfig("logging.conf")
+logging_conf_path  = str(Path(__file__).parent.parent / "logging.conf")
+logging.config.fileConfig(logging_conf_path)
 
 
 class Logger:
