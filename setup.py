@@ -28,7 +28,7 @@ setup(
     },
     package_data={
         # 包含 jllama 包中的所有 HTML 文件
-        'jllama': ['ui/dist/**', 'templates/**', 'nav.json'],
+        'jllama': ['ui/dist/**', 'templates/**', 'nav.json', 'ext/llama_cpp/**'],
     },
     # 其他元数据
     author='Jerry',
