@@ -129,7 +129,7 @@ export default {
   methods: {
     openFileSelect(val) {
       apis.openFileSelector().then(res => {
-        if (res.length > 0) {
+        if (res && res.length > 0) {
           this.form[val] = res[0]
         }
       }).catch(e => {
