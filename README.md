@@ -18,15 +18,33 @@ jllama-py是[jllama](https://github.com/zjwan461/jllama)的Python版本，并且
 
 jllama-py目前只支持大语言模型（LLM）。未来会考虑支持视觉、音频等多模态模型。jllama-py支持huggingface、gguf模型格式文件的本地推理，但是在本地部署方案上仅支持gguf模型权重格式，不过jllama-py也提供了将huggingface格式模型转换为gguf模型格式的功能。此外jllama-py仅支持Windows操作系统。目前jllama-py也只支持cuda的GPU加速方案。
 
-## 安装
+## 安装和使用
+
+### 1. 使用pip安装
+
+```shell
+pip install jllama-py
+# 运行
+jllama
+```
+
+### 2. 使用源码编译安装
 
 基础依赖安装：执行如下安装命令
 
 ```shell
+git clone https://github.com/zjwan461/jllama-py
+cd jllama-py
 pip install -r requirements.txt
+cd ui
+npm install
+npm run build
+# copy ui/dist文件夹到jllama/ui/dist目录下
+cd ../jllama
+python main.py
 ```
 
-安装llama-cpp-python：
+jllama-py使用了llama-cpp-python作为模型推理技术底座，默认情况下安装的是CPU版本的llama-cpp-python。如果需要使用cuda进行加速推理，请参考如下。
 
 CPU版本安装请参考[llama-cpp-python-cpu](llama-cpp-python-cpu.md)
 
