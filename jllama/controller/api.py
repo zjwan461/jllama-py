@@ -69,7 +69,7 @@ class Api:
         return "today is a good day"
 
     def get_nav(self):
-        with open("jllama/nav.json", "r", encoding="utf-8") as f:
+        with open("nav.json", "r", encoding="utf-8") as f:
             conf = f.read()
             json_data = json.loads(conf)
             return json_data
@@ -941,7 +941,7 @@ class Api:
 
         params["learningRate"] = float(params.get("learningRate"))
 
-        with open("jllama/templates/model_finetuning.jinja", "r", encoding="utf-8") as f:
+        with open("templates/model_finetuning.jinja", "r", encoding="utf-8") as f:
             template = Template(f.read())
             return template.render(params)
 
@@ -984,7 +984,7 @@ class Api:
         if sys_info.factory_install == "已安装":
             raise ValueError("LLamaFactory已安装")
         current_dir = os.getcwd()
-        llama_factory_install_package = os.path.join(current_dir, "jllama/ext/llamafactory-0.9.3-py3-none-any.whl")
+        llama_factory_install_package = os.path.join(current_dir, "ext/llamafactory-0.9.3-py3-none-any.whl")
 
         for log in pip_util.install_package(llama_factory_install_package):
             self.log_viewer.append_text(log)
@@ -999,7 +999,7 @@ class Api:
 
     def install_llamafactory_manual(self):
         current_dir = os.getcwd()
-        llama_factory_install_package = os.path.join(current_dir, "jllama/ext/llamafactory-0.9.3-py3-none-any.whl")
+        llama_factory_install_package = os.path.join(current_dir, "ext/llamafactory-0.9.3-py3-none-any.whl")
         install_content = (
             f"<p>进入终端，cd到项目根目录下，并执行以下命令安装llamafactory</p>"
             f"<p><strong>pip install {llama_factory_install_package}</strong></p>"

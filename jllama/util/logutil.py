@@ -5,7 +5,7 @@ import os
 if not os.path.exists("log"):
     os.mkdir("log")
 
-logging.config.fileConfig("jllama/logging.conf")
+logging.config.fileConfig("logging.conf")
 
 
 class Logger:

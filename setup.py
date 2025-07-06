@@ -15,8 +15,8 @@ def get_requires() -> list[str]:
 
 
 setup(
-    name='jllama',
-    version='1.0',
+    name='jllama-py',
+    version='1.1.1',
     url='https://github.com/zjwan461/jllama-py',
     packages=find_packages(),
     python_requires=">=3.11",
@@ -28,7 +28,7 @@ setup(
     },
     package_data={
         # 包含 jllama 包中的所有 HTML 文件
-        'jllama': ['ui/dist/**', 'templates/**', 'nav.json', 'ext/llama_cpp/**'],
+        'jllama': ['ui/dist/**', 'templates/**', 'nav.json', 'ext/llama_cpp/**', 'logging.conf'],
     },
     # 其他元数据
     author='Jerry',
