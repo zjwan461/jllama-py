@@ -37,7 +37,7 @@ class SysInfo(BaseEntity):
     cpp_version = Column(String(255))
     factory_version = Column(String(255))
     self_version = Column(String(255))
-    factory_install = Column(String(10), nullable=False, default="未安装")
+    factory_install = Column(String(10), nullable=False, default="已安装")
 
 
 class Model(BaseEntity):

@@ -7,10 +7,10 @@ GPUtil==1.4.0
 SQLAlchemy==2.0.41
 modelscope==1.26.0
 orjson==3.10.18
-transformers==4.52.4
+transformers==4.52.4; sys_platform != 'darwin'
 accelerate==1.7.0
 addict==2.4.0
-WMI==1.5.1
+WMI==1.5.1; sys_platform != 'darwin'
 hf_xet==1.1.5
 torch~=2.7.1
 numpy~=1.26.4
@@ -26,4 +26,5 @@ safetensors~=0.5.3
 jinja2~=3.1.6
 paramiko~=3.5.1
 scp~=0.15.0
-llamafactory~=0.9.3
+llamafactory==0.9.3
+llama-cpp-python[server]==0.3.12
