@@ -80,7 +80,10 @@ def get_jllama_info():
     session = SqliteSqlalchemy().session
     sys_info = session.query(SysInfo).get(999)
     session.close()
-    return sys_info.to_dic()
+    if sys_info is None:
+        return {}
+    else:
+        return sys_info.to_dic()
 
 
 if __name__ == '__main__':
