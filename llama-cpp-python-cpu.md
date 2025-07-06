@@ -9,5 +9,7 @@ pip install llama-cpp-python[server]
 ```
 
 ## 使用预编译whl文件安装
-目前llama-cpp-python官方提供的cpu版预编译whl版本只到[v0.3.2](https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.2/llama_cpp_python-0.3.2-cp311-cp311-win_amd64.whl)
+[Releases · abetlen/llama-cpp-python](https://github.com/abetlen/llama-cpp-python/releases) 
+
+下载对应版本的llama-cpp-python的whl后进行安装
 

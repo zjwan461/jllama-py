@@ -20,4 +20,6 @@ pip install llama-cpp-python[server]
 ```
 
 ## 使用预编译whl文件安装
-目前llama-cpp-python官方提供的cuda版预编译whl版本只到[v0.3.4](https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.4-cu124/llama_cpp_python-0.3.4-cp311-cp311-win_amd64.whl), cuda版本最大支持到12.4
+[Releases · abetlen/llama-cpp-python](https://github.com/abetlen/llama-cpp-python/releases)
+
+下载对应的cuda版本的whl后进行安装

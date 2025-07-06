@@ -1,6 +1,6 @@
 # ![](static/logo.png) jllama-py
 
-## 技术栈
+## 主要技术栈
 
 ###  前端
 
@@ -22,11 +22,29 @@ jllama-py目前只支持大语言模型（LLM）。未来会考虑支持视觉�
 
 ### 1. 使用pip安装
 
+jllama-py使用了llama-cpp-python作为模型推理技术底座，需要本机配置了C++编译环境。推荐先安装llama-cpp-python之后再安装jllama-py。llama-cpp-python安装请参考如下。
+
+CPU版本安装请参考[llama-cpp-python-cpu](llama-cpp-python-cpu.md)
+
+CUDA版本安装请参考[llama-cpp-python-cuda](llama-cpp-python-cuda.md)
+
+也可以直接安装llama-cpp-python官方的whl。 [Releases · abetlen/llama-cpp-python](https://github.com/abetlen/llama-cpp-python/releases)
+
 ```shell
+# 省略llama-cpp-python的安装过程
+...
 pip install jllama-py
 # 运行
 jllama
 ```
+
+如需使用pytorch的cuda加速，请额外执行如下命令。可参考[pytorch官方说明](https://pytorch.org/get-started/locally/) 。tips: **50系显卡驱动比较新,请使用cuda12.8版本**。
+
+```shell
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/${你的cuda版本}
+```
+
+![image-20250707002734351](https://gitee.com/zjwan461/images/raw/master/img/image-20250707002734351.png) 
 
 ### 2. 使用源码编译安装
 
@@ -50,7 +68,7 @@ CPU版本安装请参考[llama-cpp-python-cpu](llama-cpp-python-cpu.md)
 
 CUDA版本安装请参考[llama-cpp-python-cuda](llama-cpp-python-cuda.md)
 
-默认情况下基础依赖安装会安装上CPU版本的pytorch包，如需要安装cuda版本请执行
+默认情况下基础依赖安装会安装上CPU版本的**pytorch**包，如需要安装cuda版本请执行
 
 ```shell
 pip install -r pytorch-cuda.txt
@@ -263,24 +281,19 @@ yarl==1.20.1
 
 #### llamafactory微调
 
-jllama-py默认并没有安装llamafactory,使用此功能需要单独安装llamafactory。jllama-py内置了llamafactory-0.9.3版本的whl安装包，并提供了自动安装功能。如果自动安装出现问题，也可以使用点击手动安装查看安装命令。
+jllama-py内置了llamafactory-0.9.3版本。关于llamafactory，请参考[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/installation.html)官方网站
 
-![image-20250630232241763](https://gitee.com/zjwan461/images/raw/master/img/image-20250630232241763.png) 
+![](https://gitee.com/zjwan461/images/raw/master/img/image-20250707002154475.png) 
 
-![image-20250630232343995](https://gitee.com/zjwan461/images/raw/master/img/image-20250630232343995.png) 
 
-![image-20250630233802818](https://gitee.com/zjwan461/images/raw/master/img/image-20250630233802818.png) 
 
  ## 开发接入
 
-修改py/config.json中的model为dev，修改ai_config配置项中本地保存模型的目录。如果需要设置网络代理，请修改proxy配置项中的代理地址（使用huggingface下载模型时需要配置此项）。
+修改当前用户名录下配置文件`${USER}/jllama/config.json`中的model为dev，修改ai_config配置项中本地保存模型的目录。如果需要设置网络代理，请修改proxy配置项中的代理地址（使用huggingface下载模型时需要配置此项）。
 
 ```json
 {
     "db_url": "sqlite:///db/jllama.db",
-    "log": {
-        "path": "log"
-    },
     "server": {
         "host": "127.0.0.1",
         "port": 5000
@@ -292,7 +305,6 @@ jllama-py默认并没有安装llamafactory,使用此功能需要单独安装llam
     "app_height": 768,
     "ai_config": {
         "model_save_dir": "E:/models",
-        "model_import_dir": "E:/models/import",
         "llama_factory_port": 7860
     },
     "proxy": {
