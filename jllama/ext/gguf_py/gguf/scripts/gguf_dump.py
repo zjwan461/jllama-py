@@ -28,7 +28,7 @@ def get_file_host_endian(reader: GGUFReader) -> tuple[str, str]:
 
 
 # For more information about what field.parts and field.data represent,
-# please see the comments in the modify_gguf.jllama example.
+# please see the comments in the modify_gguf.py example.
 def dump_metadata(reader: GGUFReader, args: argparse.Namespace) -> None:
     host_endian, file_endian = get_file_host_endian(reader)
     print(f'* File is {file_endian} endian, script is running on a {host_endian} endian host.')  # noqa: NP100

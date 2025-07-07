@@ -43,7 +43,7 @@ def read_gguf_file(gguf_file_path):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        logger.info("Usage: reader.jllama <path_to_gguf_file>")
+        logger.info("Usage: reader.py <path_to_gguf_file>")
         sys.exit(1)
     gguf_file_path = sys.argv[1]
     read_gguf_file(gguf_file_path)

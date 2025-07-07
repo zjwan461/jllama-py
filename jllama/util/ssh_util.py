@@ -28,19 +28,28 @@ def upload_and_exec(hostname: str, port: int, username: str, password: str, loca
 
         # 执行远程临时脚本
         stdin, stdout, stderr = ssh.exec_command(f"{exe_path} {remote_script_dir}/{script_name}")
-        info_output = stdout.read().decode()
-        err_output = stderr.read().decode()
-        logger.info(f"执行结果： {info_output}")
-        logger.info(f"错误输出： {err_output}")
-        if err_output != "":
-            e = ValueError(f"远程执行错误,{err_output}")
-            logger.error(e)
-            return False, err_output
+
+        i = 0
+        for line in iter(stdout.readline, ''):
+            if i == 0:
+                yield "remote-train: info start"
+            yield "remote-train: " + line.strip()
+            i += 1
         else:
-            return True, ''
+            yield "remote-train: info finish"
+
+        i = 0
+        for line in iter(stderr.readline, ''):
+            if i == 0:
+                yield "remote-train: error start"
+            yield "remote-train: " + line
+            i += 1
+        else:
+            yield "remote-train: error finish"
+
+
     except Exception as e:
         logger.error(e)
-        return False, str(e)
     finally:
         ssh.close()
 

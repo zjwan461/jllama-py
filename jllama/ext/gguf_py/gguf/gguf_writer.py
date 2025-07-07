@@ -153,7 +153,7 @@ class GGUFWriter:
         if last_lora_a is not None:
             total_params = -total_params
 
-        # NOTE: keep the output in the same order as accepted by 'size_label' in gguf_py/gguf/utility.jllama
+        # NOTE: keep the output in the same order as accepted by 'size_label' in gguf_py/gguf/utility.py
         return total_params, shared_params, expert_params, expert_count
 
     def format_shard_names(self, path: Path) -> list[Path]:

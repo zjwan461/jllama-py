@@ -5,7 +5,7 @@ from jllama.util.logutil import Logger
 import os
 from jllama.config import get_proxy_config
 
-logger = Logger("Api.jllama")
+logger = Logger(__name__)
 
 
 def get_modelscope_model_file(repo: str, revision="master", root=""):

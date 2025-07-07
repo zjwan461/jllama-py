@@ -7,7 +7,7 @@ from jllama.util.db_util import SqliteSqlalchemy, FileDownload, Model
 from jllama.util.logutil import Logger
 from jllama.config import get_proxy_config
 
-logger = Logger("jllama.util.download.jllama")
+logger = Logger(__name__)
 
 
 def modelscope_download(model_id, model_repo: str, cache_dir, file_pattern, window=None):

@@ -201,7 +201,7 @@ class LazyBase(ABC, metaclass=LazyMeta):
 class LazyNumpyTensor(LazyBase):
     _tensor_type = np.ndarray
 
-    shape: tuple[int, ...]  # Makes the type checker happy in quants.jllama
+    shape: tuple[int, ...]  # Makes the type checker happy in quants.py
 
     @classmethod
     def meta_with_dtype_and_shape(cls, dtype: DTypeLike, shape: tuple[int, ...]) -> np.ndarray[Any, Any]:

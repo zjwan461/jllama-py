@@ -8,7 +8,6 @@ from datetime import datetime
 from pathlib import Path
 from time import sleep
 import webview
-import torch
 
 import jllama.ai.llama_server as llama_server
 
@@ -33,8 +32,9 @@ from jinja2 import Template
 from jllama.util.ssh_util import check_connection, upload_and_exec
 import jllama.util.pip_util as pip_util
 import jllama.ai.llamafactory_server as llamafactory_server
+from jllama.env import jllama_version, factory_version, cpp_version
 
-logger = Logger("Api.jllama")
+logger = Logger(__name__)
 
 
 class Api:
@@ -90,7 +90,8 @@ class Api:
                 os_info = sysInfoUtil.get_os_info()
                 gpu_platform = "cuda" if sysInfoUtil.is_cuda_available() else "cpu"
                 sys_info = SysInfo(id=999, os_arch=os_info['arch'], platform=os_info['os'], gpu_platform=gpu_platform,
-                                   cpp_version="0.3.9", factory_version="v0.9.3", self_version="v1.0")
+                                   cpp_version=cpp_version, factory_version=factory_version,
+                                   self_version=jllama_version)
                 session.add(sys_info)
                 session.commit()
                 return "success"
@@ -959,19 +960,22 @@ class Api:
         train_code = self.generate_train_code(params)
         temp_dir = tempfile.gettempdir()
         date_str = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        local_code_path = os.path.join(temp_dir, f"train_{date_str}.jllama")
+        local_code_path = os.path.join(temp_dir, f"train_{date_str}.py")
         with open(local_code_path, "w", encoding="utf-8") as f:
             f.write(train_code)
             f.flush()
 
         start_time = time.time()
-        result, err_msg = upload_and_exec(params.get("remoteIp"), int(params.get("remotePort")),
-                                          params.get("remoteUser"),
-                                          params.get("remotePassword"), local_code_path,
-                                          params.get("remotePath"), params.get("execPath"))
+        result = True
+        for item in upload_and_exec(params.get("remoteIp"), int(params.get("remotePort")),
+                                    params.get("remoteUser"),
+                                    params.get("remotePassword"), local_code_path,
+                                    params.get("remotePath"), params.get("execPath")):
+            self.log_viewer.append_text(item)
+
         end_time = time.time()
 
-        self.save_train_result("成功" if result == True else "失败", "remote", end_time - start_time, None, err_msg,
+        self.save_train_result("成功", "remote", end_time - start_time, None, None,
                                params)
 
         return result
