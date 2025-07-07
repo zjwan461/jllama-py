@@ -1,5 +1,6 @@
 # setup.py
 import os.path
+from jllama.env import jllama_version
 
 from setuptools import setup, find_packages
 
@@ -26,7 +27,7 @@ def get_requires() -> list[str]:
 
 setup(
     name='jllama-py',
-    version='1.1.4',
+    version=jllama_version,
     url='https://github.com/zjwan461/jllama-py',
     packages=find_packages(),
     python_requires=">=3.11",
