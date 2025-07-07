@@ -1,5 +1,15 @@
 # setup.py
+import os.path
+
 from setuptools import setup, find_packages
+
+
+def check_ui_install():
+    if not os.path.exists("jllama/ui/dist"):
+        raise Exception("jllama ui尚未构建,请参考执行npm run build后copy dist文件夹到jllama/ui/dist文件夹下")
+
+
+check_ui_install()
 
 
 def readme():
@@ -16,7 +26,7 @@ def get_requires() -> list[str]:
 
 setup(
     name='jllama-py',
-    version='1.1.2',
+    version='1.1.4',
     url='https://github.com/zjwan461/jllama-py',
     packages=find_packages(),
     python_requires=">=3.11",
