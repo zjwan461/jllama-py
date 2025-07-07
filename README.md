@@ -37,8 +37,18 @@ pip install jllama-py
 # 运行
 jllama
 ```
+直接安装请参考如下。CPU版本安装请提前下载好`MinGW`或安装`Visual Studio`；CUDA版本安装请安装`Visual Studio 2022`软件并安装`C++运行环境`。
+```shell
+# CPU版本安装
+$env:CMAKE_GENERATOR = "MinGW Makefiles"
+$env:CMAKE_ARGS = "-DGGML_OPENBLAS=on -DCMAKE_C_COMPILER=${MinGW安装目录}/mingw64/bin/gcc.exe -DCMAKE_CXX_COMPILER=${MinGW安装目录}/mingw64/bin/g++.exe"
+pip install jllama-py
 
-如需使用pytorch的cuda加速，请额外执行如下命令。可参考[pytorch官方说明](https://pytorch.org/get-started/locally/) 。tips: **50系显卡驱动比较新,请使用cuda12.8版本**。
+# CUDA版本安装
+$env:CMAKE_ARGS = "-DGGML_CUDA=ON"
+pip install jllama-py
+```
+关于pytorch的cuda加速，请额外执行如下命令。可参考[pytorch官方说明](https://pytorch.org/get-started/locally/) 。tips: **50系显卡驱动比较新,请使用cuda12.8版本**。在jllama-py中，pytorch用于hf格式的模型推理以及模型微调。
 
 ```shell
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/${你的cuda版本}
