@@ -324,7 +324,7 @@ npm run serve
 
 运行主程序
 
-```python
+```shell
 python main.py
 ```
 
