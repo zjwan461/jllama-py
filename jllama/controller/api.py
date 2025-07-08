@@ -20,7 +20,7 @@ from jllama.util import common_util
 from jllama.util.logutil import Logger
 from jllama.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog, GgufSplitMerge, \
     Quantize, \
-    ModelConvert, TrainLora
+    ModelConvert, TrainLora, RemoteServer
 import jllama.config as config
 import orjson
 import jllama.util.model_file_util as model_file_util
@@ -957,6 +957,8 @@ class Api:
                                          params.get("remotePassword")):
             raise ValueError("SSH连接失败")
 
+        self.save_remote_info(params)
+
         train_code = self.generate_train_code(params)
         temp_dir = tempfile.gettempdir()
         date_str = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
@@ -979,6 +981,22 @@ class Api:
                                params)
 
         return result
+
+    def save_remote_info(self, params):
+        session = SqliteSqlalchemy().session
+        try:
+            remote_server = RemoteServer(ip=params.get("remoteIp"), port=params.get("remotePort"),
+                                         username=params.get("remoteUser"),
+                                         password=params.get("remotePassword"),
+                                         remote_path=params.get("remotePath"), python_exec_path=params.get("execPath"))
+            session.add(remote_server)
+            session.commit()
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
 
     def get_llamafactory_info(self):
         factory_install = sysInfoUtil.get_jllama_info()["factory_install"]
@@ -1045,3 +1063,11 @@ class Api:
 
     def is_lf_running(self):
         return llamafactory_server.webui_process.is_alive()
+
+    def get_recent_server_info(self):
+        session = SqliteSqlalchemy().session
+        record = session.query(RemoteServer).order_by(RemoteServer.create_time.desc()).limit(1).all()
+        if record is not None and len(record) > 0:
+            return orjson.dumps(record[0].to_dic()).decode("utf-8")
+        else:
+            return None

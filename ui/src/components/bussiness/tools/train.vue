@@ -376,6 +376,7 @@ export default {
       this.$refs[form].validate((valid) => {
         if (valid) {
           this.showRemoteDialog = true
+          this.getRecentRemoteInfo()
         }
       })
     },
@@ -416,10 +417,10 @@ export default {
       this.$refs[form].validate((valid) => {
         if (valid) {
           const req = {...this.trainArgs, ...this.remoteInfo}
+          this.$message.success('开始远程微调')
           apis.remoteTrain(req).then(res => {
-            console.log(res)
             if (res === true) {
-              this.$message.info("执行成功")
+              this.$message.info("执行完成")
             } else {
               this.$message.error("执行失败")
             }
@@ -517,6 +518,21 @@ export default {
         endLoading(loading)
         this.$message.error(e)
       });
+    },
+    getRecentRemoteInfo() {
+      apis.getRecentServerInfo().then(res => {
+        if (res && res.length > 0) {
+          const info = JSON.parse(res)
+          this.remoteInfo.remoteIp = info.ip
+          this.remoteInfo.remotePort = info.port
+          this.remoteInfo.remoteUser = info.username
+          this.remoteInfo.remotePassword = info.password
+          this.remoteInfo.remotePath = info.remote_path
+          this.remoteInfo.execPath = info.python_exec_path
+        }
+      }).catch(e => {
+        this.$message.error(e)
+      })
     },
   }
 }

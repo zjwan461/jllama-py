@@ -3,10 +3,16 @@ import logging.config
 import os
 from pathlib import Path
 
-if not os.path.exists("log"):
-    os.mkdir("log")
-
-logging_conf_path  = str(Path(__file__).parent.parent / "logging.conf")
+log_file_dir = os.path.join(os.path.expanduser('~'), "jllama/logs")
+path = Path(log_file_dir)
+path.mkdir(exist_ok=True)
+log_file_path = log_file_dir + "/jllama.log"
+logging_conf_path = str(Path(__file__).parent.parent / "logging.conf")
+with open(logging_conf_path, "r+", encoding="utf-8") as f:
+    content = f.read()
+    content = content.format(log_file_path)
+    f.seek(0)
+    f.write(content)
 logging.config.fileConfig(logging_conf_path)
 
 

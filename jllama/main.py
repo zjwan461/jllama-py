@@ -193,6 +193,9 @@ class JsApi:
     def is_lf_running(self):
         return self.controller.is_lf_running()
 
+    def get_recent_server_info(self):
+        return self.controller.get_recent_server_info()
+
 
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 

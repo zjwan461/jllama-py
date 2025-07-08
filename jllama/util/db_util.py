@@ -116,6 +116,17 @@ class TrainLora(BaseEntity):
     train_args = Column(String(2000), nullable=False)
 
 
+class RemoteServer(BaseEntity):
+    __tablename__ = "remote_server"
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    ip = Column(String(50), nullable=False)
+    port = Column(String(5), nullable=False, default="22")
+    username = Column(String(50), nullable=False)
+    password = Column(String(50), nullable=False)
+    remote_path = Column(String(255), nullable=False, default="~/train")
+    python_exec_path = Column(String(50), nullable=False, default="/usr/bin/python3")
+
+
 class SqliteSqlalchemy(object):
     def __init__(self):
         # 创建Sqlite连接引擎

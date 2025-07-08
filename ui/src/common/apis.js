@@ -138,8 +138,15 @@ export default {
   checkSshConnection(hostname, port, username, password) {
     return window.pywebview.api.check_ssh_connection(hostname, port, username, password)
   },
-  remoteTrain(params) {
-    return window.pywebview.api.remote_train(params)
+  async remoteTrain(params) {
+    // return window.pywebview.api.remote_train(params)
+    return new Promise((resolve, reject) => {
+      window.pywebview.api.remote_train(params).then(res => {
+        resolve(res)
+      }).catch(err => {
+        reject(err)
+      })
+    })
   },
   getLlamaFactoryInfo() {
     return window.pywebview.api.get_llamafactory_info()
@@ -170,5 +177,8 @@ export default {
   },
   isLlamafactoryRunning() {
     return window.pywebview.api.is_lf_running()
+  },
+  getRecentServerInfo() {
+    return window.pywebview.api.get_recent_server_info()
   },
 }
