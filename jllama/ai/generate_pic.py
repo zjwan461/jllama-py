@@ -1,5 +1,5 @@
 import torch
-from diffusers import StableDiffusionPipeline
+from diffusers import StableDiffusionPipeline, EulerDiscreteScheduler
 import matplotlib.pyplot as plt
 
 # 设置设备
@@ -34,8 +34,13 @@ pipe = pipe.to(device)
 lora_path = r"E:\models\yangshaoping\ysp123majicMIX"  # 替换为你的 LoRA 文件路径
 pipe.load_lora_weights(lora_path, weight_name="ysp123majicMIX.safetensors", alpha=0.7)
 
+# 采样方式
+pipe.scheduler = EulerDiscreteScheduler.from_config(pipe.scheduler.config)
 
-# 设置 LoRA 权重的强度（可选，范围通常为 0.0 到 1.0）
+# 设置固定的随机种子（例如 42）
+seed = 42
+generator = torch.Generator("cuda").manual_seed(seed)
+
 
 # 定义生成函数
 def generate_image(prompt, negative_prompt, num_images=1, guidance_scale=7.5, num_inference_steps=30, height=512,
@@ -59,7 +64,8 @@ def generate_image(prompt, negative_prompt, num_images=1, guidance_scale=7.5, nu
         guidance_scale=guidance_scale,
         num_inference_steps=num_inference_steps,  # 控制采样步数的参数
         height=height,
-        width=width
+        width=width,
+        generator=generator
     ).images
 
     return images
