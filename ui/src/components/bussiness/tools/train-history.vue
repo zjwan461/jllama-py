@@ -6,14 +6,6 @@
     </el-breadcrumb>
 
     <el-card>
-<!--      <el-form :inline="true" :model="formInline" class="demo-form-inline">
-        <el-form-item label="搜索">
-          <el-input v-model="formInline.search" placeholder="搜索模型微调历史"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="getTableData">查询</el-button>
-        </el-form-item>
-      </el-form>-->
       <el-table
         :data="tableData"
         border
@@ -36,15 +28,16 @@
           prop="err_msg"
           label="失败信息">
         </el-table-column>
-         <el-table-column
+        <el-table-column
           prop="create_time"
           label="执行时间">
         </el-table-column>
         <el-table-column
           fixed="right"
           label="操作"
-          width="80">
+          width="180">
           <template slot-scope="scope">
+            <el-button @click="reTrain(scope.row, scope.$index)" type="primary" size="small">重新训练</el-button>
             <el-button @click="del(scope.row, scope.$index)" type="danger" size="small">删除</el-button>
           </template>
         </el-table-column>
@@ -95,7 +88,9 @@ export default {
       }
       this.logIndex = 1
     },
-
+    reTrain(item) {
+      this.$router.push({path: '/tools/train', query: item})
+    },
     del(item) {
       this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
         confirmButtonText: '确定',

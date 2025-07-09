@@ -316,12 +316,26 @@ export default {
     }
   },
   created() {
+    this.initQuery()
     this.initDir()
     this.getTrainState()
     this.getLlamaFactoryInfo()
     this.getLlamafactoryState()
   },
   methods: {
+    initQuery() {
+      const query = this.$route.query
+      if (query && query.train_args.length > 0) {
+        const oldArgs = JSON.parse(query.train_args)
+        console.log(oldArgs)
+        this.trainArgs = oldArgs
+        if (oldArgs.bnb_4bit === true) {
+          this.trainArgs.bnbConfig = bnb_4bit
+        } else if (oldArgs.bnb_8bit === true) {
+          this.trainArgs.bnbConfig = bnb_8bit
+        }
+      }
+    },
     initDir() {
       let dateStr = getDateString()
       this.trainArgs.loraSaveDir = "./lora_" + dateStr
