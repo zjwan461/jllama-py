@@ -66,6 +66,10 @@ const routes = [{
       path: '/tools/train-history',
       name: 'train',
       component: () => import('../components/bussiness/tools/train-history.vue')
+    }, {
+      path: '/aigc/sd',
+      name: 'sd',
+      component: () => import('../components/bussiness/aigc/sd.vue')
     },
     ]
   }]

@@ -325,7 +325,7 @@ export default {
   methods: {
     initQuery() {
       const query = this.$route.query
-      if (query && query.train_args.length > 0) {
+      if (query && query.train_args) {
         const oldArgs = JSON.parse(query.train_args)
         console.log(oldArgs)
         this.trainArgs = oldArgs

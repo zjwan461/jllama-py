@@ -20,7 +20,7 @@ from jllama.util import common_util
 from jllama.util.logutil import Logger
 from jllama.util.db_util import SqliteSqlalchemy, SysInfo, Model, FileDownload, ReasoningExecLog, GgufSplitMerge, \
     Quantize, \
-    ModelConvert, TrainLora, RemoteServer
+    ModelConvert, TrainLora, RemoteServer, StableDiffusionInfo
 import jllama.config as config
 import orjson
 import jllama.util.model_file_util as model_file_util
@@ -33,6 +33,7 @@ from jllama.util.ssh_util import check_connection, upload_and_exec
 import jllama.util.pip_util as pip_util
 import jllama.ai.llamafactory_server as llamafactory_server
 from jllama.env import jllama_version, factory_version, cpp_version
+from modelscope import snapshot_download
 
 logger = Logger(__name__)
 
@@ -1067,7 +1068,45 @@ class Api:
     def get_recent_server_info(self):
         session = SqliteSqlalchemy().session
         record = session.query(RemoteServer).order_by(RemoteServer.create_time.desc()).limit(1).all()
+        session.close()
         if record is not None and len(record) > 0:
             return orjson.dumps(record[0].to_dic()).decode("utf-8")
         else:
             return None
+
+    def get_sd_info(self):
+        session = SqliteSqlalchemy().session
+        try:
+            sd_info = session.query(StableDiffusionInfo).get(999)
+            if sd_info is None:
+                sd_info = StableDiffusionInfo(id=999)
+                session.add(sd_info)
+            session.commit()
+            return orjson.dumps(sd_info.to_dic()).decode("utf-8")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    def init_sd(self, window):
+        model_save_dir = config.get_ai_config().get("model_save_dir")
+        model_dir = snapshot_download("AI-ModelScope/stable-diffusion-v1-5", cache_dir=model_save_dir,
+                                      allow_file_pattern="*")
+
+        session = SqliteSqlalchemy().session
+        try:
+            sd_info = session.query(StableDiffusionInfo).get(999)
+            if sd_info is None:
+                sd_info = StableDiffusionInfo(id=999)
+            sd_info.main_model_path = model_dir
+            sd_info.state = "已初始化"
+            session.commit()
+            window.evaluate_js("vue.messageArrive('jllama提醒','StableDiffusion环境初始化成功','success')")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.rollback()

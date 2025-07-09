@@ -181,4 +181,10 @@ export default {
   getRecentServerInfo() {
     return window.pywebview.api.get_recent_server_info()
   },
+  getSdInfo() {
+    return window.pywebview.api.get_sd_info()
+  },
+  initSd() {
+    return window.pywebview.api.init_sd()
+  },
 }

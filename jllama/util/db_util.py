@@ -127,6 +127,14 @@ class RemoteServer(BaseEntity):
     python_exec_path = Column(String(50), nullable=False, default="/usr/bin/python3")
 
 
+class StableDiffusionInfo(BaseEntity):
+    __tablename__ = "sd_info"
+    id = Column(Integer, primary_key=True, nullable=False, default=999)
+    main_model_path = Column(String(500))
+    sd_version = Column(String(50), default="1.5")
+    state = Column(String(50), default="待初始化")
+
+
 class SqliteSqlalchemy(object):
     def __init__(self):
         # 创建Sqlite连接引擎

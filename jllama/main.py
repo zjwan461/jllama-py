@@ -196,6 +196,11 @@ class JsApi:
     def get_recent_server_info(self):
         return self.controller.get_recent_server_info()
 
+    def get_sd_info(self):
+        return self.controller.get_sd_info()
+
+    def init_sd(self):
+        return self.controller.init_sd(window)
 
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 
