@@ -98,14 +98,22 @@
           </div>
         </el-col>
         <el-col :span="12">
-          <div v-if="generate_imgs.length>0" class="image-container" v-for="(image, index) in generate_imgs"
-               :key="index" v-loading="loading_img">
-            <img
-              :src="image"
-              class="gallery-image"
-              @click="viewImage(image)"
-            >
-            <div><el-button type="text" size="mini" @click="saveImg(image)">保存图片</el-button></div>
+          <div class="image-area" v-loading="loading_img">
+            <div style="text-align: center">
+              图片种子:
+              <el-tag v-if="current_seed !==-1">{{current_seed}}</el-tag>
+            </div>
+            <div v-if="generate_imgs.length>0" class="image-container" v-for="(image, index) in generate_imgs"
+                 :key="index">
+              <img
+                :src="image"
+                class="gallery-image"
+                @click="viewImage(image)"
+              >
+              <div>
+                <el-button type="text" size="mini" @click="saveImg(image)">保存图片</el-button>
+              </div>
+            </div>
           </div>
         </el-col>
         <image-viewer
@@ -129,6 +137,7 @@ export default {
   },
   data() {
     return {
+      current_seed: -1,
       loading_img: false,
       viewerVisible: false,
       generate_imgs: [],
@@ -197,7 +206,7 @@ export default {
           apis.sdGeneratePic(this.sd_reasonning).then(res => {
             this.loading_img = false
             this.generate_imgs = res.images
-            this.sd_reasonning.seed = res.seed
+            this.current_seed = res.seed
           }).catch(e => {
             this.loading_img = false
             this.$message.error(e)
@@ -227,13 +236,16 @@ export default {
   line-height: 30px;
 }
 
+.image-area {
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
 .image-container {
   margin: 15px;
   text-align: center;
   transition: transform 0.3s;
-  height: 700px;
-  overflow-y: auto;
-  scroll-behavior: smooth;
+
 }
 
 .gallery-image {
