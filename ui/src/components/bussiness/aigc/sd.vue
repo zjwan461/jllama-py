@@ -99,9 +99,9 @@
         </el-col>
         <el-col :span="12">
           <div class="image-area" v-loading="loading_img">
-            <div style="text-align: center">
+            <div style="text-align: center" v-if="current_seed !==-1">
               图片种子:
-              <el-tag v-if="current_seed !==-1">{{current_seed}}</el-tag>
+              <el-tag>{{ current_seed }}</el-tag>
             </div>
             <div v-if="generate_imgs.length>0" class="image-container" v-for="(image, index) in generate_imgs"
                  :key="index">
