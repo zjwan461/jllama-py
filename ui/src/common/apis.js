@@ -187,4 +187,10 @@ export default {
   initSd() {
     return window.pywebview.api.init_sd()
   },
+  sdGeneratePic(params) {
+    return window.pywebview.api.sd_generate_pic(params)
+  },
+  saveImages(base64) {
+    return window.pywebview.api.save_image(base64)
+  },
 }

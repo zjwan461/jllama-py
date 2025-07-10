@@ -147,7 +147,7 @@ if __name__ == "__main__":
     print(supported_scheduler("Euler"))
 
     # 设置提示词
-    prompt = "1girl,full body,big bust,bikini,long wavy hair,dress,stand"
+    prompt = "(a beautiful woman in a deep v-neck evening gown,full body,beautiful detailed eyes,beautiful detailed lips,extremely detailed eyes and face,long eyelashes,graceful posture,elegant demeanor,smiling,flowing hair,sparkling jewelry,red carpet,glamorous,high fashion,richly textured fabric,silky smooth,shimmering,refined,alluring,confident,(best quality,4k,8k,highres,masterpiece:1.2),ultra-detailed,(realistic,photorealistic,photo-realistic:1.37),HDR,studio lighting,ultra-fine painting,sharp focus,physically-based rendering,extreme detail description,professional,vivid colors,bokeh,portrait,fashion photography,evening atmosphere,warm tones,soft lighting)"
     negative_prompt = "old,ugly"
     # 生成图像
     images, seed = generate_pic(sd_origin_model_path=r"E:\models\AI-ModelScope\stable-diffusion-v1-5",

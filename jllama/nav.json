@@ -88,7 +88,7 @@
     "children": [
       {
         "id": 41,
-        "title": "StableDiffusion",
+        "title": "StableDiffusion文生图",
         "icon": "el-icon-lollipop",
         "href": "/aigc/sd"
       }

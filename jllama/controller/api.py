@@ -1,3 +1,4 @@
+import base64
 import json
 import os.path
 import tempfile
@@ -5,6 +6,7 @@ import threading
 import time
 import tkinter as tk
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 from time import sleep
 import webview
@@ -34,6 +36,7 @@ import jllama.util.pip_util as pip_util
 import jllama.ai.llamafactory_server as llamafactory_server
 from jllama.env import jllama_version, factory_version, cpp_version
 from modelscope import snapshot_download
+from jllama.ai.sd_reasoning import supported_scheduler, list_schedulers, generate_pic
 
 logger = Logger(__name__)
 
@@ -1110,3 +1113,96 @@ class Api:
             raise e
         finally:
             session.rollback()
+
+    def sd_generate_pic(self, params, window):
+        session = SqliteSqlalchemy().session
+        sd_info = session.query(StableDiffusionInfo).get(999)
+        if sd_info is None or sd_info.state == '待初始化' or not os.path.exists(sd_info.main_model_path):
+            raise Exception("SD环境尚未初始化")
+        session.close()
+        """
+        seed: -1,
+        checkpoint: null,
+        lora: null,
+        scheduler: 'Euler',
+        num_inference_steps: 30,
+        img_num: 2,
+        img_height: 512,
+        img_width: 512
+        """
+        seed = int(params.get("seed", -1))
+        prompt = params.get("prompt")
+        negative_prompt = params.get("negative_prompt")
+        checkpoint = params.get("checkpoint")
+        lora = params.get("lora")
+        scheduler = params.get("scheduler")
+        lora_alpha = float(params.get("lora_alpha"))
+        guidance_scale = float(params.get("guidance_scale"))
+        num_inference_steps = int(params.get("num_inference_steps"))
+        img_num = int(params.get("img_num"))
+        img_height = int(params.get("img_height"))
+        img_width = int(params.get("img_width"))
+
+        if prompt is None or len(prompt) == 0:
+            raise ValueError("正向提示词必填")
+
+        if checkpoint is not None and len(checkpoint) > 0 and not os.path.exists(checkpoint):
+            raise ValueError(f"找不到checkpoint文件：{checkpoint}")
+
+        if lora is not None and len(lora) > 0 and not os.path.exists(lora):
+            raise ValueError(f"找不到lora文件：{lora}")
+
+        if not supported_scheduler(scheduler):
+            raise ValueError(f"不支持的采样器，必须是: {list_schedulers()}")
+
+        if lora_alpha > 1.0:
+            raise ValueError("lora_alpha为0-1的小数")
+
+        log_handler.textViewer = self.get_log_viewer()
+        images, seed = generate_pic(sd_origin_model_path=sd_info.main_model_path,
+                                    prompt=prompt,
+                                    negative_prompt=negative_prompt,
+                                    checkpoint_path=checkpoint,
+                                    lora_path=lora,
+                                    num_images=img_num,
+                                    guidance_scale=guidance_scale,
+                                    seed=seed,
+                                    scheduler=scheduler,
+                                    num_inference_steps=num_inference_steps,
+                                    lora_alpha=lora_alpha,
+                                    height=img_height,
+                                    width=img_width
+                                    )
+
+        window.evaluate_js("vue.messageArrive('jllama提醒','图片生成成功','success')")
+
+        result = {"seed": seed}
+        images_base64 = []
+        for image in images:
+            # 转换为 Base64
+            buffered = BytesIO()
+            image.save(buffered, format="PNG")
+            img_str = "data:image/png;base64," + base64.b64encode(buffered.getvalue()).decode()
+            images_base64.append(img_str)
+        result["images"] = images_base64
+        return result
+
+    def save_image(self, img_base64, window):
+        date_str = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        result = window.create_file_dialog(
+            webview.SAVE_DIALOG, directory='/', save_filename=f'sd_generate_{date_str}.png'
+        )
+        # 检查是否包含数据前缀（如 data:image/jpeg;base64,）
+        if img_base64.startswith('data:'):
+            # 分割前缀和实际的 Base64 数据
+            prefix, data = img_base64.split(',', 1)
+            img_base64 = data
+
+        image_data = base64.b64decode(img_base64)
+
+        if result:
+            with open(result, "wb") as f:
+                f.write(image_data)
+            return "success"
+        else:
+            return "abort"

@@ -202,6 +202,11 @@ class JsApi:
     def init_sd(self):
         return self.controller.init_sd(window)
 
+    def sd_generate_pic(self, params):
+        return self.controller.sd_generate_pic(params, window)
+
+    def save_image(self, img_base64):
+        return self.controller.save_image(img_base64,window)
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 
 CORS(server)
