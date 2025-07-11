@@ -17,7 +17,7 @@
             <div>常用AIGC社区：&nbsp;&nbsp;
               <el-link type="primary" href="https://www.liblib.art/" target="_blank">liblib art</el-link>&nbsp;&nbsp;&nbsp;&nbsp;
               <el-link type="primary" href="https://www.aigccn.cc/" target="_blank">AIGC社区</el-link>&nbsp;&nbsp;&nbsp;&nbsp;
-              <el-link type="primary"href="https://modelscope.cn/aigc/models" target="_blank">ModelScope AIGC</el-link>
+              <el-link type="primary" href="https://modelscope.cn/aigc/models" target="_blank">ModelScope AIGC</el-link>
             </div>
             <div>
               <el-button @click="initSd" type="primary" size="small" v-if="sd_info.state === '待初始化'">初始化
@@ -100,6 +100,13 @@
         </el-col>
         <el-col :span="12">
           <div class="image-area" v-loading="loading_img">
+            <div v-if="generate_imgs.length==0" style="line-height: 28px">
+              <el-image>
+                <div slot="error" class="image-slot">
+                  <i class="el-icon-picture-outline"></i>
+                </div>
+              </el-image>
+            </div>
             <div style="text-align: center" v-if="current_seed !==-1">
               图片种子:
               <el-tag>{{ current_seed }}</el-tag>
@@ -241,6 +248,7 @@ export default {
 .image-area {
   overflow-y: auto;
   scroll-behavior: smooth;
+  text-align: center;
 }
 
 .image-container {
@@ -257,4 +265,5 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   max-height: 300px;
 }
+
 </style>
