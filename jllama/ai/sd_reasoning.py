@@ -82,7 +82,7 @@ def generate_pic(sd_origin_model_path, prompt: str, negative_prompt: str = None,
 
     if seed < 0:
         # 获取随机种子
-        seed = randint(1, 100000)
+        seed = randint(1, 9999999999)
         logger.info(f"获取随机种子，seed={seed}")
     else:
         logger.info(f"使用指定种子，seed={seed}")
