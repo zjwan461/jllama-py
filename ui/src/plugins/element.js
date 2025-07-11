@@ -44,7 +44,7 @@ import {
   Steps,
   Alert,
   Tabs,
-  TabPane, Slider, Spinner, Collapse, CollapseItem
+  TabPane, Slider, Spinner, Collapse, CollapseItem, Link, Descriptions
 
 } from 'element-ui'
 
@@ -99,3 +99,5 @@ Vue.use(Slider)
 Vue.use(Spinner)
 Vue.use(Collapse)
 Vue.use(CollapseItem)
+Vue.use(Link)
+Vue.use(Descriptions)

@@ -15,9 +15,9 @@
             <div>SD基础模型保存目录：<u>{{ sd_info.main_model_path }}</u></div>
             <div>SD版本：<u>{{ sd_info.sd_version }}</u></div>
             <div>常用AIGC社区：&nbsp;&nbsp;
-              <a href="https://www.liblib.art/" target="_blank">liblib art</a>&nbsp;&nbsp;&nbsp;&nbsp;
-              <a href="https://www.aigccn.cc/" target="_blank">AIGC社区</a>&nbsp;&nbsp;&nbsp;&nbsp;
-              <a href="https://modelscope.cn/aigc/models" target="_blank">ModelScope AIGC</a>
+              <el-link type="primary" href="https://www.liblib.art/" target="_blank">liblib art</el-link>&nbsp;&nbsp;&nbsp;&nbsp;
+              <el-link type="primary" href="https://www.aigccn.cc/" target="_blank">AIGC社区</el-link>&nbsp;&nbsp;&nbsp;&nbsp;
+              <el-link type="primary"href="https://modelscope.cn/aigc/models" target="_blank">ModelScope AIGC</el-link>
             </div>
             <div>
               <el-button @click="initSd" type="primary" size="small" v-if="sd_info.state === '待初始化'">初始化
