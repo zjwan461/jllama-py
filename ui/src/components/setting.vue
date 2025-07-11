@@ -7,6 +7,9 @@
       <el-row>
         <el-col :span="12">
           <el-form :model="settings" :rules="rules" class="setting-form" label-width="160px">
+            <el-form-item label="自动开启输出窗口" prop="auto_open_log_window">
+              <el-switch v-model="auto_open_log_window"></el-switch>
+            </el-form-item>
             <el-form-item label="模型存放目录" prop="model_save_dir">
               <el-input v-model="settings.model_save_dir" placeholder="模型存放目录"></el-input>
             </el-form-item>
@@ -56,6 +59,7 @@ export default {
           {required: true, message: '模型保存目录必填', trigger: 'blur'}
         ]
       },
+      auto_open_log_window: true,
       settings: {
         llama_cpp_dir: '',
         model_save_dir: '',
@@ -78,7 +82,12 @@ export default {
   },
   methods: {
     save() {
-      const req = {"ai_config": this.settings, "proxy": this.proxy, "aigc": this.aigc}
+      const req = {
+        "ai_config": this.settings,
+        "proxy": this.proxy,
+        "aigc": this.aigc,
+        "auto_open_log_window": this.auto_open_log_window
+      }
       apis.saveSetting(req).then(res => {
         if (res === 'success') {
           this.$message.success("更新成功")
@@ -94,6 +103,7 @@ export default {
         this.settings = res.ai_config
         this.proxy = res.proxy ? res.proxy : {}
         this.aigc = res.aigc ? res.aigc : {}
+        this.auto_open_log_window = res.auto_open_log_window
       }).catch(e => {
         endLoading(loading)
         this.$message.error(e)

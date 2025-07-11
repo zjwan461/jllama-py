@@ -2,7 +2,7 @@ import threading
 import tkinter as tk
 from tkinter import ttk, scrolledtext
 from queue import Queue
-
+from jllama.config import get_auto_open_log_window
 
 class TextViewer:
     def __init__(self, root):
@@ -75,7 +75,7 @@ class TextViewer:
         if not text.endswith('\n'):
             text += '\n'
         """如果不是可见状态则显示控制台面板"""
-        if not self.root.winfo_viewable():
+        if not self.root.winfo_viewable() and get_auto_open_log_window():
             self.root.deiconify()
         """设置文本内容"""
         self.text_area.config(state=tk.NORMAL)  # 启用编辑

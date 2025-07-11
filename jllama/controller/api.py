@@ -739,7 +739,7 @@ class Api:
 
     def get_setting(self):
         return {"ai_config": config.get_ai_config(), "proxy": config.get_proxy_config(),
-                "aigc": config.get_aigc_config()}
+                "aigc": config.get_aigc_config(), "auto_open_log_window": config.get_auto_open_log_window()}
 
     def save_setting(self, params):
         ai_config = params.get("ai_config")
@@ -748,6 +748,8 @@ class Api:
         config.save_proxy_config(proxy)
         aigc = params.get("aigc")
         config.save_aigc_config(aigc)
+        auto_open_log_window = params.get("auto_open_log_window", True)
+        config.save_auto_open_log_window(auto_open_log_window)
 
     def get_llama_cpp_config(self):
         file_path = config.get_llama_server_config_path()

@@ -20,6 +20,7 @@ def get_default():
         "app_width": 1366,
         "app_height": 768,
         "llama_server_config_path": f"{user_dir}/jllama/llama_cpp_config.json",
+        "auto_open_log_window": True,
         "ai_config": {
             "model_save_dir": f"{user_dir}/jllama/models",
             "llama_factory_port": 7860,
@@ -136,8 +137,7 @@ def get_server_config():
 
 def save_ai_config(config: dict):
     dic["ai_config"] = config
-    with open(config_path, "w", encoding="utf-8") as f:
-        json.dump(dic, f, ensure_ascii=False, indent=4)
+    save_to_file()
     read_config()
 
 
@@ -158,13 +158,26 @@ def get_aigc_config() -> dict:
 
 def save_aigc_config(config: dict):
     dic["aigc"] = config
-    with open(config_path, "w", encoding="utf-8") as f:
-        json.dump(dic, f, ensure_ascii=False, indent=4)
+    save_to_file()
     read_config()
 
 
 def save_proxy_config(config: dict):
     dic["proxy"] = config
+    save_to_file()
+    read_config()
+
+
+def save_to_file():
     with open(config_path, "w", encoding="utf-8") as f:
         json.dump(dic, f, ensure_ascii=False, indent=4)
+
+
+def get_auto_open_log_window() -> bool:
+    return dic.get("auto_open_log_window", True)
+
+
+def save_auto_open_log_window(option: bool):
+    dic["auto_open_log_window"] = option
+    save_to_file()
     read_config()
