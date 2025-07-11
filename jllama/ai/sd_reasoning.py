@@ -43,7 +43,7 @@ def list_schedulers() -> list:
 def generate_pic(sd_origin_model_path, prompt: str, negative_prompt: str = None, checkpoint_path: str = None,
                  lora_path: str = None,
                  num_images=1, guidance_scale=7.5, seed=-1, scheduler="Euler",
-                 num_inference_steps=30, lora_alpha=0.7, height=512, width=512):
+                 num_inference_steps=30, lora_alpha=0.7, height=512, width=512, log_step=5):
     # 设置设备
     device = "cuda" if torch.cuda.is_available() else "cpu"
     logger.info(f"使用设备: {device}")
@@ -114,7 +114,7 @@ def generate_pic(sd_origin_model_path, prompt: str, negative_prompt: str = None,
         height=height,
         width=width,
         generator=generator,
-        callback_on_step_end=SimpleSDCallback(log_step=5, total_step=num_inference_steps),
+        callback_on_step_end=SimpleSDCallback(log_step=log_step, total_step=num_inference_steps),
     ).images
     logger.info(f"生成完成")
 

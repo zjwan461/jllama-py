@@ -7,20 +7,29 @@
       <el-row>
         <el-col :span="12">
           <el-form :model="settings" :rules="rules" class="setting-form" label-width="160px">
-            <el-form-item label="外挂llama.cpp目录" prop="llama_cpp_dir">
-              <el-input v-model="settings.llama_cpp_dir" placeholder="填写此目录则会使用你外挂的llama.cpp"></el-input>
-            </el-form-item>
             <el-form-item label="模型存放目录" prop="model_save_dir">
-              <el-input v-model="settings.model_save_dir" placeholder=""></el-input>
+              <el-input v-model="settings.model_save_dir" placeholder="模型存放目录"></el-input>
             </el-form-item>
             <el-form-item label="LlamaFactory服务端口">
               <el-input-number v-model="settings.llama_factory_port"></el-input-number>
+            </el-form-item>
+            <el-form-item label="微调log step">
+              <el-input-number v-model="settings.train_log_step"></el-input-number>
             </el-form-item>
             <el-form-item label="http网络代理" prop="http_proxy">
               <el-input v-model="proxy.http_proxy" placeholder="http代理"></el-input>
             </el-form-item>
             <el-form-item label="https网络代理" prop="http_proxy">
               <el-input v-model="proxy.https_proxy" placeholder="https代理"></el-input>
+            </el-form-item>
+            <el-form-item label="AIGC最小种子数" prop="min_seed">
+              <el-input-number v-model="aigc.min_seed"></el-input-number>
+            </el-form-item>
+            <el-form-item label="AIGC最大种子数" prop="min_seed">
+              <el-input-number v-model="aigc.max_seed"></el-input-number>
+            </el-form-item>
+            <el-form-item label="AIGC log step" prop="aigc_log_step">
+              <el-input-number v-model="aigc.log_step"></el-input-number>
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="save">提交</el-button>
@@ -50,11 +59,17 @@ export default {
       settings: {
         llama_cpp_dir: '',
         model_save_dir: '',
-        llama_factory_port: ''
+        llama_factory_port: '',
+        train_log_step: 5
       },
       proxy: {
         http_proxy: '',
         https_proxy: ''
+      },
+      aigc: {
+        min_seed: 1,
+        max_seed: 9999999999,
+        log_step: 5
       }
     }
   },
@@ -63,7 +78,7 @@ export default {
   },
   methods: {
     save() {
-      const req = {"ai_config": this.settings, "proxy": this.proxy}
+      const req = {"ai_config": this.settings, "proxy": this.proxy, "aigc": this.aigc}
       apis.saveSetting(req).then(res => {
         if (res === 'success') {
           this.$message.success("更新成功")
@@ -77,7 +92,8 @@ export default {
       apis.getSetting().then(res => {
         endLoading(loading)
         this.settings = res.ai_config
-        this.proxy = res.proxy? res.proxy: {}
+        this.proxy = res.proxy ? res.proxy : {}
+        this.aigc = res.aigc ? res.aigc : {}
       }).catch(e => {
         endLoading(loading)
         this.$message.error(e)

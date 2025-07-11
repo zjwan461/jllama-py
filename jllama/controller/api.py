@@ -738,13 +738,16 @@ class Api:
             session.close()
 
     def get_setting(self):
-        return {"ai_config": config.get_ai_config(), "proxy": config.get_proxy_config()}
+        return {"ai_config": config.get_ai_config(), "proxy": config.get_proxy_config(),
+                "aigc": config.get_aigc_config()}
 
     def save_setting(self, params):
         ai_config = params.get("ai_config")
         config.save_ai_config(ai_config)
         proxy = params.get("proxy")
         config.save_proxy_config(proxy)
+        aigc = params.get("aigc")
+        config.save_aigc_config(aigc)
 
     def get_llama_cpp_config(self):
         file_path = config.get_llama_server_config_path()
@@ -860,7 +863,9 @@ class Api:
                                                                 per_device_train_batch_size=per_device_train_batch_size,
                                                                 learning_rate=learning_rate, lora_target=lora_target,
                                                                 lora_dropout=lora_dropout, bnb_4bit=bnb_4bit,
-                                                                bnb_8bit=bnb_8bit
+                                                                bnb_8bit=bnb_8bit,
+                                                                logging_steps=config.get_ai_config().get(
+                                                                    "train_log_step", 5)
                                                                 )
             result = "成功" if not break_train else "中断"
             window.evaluate_js("vue.messageArrive('jllama提醒','训练任务执行成功','success')")
@@ -1171,7 +1176,8 @@ class Api:
                                     num_inference_steps=num_inference_steps,
                                     lora_alpha=lora_alpha,
                                     height=img_height,
-                                    width=img_width
+                                    width=img_width,
+                                    log_step=config.get_aigc_config().get("log_step", 5)
                                     )
 
         window.evaluate_js("vue.messageArrive('jllama提醒','图片生成成功','success')")

@@ -23,11 +23,17 @@ def get_default():
         "ai_config": {
             "model_save_dir": f"{user_dir}/jllama/models",
             "llama_factory_port": 7860,
-            "llama_factory_host": "0.0.0.0"
+            "llama_factory_host": "0.0.0.0",
+            "train_log_step": 5
         },
         "proxy": {
             "http_proxy": "",
             "https_proxy": ""
+        },
+        "aigc": {
+            "min_seed": 1,
+            "max_seed": 9999999999,
+            "log_step": 5
         }
     }
 
@@ -104,7 +110,8 @@ def get_ai_config() -> dict:
     return dic.get("ai_config", {
         "model_save_dir": f"{user_dir}/jllama/models",
         "llama_factory_port": 7860,
-        "llama_factory_host": "0.0.0.0"
+        "llama_factory_host": "0.0.0.0",
+        "train_log_step": 5
     })
 
 
@@ -139,6 +146,21 @@ def get_proxy_config() -> dict:
         "http_proxy": "",
         "https_proxy": ""
     })
+
+
+def get_aigc_config() -> dict:
+    return dic.get("aigc", {
+        "min_seed": 1,
+        "max_seed": 9999999999,
+        "log_step": 5
+    })
+
+
+def save_aigc_config(config: dict):
+    dic["aigc"] = config
+    with open(config_path, "w", encoding="utf-8") as f:
+        json.dump(dic, f, ensure_ascii=False, indent=4)
+    read_config()
 
 
 def save_proxy_config(config: dict):

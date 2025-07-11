@@ -46,7 +46,8 @@
                   <el-button size="small" type="primary" @click="openFileSelect('datasetPath')">选择文件</el-button>
                 </el-form-item>
                 <el-form-item label="测试集占比" prop="datasetTestSize">
-                  <el-input type="text" v-model="trainArgs.datasetTestSize" placeholder="测试集占比"></el-input>
+                  <el-input-number :precision="2" :step="0.01" :max="1" type="text" v-model="trainArgs.datasetTestSize"
+                                   placeholder="测试集占比"></el-input-number>
                 </el-form-item>
                 <el-form-item label="截断长度" prop="datasetMaxLength">
                   <el-input v-model="trainArgs.datasetMaxLength" type="text" placeholder="数据集最大长度"></el-input>
@@ -65,7 +66,8 @@
                   <el-input v-model="trainArgs.loraTarget" placeholder="lora target"></el-input>
                 </el-form-item>
                 <el-form-item label="lora_dropout" prop="loraDropout">
-                  <el-input v-model="trainArgs.loraDropout" placeholder="lora dropout"></el-input>
+                  <el-input-number :precision="2" :step="0.01" :max="1" v-model="trainArgs.loraDropout"
+                                   placeholder="lora dropout"></el-input-number>
                 </el-form-item>
                 <el-form-item label="bnb量化" prop="bnbConfig">
                   <el-select v-model="trainArgs.bnbConfig">

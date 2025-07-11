@@ -87,7 +87,8 @@
                   </el-col>
                   <el-col class="line" :span="3">lora系数</el-col>
                   <el-col :span="9">
-                    <el-input v-model="sd_reasonning.lora_alpha" placeholder="lora影响系数"></el-input>
+                    <el-input-number :precision="2" :step="0.01" :max="1" v-model="sd_reasonning.lora_alpha"
+                                     placeholder="lora影响系数"></el-input-number>
                   </el-col>
                 </el-form-item>
                 <el-form-item>
