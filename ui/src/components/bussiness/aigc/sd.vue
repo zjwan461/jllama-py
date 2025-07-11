@@ -8,7 +8,7 @@
     <el-card>
       <el-row>
         <el-col :span="12">
-          <div class="sd-info">
+          <div class="sd-info" v-loading="sd_info_loading">
             <div>SD环境状态：
               <el-tag>{{ sd_info.state }}</el-tag>
             </div>
@@ -137,6 +137,7 @@ export default {
   },
   data() {
     return {
+      sd_info_loading: false,
       current_seed: -1,
       loading_img: false,
       viewerVisible: false,
@@ -188,13 +189,13 @@ export default {
       })
     },
     initSd() {
-      const loading = startLoading("SD模型下载中")
+      this.sd_info_loading = true
       apis.initSd().then(res => {
-        endLoading(loading)
+        this.sd_info_loading = false
         this.$message.success("SD环境初始化完成")
         this.getSdInfo()
       }).catch(e => {
-        endLoading(loading)
+        this.sd_info_loading = false
         this.$message.error(e)
       });
     },

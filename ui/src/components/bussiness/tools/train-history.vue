@@ -37,7 +37,7 @@
           label="操作"
           width="180">
           <template slot-scope="scope">
-            <el-button @click="reTrain(scope.row, scope.$index)" type="primary" size="small">重新训练</el-button>
+            <el-button @click="reTrain(scope.row, scope.$index)" type="primary" size="small">重用</el-button>
             <el-button @click="del(scope.row, scope.$index)" type="danger" size="small">删除</el-button>
           </template>
         </el-table-column>
