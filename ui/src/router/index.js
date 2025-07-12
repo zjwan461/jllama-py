@@ -67,9 +67,13 @@ const routes = [{
       name: 'train',
       component: () => import('../components/bussiness/tools/train-history.vue')
     }, {
-      path: '/aigc/sd',
-      name: 'sd',
-      component: () => import('../components/bussiness/aigc/sd.vue')
+      path: '/aigc/sd-text-pic',
+      name: 'sd-text-pic',
+      component: () => import('../components/bussiness/aigc/sd-text-pic.vue')
+    }, {
+      path: '/aigc/sd-pic-pic',
+      name: 'sd-pic-pic',
+      component: () => import('../components/bussiness/aigc/sd-pic-pic.vue')
     },
     ]
   }]

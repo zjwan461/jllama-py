@@ -1,4 +1,7 @@
+import os
 import subprocess
+import tempfile
+
 from flask_cors import CORS
 import threading
 
@@ -206,7 +209,9 @@ class JsApi:
         return self.controller.sd_generate_pic(params, window)
 
     def save_image(self, img_base64):
-        return self.controller.save_image(img_base64,window)
+        return self.controller.save_image(img_base64, window)
+
+
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 
 CORS(server)
@@ -304,6 +309,19 @@ def chat_completions():
             return reasoning.running_transformers[model.id].chat_blocking(messages), 200
     else:
         return jsonify({"error": {"message": f"not supported model type {model.type}"}}), 400
+
+
+@server.route("/upload", methods=["POST"])
+def upload():
+    if 'file' not in request.files:
+        return jsonify({"Status": "Error 0000", "Msg": "没有上传图片，请重新上传!"})
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"Status": "Error 0000", "Msg": "没有上传图片，请重新上传!"})
+    filename = file.filename
+    temp_dir = tempfile.gettempdir()
+    file.save(os.path.join(temp_dir, filename))
+    return f"{temp_dir}/{filename}", 200
 
 
 def start_dev_flask():

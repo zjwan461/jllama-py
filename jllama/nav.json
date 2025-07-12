@@ -90,7 +90,13 @@
         "id": 41,
         "title": "SD文生图",
         "icon": "el-icon-lollipop",
-        "href": "/aigc/sd"
+        "href": "/aigc/sd-text-pic"
+      },
+      {
+        "id": 42,
+        "title": "SD图生图",
+        "icon": "el-icon-picture-outline",
+        "href": "/aigc/sd-pic-pic"
       }
     ]
   }

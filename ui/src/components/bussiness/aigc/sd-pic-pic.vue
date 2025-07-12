@@ -2,29 +2,32 @@
   <div>
     <el-breadcrumb separator="/">
       <el-breadcrumb-item>AIGC专区</el-breadcrumb-item>
-      <el-breadcrumb-item>StableDiffusion文生图</el-breadcrumb-item>
+      <el-breadcrumb-item>StableDiffusion图生图</el-breadcrumb-item>
     </el-breadcrumb>
 
     <el-card>
       <el-row>
         <el-col :span="12">
-          <div class="sd-info" v-loading="sd_info_loading">
-            <div>SD环境状态：
-              <el-tag>{{ sd_info.state }}</el-tag>
-            </div>
-            <div>SD基础模型保存目录：<u>{{ sd_info.main_model_path }}</u></div>
-            <div>SD版本：<u>{{ sd_info.sd_version }}</u></div>
-            <div>常用AIGC社区：&nbsp;&nbsp;
-              <el-link type="primary" href="https://www.liblib.art/" target="_blank">liblib art</el-link>&nbsp;&nbsp;&nbsp;&nbsp;
-              <el-link type="primary" href="https://www.aigccn.cc/" target="_blank">AIGC社区</el-link>&nbsp;&nbsp;&nbsp;&nbsp;
-              <el-link type="primary" href="https://modelscope.cn/aigc/models" target="_blank">ModelScope AIGC</el-link>
-            </div>
-            <div>
-              <el-button @click="initSd" type="primary" size="small" v-if="sd_info.state === '待初始化'">初始化
-              </el-button>
-            </div>
+          <div>
+            <SdInfo :sd_info="sd_info" @getSdInfo="getSdInfo"></SdInfo>
             <div v-if="sd_info.state ==='已初始化'">
               <el-form :model="sd_reasonning" ref="form" :rules="rules">
+                <el-form-item label="上传原图" prop="input_img">
+                  <el-input v-show="false" v-model="sd_reasonning.input_img" disabled></el-input>
+                  <br>
+                  <el-upload
+                    drag
+                    list-type="picture"
+                    :multiple=false
+                    :accept="'image/*'"
+                    :auto-upload=true
+                    :on-success="uploadSuccess"
+                    action="http://127.0.0.1:5000/upload">
+                    <i class="el-icon-upload"></i>
+                    <div class="el-upload__text">将图片拖到此处，或<em>点击上传</em></div>
+                    <div class="el-upload__tip" slot="tip">只能上传jpg/png等图片文件</div>
+                  </el-upload>
+                </el-form-item>
                 <el-form-item label="正向提示词" prop="prompt">
                   <el-input type="textarea" v-model="sd_reasonning.prompt"
                             placeholder="用来引导SD模型生成图片的自然语言。建议使用单词+,拼接的方式。例：1girl,long hair,stand,dress"></el-input>
@@ -137,15 +140,16 @@
 import apis from "../../../common/apis"
 import {endLoading, startLoading} from "../../../common/common"
 import ImageViewer from '@/components/ImageViewer.vue';
+import SdInfo from '@/components/SdInfo.vue';
 
 
 export default {
   components: {
-    ImageViewer
+    ImageViewer,
+    SdInfo
   },
   data() {
     return {
-      sd_info_loading: false,
       current_seed: -1,
       loading_img: false,
       viewerVisible: false,
@@ -154,6 +158,7 @@ export default {
         state: '待初始化'
       },
       sd_reasonning: {
+        input_img: '',
         prompt: '',
         negative_prompt: '',
         seed: -1,
@@ -170,8 +175,10 @@ export default {
       rules: {
         prompt: [
           {required: true, message: '请输入正向提示词', trigger: 'blur'}
+        ],
+        input_img: [
+          {required: true, message: '请选择图片', trigger: 'blur'}
         ]
-
       },
     }
   },
@@ -196,30 +203,12 @@ export default {
         this.$message.error(e)
       })
     },
-    initSd() {
-      this.sd_info_loading = true
-      apis.initSd().then(res => {
-        this.sd_info_loading = false
-        this.$message.success("SD环境初始化完成")
-        this.getSdInfo()
-      }).catch(e => {
-        this.sd_info_loading = false
-        this.$message.error(e)
-      });
-    },
     onSubmit(form) {
       this.$refs[form].validate((valid) => {
         if (valid) {
           this.loading_img = true
           this.$message.success("开始生成图片")
-          apis.sdGeneratePic(this.sd_reasonning).then(res => {
-            this.loading_img = false
-            this.generate_imgs = res.images
-            this.current_seed = res.seed
-          }).catch(e => {
-            this.loading_img = false
-            this.$message.error(e)
-          })
+
         }
       })
     },
@@ -235,7 +224,10 @@ export default {
     viewImage(image) {
       this.$refs.imageViewerRef.loadImage(image);
       this.viewerVisible = true
-    }
+    },
+    uploadSuccess(response, file, fileList) {
+      this.sd_reasonning.input_img = response
+    },
   }
 }
 </script>
