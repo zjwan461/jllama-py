@@ -14,6 +14,7 @@ from jllama.util.db_util import SqliteSqlalchemy, Model, FileDownload
 import jllama.ai.reasoning_service as reasoning
 import jllama.ai.llama_server as llama_server
 import jllama.ai.llamafactory_server as llamafactory_server
+import jllama.util.common_util as common_util
 
 controller = api.Api()
 app_name = config.get_app_name()
@@ -321,7 +322,15 @@ def upload():
     filename = file.filename
     temp_dir = tempfile.gettempdir()
     file.save(os.path.join(temp_dir, filename))
-    return f"{temp_dir}/{filename}", 200
+    file_path = f"{temp_dir}/{filename}"
+    image = common_util.load_image(file_path)
+    width, height = image.size
+    result = {
+        "file_path": file_path,
+        "width": width,
+        "height": height
+    }
+    return jsonify(result), 200
 
 
 def start_dev_flask():

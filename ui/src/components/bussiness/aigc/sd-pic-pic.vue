@@ -21,7 +21,12 @@
                     :multiple=false
                     :accept="'image/*'"
                     :auto-upload=true
+                    :file-list="fileList"
+                    :limit=1
                     :on-success="uploadSuccess"
+                    :before-upload="beforeUpload"
+                    :on-remove="fileRemove"
+                    :on-exceed="exceed"
                     action="http://127.0.0.1:5000/upload">
                     <i class="el-icon-upload"></i>
                     <div class="el-upload__text">将图片拖到此处，或<em>点击上传</em></div>
@@ -90,9 +95,17 @@
                   </el-col>
                   <el-col class="line" :span="3">lora系数</el-col>
                   <el-col :span="9">
-                    <el-input-number :precision="2" :step="0.01" :max="1" v-model="sd_reasonning.lora_alpha"
+                    <el-input-number :precision="2" :step="0.01" :max="1" :min="0.01" v-model="sd_reasonning.lora_alpha"
                                      placeholder="lora影响系数"></el-input-number>
                   </el-col>
+                </el-form-item>
+                <el-form-item>
+                  <el-col class="line" :span="3">变化率</el-col>
+                  <el-col :span="9">
+                    <el-input-number :precision="2" :step="0.01" :max="1" :min="0.01" v-model="sd_reasonning.strength"
+                                     placeholder="图像变化程度"></el-input-number>
+                  </el-col>
+
                 </el-form-item>
                 <el-form-item>
                   <el-button type="primary" @click="onSubmit('form')">提交</el-button>
@@ -150,6 +163,7 @@ export default {
   },
   data() {
     return {
+      fileList: [],
       current_seed: -1,
       loading_img: false,
       viewerVisible: false,
@@ -170,7 +184,8 @@ export default {
         guidance_scale: 3.0,
         img_num: 2,
         img_height: 512,
-        img_width: 512
+        img_width: 512,
+        strength: 0.50
       },
       rules: {
         prompt: [
@@ -226,7 +241,19 @@ export default {
       this.viewerVisible = true
     },
     uploadSuccess(response, file, fileList) {
-      this.sd_reasonning.input_img = response
+      this.sd_reasonning.input_img = response.file_path
+      this.sd_reasonning.img_width = response.width
+      this.sd_reasonning.img_height = response.height
+      this.fileList = fileList
+    },
+    beforeUpload(file) {
+
+    },
+    fileRemove(file, fileList) {
+
+    },
+    exceed(files, fileList) {
+      this.$message.warning("一次只能处理一张图")
     },
   }
 }
