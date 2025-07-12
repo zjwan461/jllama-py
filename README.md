@@ -295,6 +295,16 @@ jllama-py内置了llamafactory-0.9.3版本。关于llamafactory，请参考[LLaM
 
 ![](https://gitee.com/zjwan461/images/raw/master/img/image-20250707002154475.png) 
 
+### AIGC专区
+
+#### Stable Diffustion文生图
+![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015028.png)
+jllama-py对Stable Diffustion 1.5 文生图做了简单的实现。可以通过简单的提示词和基础的参数调整生成图片。具体的操作步骤如下。
+
+1. 安装SD基础环境依赖，也就是下载SD基础模型。这个过程所需的时长取决于你的网络状况。你也可以手动下载SD1.5的模型放在设置的模型目录下。
+![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015325.png)
+2. 填写提示词和其他相关参数即可，点击按钮生成图片。
+![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015551.png)
 
 
  ## 开发接入
@@ -320,6 +330,11 @@ jllama-py内置了llamafactory-0.9.3版本。关于llamafactory，请参考[LLaM
     "proxy": {
         "http_proxy": "",
         "https_proxy": ""
+    },
+    "aigc": {
+            "min_seed": 1,
+            "max_seed": 9999999999,
+            "log_step": 5
     }
 }
 ```
@@ -335,6 +350,10 @@ npm run serve
 运行主程序
 
 ```shell
+# 参考之前的从源代码构建章节，安装requirements
+
+pip install -r requirements.txt
+
 python main.py
 ```
 
