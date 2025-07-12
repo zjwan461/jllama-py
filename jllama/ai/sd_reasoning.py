@@ -1,6 +1,7 @@
 import torch
+from PIL import Image
 from diffusers import StableDiffusionPipeline, EulerDiscreteScheduler, DDIMScheduler, DPMSolverMultistepScheduler, \
-    LMSDiscreteScheduler, PNDMScheduler
+    LMSDiscreteScheduler, PNDMScheduler, StableDiffusionImg2ImgPipeline
 import matplotlib.pyplot as plt
 from random import randint
 from jllama.util.logutil import Logger
@@ -40,14 +41,102 @@ def list_schedulers() -> list:
     return [k for k in SDScheduler.__members__]
 
 
-def generate_pic(sd_origin_model_path, prompt: str, negative_prompt: str = None, checkpoint_path: str = None,
-                 lora_path: str = None,
-                 num_images=1, guidance_scale=7.5, seed=-1, scheduler="Euler",
-                 num_inference_steps=30, lora_alpha=0.7, height=512, width=512, log_step=5):
+def pic_to_pic(sd_origin_model_path, input_image: Image, prompt: str, negative_prompt: str = None,
+               checkpoint_path: str = None, num_images=1,
+               lora_path: str = None, guidance_scale=7.5, seed=-1, scheduler="Euler", strength=0.75,
+               num_inference_steps=30, lora_alpha=0.7, log_step=5,
+               min_seed=1, max_seed=9999999999):
     # 设置设备
+    device, torch_dtype = get_base()
+    logger.info("开始加载SD模型")
+    # 使用第三方checkpoint生成图片，需要指定原生SD的config位置
+    if checkpoint_path:
+        logger.info(f"使用第三方checkpoint生成图片: {checkpoint_path}")
+        pipe = StableDiffusionImg2ImgPipeline.from_single_file(
+            checkpoint_path,
+            torch_dtype=torch_dtype,
+            safety_checker=None,  # 可以移除安全检查器，但要注意风险
+            config=sd_origin_model_path,
+            use_safetensors=True,
+            local_files_only=True,
+        )
+    else:
+        logger.info(f"使用原生SD模型生成图片: {sd_origin_model_path}")
+        # 使用原生sd模型生成图片
+        pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
+            sd_origin_model_path,
+            torch_dtype=torch_dtype,
+            safety_checker=None,  # 可以移除安全检查器，但要注意风险
+            use_safetensors=True,
+            local_files_only=True
+        )
+    pipe = pipe.to(device)
+
+    load_lora(lora_alpha, lora_path, pipe)
+
+    # 采样方式
+    load_scheduler(pipe, scheduler)
+
+    generator, seed = get_generator(device, max_seed, min_seed, seed)
+    logger.info(f"开始生成图像: '{prompt}'")
+
+    images = pipe(
+        prompt=prompt,
+        negative_prompt=negative_prompt,
+        num_images_per_prompt=num_images,
+        image=input_image,
+        strength=strength,  # 控制图像变化程度（0-1）
+        guidance_scale=guidance_scale,
+        num_inference_steps=num_inference_steps,
+        generator=generator,
+        callback_on_step_end=SimpleSDCallback(log_step=log_step, total_step=num_inference_steps),
+    ).images
+
+    logger.info(f"生成完成")
+
+    del pipe
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    logger.info(f"已卸载模型")
+    return images, seed
+
+
+def get_base():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     logger.info(f"使用设备: {device}")
     torch_dtype = torch.bfloat16 if device == "cuda" else torch.float32
+    return device, torch_dtype
+
+
+def get_generator(device, max_seed, min_seed, seed):
+    if seed < 0:
+        # 获取随机种子
+        seed = randint(min_seed, max_seed)
+        logger.info(f"获取随机种子，seed={seed}")
+    else:
+        logger.info(f"使用指定种子，seed={seed}")
+    generator = torch.Generator(device).manual_seed(seed)
+    return generator, seed
+
+
+def load_scheduler(pipe, scheduler):
+    pipe.scheduler = SDScheduler[scheduler].value.from_config(pipe.scheduler.config)
+
+
+def load_lora(lora_alpha, lora_path, pipe):
+    if lora_path:
+        # 加载 LoRA 权重
+        logger.info(f"加载第三方LoRA: {lora_path}")
+        pipe.load_lora_weights(lora_path, alpha=lora_alpha)
+
+
+def text_to_pic(sd_origin_model_path, prompt: str, negative_prompt: str = None, checkpoint_path: str = None,
+                lora_path: str = None,
+                num_images=1, guidance_scale=7.5, seed=-1, scheduler="Euler",
+                num_inference_steps=30, lora_alpha=0.7, height=512, width=512, log_step=5,
+                min_seed=1, max_seed=9999999999):
+    # 设置设备
+    device, torch_dtype = get_base()
     logger.info("开始加载SD模型")
     # 使用第三方checkpoint生成图片，需要指定原生SD的config位置
     if checkpoint_path:
@@ -72,22 +161,12 @@ def generate_pic(sd_origin_model_path, prompt: str, negative_prompt: str = None,
         )
     pipe = pipe.to(device)
 
-    if lora_path:
-        # 加载 LoRA 权重
-        logger.info(f"加载第三方LoRA: {lora_path}")
-        pipe.load_lora_weights(lora_path, alpha=lora_alpha)
+    load_lora(lora_alpha, lora_path, pipe)
 
     # 采样方式
-    pipe.scheduler = SDScheduler[scheduler].value.from_config(pipe.scheduler.config)
+    load_scheduler(pipe, scheduler)
 
-    if seed < 0:
-        # 获取随机种子
-        seed = randint(1, 9999999999)
-        logger.info(f"获取随机种子，seed={seed}")
-    else:
-        logger.info(f"使用指定种子，seed={seed}")
-
-    generator = torch.Generator(device).manual_seed(seed)
+    generator, seed = get_generator(device, max_seed, min_seed, seed)
 
     """
        使用Stable Diffusion生成图像
@@ -150,11 +229,11 @@ if __name__ == "__main__":
     prompt = "(a beautiful woman in a deep v-neck evening gown,full body,beautiful detailed eyes,beautiful detailed lips,extremely detailed eyes and face,long eyelashes,graceful posture,elegant demeanor,smiling,flowing hair,sparkling jewelry,red carpet,glamorous,high fashion,richly textured fabric,silky smooth,shimmering,refined,alluring,confident,(best quality,4k,8k,highres,masterpiece:1.2),ultra-detailed,(realistic,photorealistic,photo-realistic:1.37),HDR,studio lighting,ultra-fine painting,sharp focus,physically-based rendering,extreme detail description,professional,vivid colors,bokeh,portrait,fashion photography,evening atmosphere,warm tones,soft lighting)"
     negative_prompt = "old,ugly"
     # 生成图像
-    images, seed = generate_pic(sd_origin_model_path=r"E:\models\AI-ModelScope\stable-diffusion-v1-5",
-                                checkpoint_path=r"E:\models\MusePublic\majicMIX_realistic_maijuxieshi_SD_1_5\majicmixRealistic_v7.safetensors",
-                                lora_path=r"E:\models\yangshaoping\ysp123majicMIX\ysp123majicMIX.safetensors",
-                                prompt=prompt,
-                                negative_prompt=negative_prompt, num_images=2, guidance_scale=3)
+    images, seed = text_to_pic(sd_origin_model_path=r"E:\models\AI-ModelScope\stable-diffusion-v1-5",
+                               checkpoint_path=r"E:\models\MusePublic\majicMIX_realistic_maijuxieshi_SD_1_5\majicmixRealistic_v7.safetensors",
+                               lora_path=r"E:\models\yangshaoping\ysp123majicMIX\ysp123majicMIX.safetensors",
+                               prompt=prompt,
+                               negative_prompt=negative_prompt, num_images=2, guidance_scale=3)
     print(f"种子: {seed}")
     # 显示图像
     for i, image in enumerate(images):

@@ -36,7 +36,7 @@ import jllama.util.pip_util as pip_util
 import jllama.ai.llamafactory_server as llamafactory_server
 from jllama.env import jllama_version, factory_version, cpp_version
 from modelscope import snapshot_download
-from jllama.ai.sd_reasoning import supported_scheduler, list_schedulers, generate_pic
+from jllama.ai.sd_reasoning import supported_scheduler, list_schedulers, text_to_pic
 
 logger = Logger(__name__)
 
@@ -747,6 +747,10 @@ class Api:
         proxy = params.get("proxy")
         config.save_proxy_config(proxy)
         aigc = params.get("aigc")
+        min_seed = aigc.get("min_seed")
+        max_seed = aigc.get("max_seed")
+        if min_seed <= max_seed:
+            raise ValueError("种子数的范围最大值必须大于最小值")
         config.save_aigc_config(aigc)
         auto_open_log_window = params.get("auto_open_log_window", True)
         config.save_auto_open_log_window(auto_open_log_window)
@@ -1166,21 +1170,24 @@ class Api:
             raise ValueError("lora_alpha为0-1的小数")
 
         log_handler.textViewer = self.get_log_viewer()
-        images, seed = generate_pic(sd_origin_model_path=sd_info.main_model_path,
-                                    prompt=prompt,
-                                    negative_prompt=negative_prompt,
-                                    checkpoint_path=checkpoint,
-                                    lora_path=lora,
-                                    num_images=img_num,
-                                    guidance_scale=guidance_scale,
-                                    seed=seed,
-                                    scheduler=scheduler,
-                                    num_inference_steps=num_inference_steps,
-                                    lora_alpha=lora_alpha,
-                                    height=img_height,
-                                    width=img_width,
-                                    log_step=config.get_aigc_config().get("log_step", 5)
-                                    )
+        aigc_config = config.get_aigc_config()
+        images, seed = text_to_pic(sd_origin_model_path=sd_info.main_model_path,
+                                   prompt=prompt,
+                                   negative_prompt=negative_prompt,
+                                   checkpoint_path=checkpoint,
+                                   lora_path=lora,
+                                   num_images=img_num,
+                                   guidance_scale=guidance_scale,
+                                   seed=seed,
+                                   scheduler=scheduler,
+                                   num_inference_steps=num_inference_steps,
+                                   lora_alpha=lora_alpha,
+                                   height=img_height,
+                                   width=img_width,
+                                   log_step=aigc_config.get("log_step", 5),
+                                   min_seed=aigc_config.get("min_seed", 1),
+                                   max_seed=aigc_config.get("max_seed", 9999999999)
+                                   )
 
         window.evaluate_js("vue.messageArrive('jllama提醒','图片生成成功','success')")
 
