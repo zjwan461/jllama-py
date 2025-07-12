@@ -89,7 +89,7 @@ def pic_to_pic(sd_origin_model_path, input_image: Image, prompt: str, negative_p
         guidance_scale=guidance_scale,
         num_inference_steps=num_inference_steps,
         generator=generator,
-        callback_on_step_end=SimpleSDCallback(log_step=log_step, total_step=num_inference_steps),
+        callback_on_step_end=SimpleSDCallback(log_step=log_step, total_step=int(num_inference_steps * strength)),
     ).images
 
     logger.info(f"生成完成")
