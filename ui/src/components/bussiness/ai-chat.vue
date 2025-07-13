@@ -238,11 +238,16 @@ export default {
       }
     },
     getUrl() {
-      apis.getAiChatUrl().then(res => {
-        this.apiUrl = res
-      }).catch(e => {
-        this.$message.error(e)
-      })
+      const base_url = this.$store.state.sysInfo.base_url
+      if (base_url) {
+        this.apiUrl = base_url + '/v1/chat/completions'
+      } else {
+        apis.getAiChatUrl().then(res => {
+          this.apiUrl = res
+        }).catch(e => {
+          this.$message.error(e)
+        })
+      }
     }
   }
 }

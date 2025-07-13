@@ -94,3 +94,15 @@ export function getDateString() {
 //   return `${year}-${month}-${day}-${hours}-${minutes}-${seconds}`
   return year + '-' + month + '-' + day + '-' + hours + '-' + minutes + '-' + seconds
 }
+
+export function closestMultipleOf8(num) {
+  const remainder = num % 8;
+
+  if (remainder === 0) {
+    return num; // 已经是 8 的倍数
+  } else if (remainder <= 4) {
+    return num - remainder; // 向下取整
+  } else {
+    return num + (8 - remainder); // 向上取整
+  }
+}

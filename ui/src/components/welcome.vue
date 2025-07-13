@@ -266,6 +266,7 @@ export default {
       apis.getSysInfo().then(res => {
         endLoading(loading)
         this.server = JSON.parse(res)
+        this.$store.commit('setSysInfo', this.server)
       }).catch(e => {
         endLoading(loading)
         this.$message.error(e)

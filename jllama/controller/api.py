@@ -81,9 +81,11 @@ class Api:
             return json_data
 
     def get_sys_info(self):
+        server_config = config.get_server_config()
         result = {"cpu": sysInfoUtil.get_cpu_info(), "memory": sysInfoUtil.get_memory_info(),
                   "gpus": sysInfoUtil.get_gpu_info(),
-                  "os": sysInfoUtil.get_os_info(), "jllamaInfo": sysInfoUtil.get_jllama_info()}
+                  "os": sysInfoUtil.get_os_info(), "jllamaInfo": sysInfoUtil.get_jllama_info(),
+                  "base_url": f"http://{server_config.get('host')}:{server_config.get('port')}"}
         return orjson.dumps(result).decode("utf-8")
 
     def init_env(self):

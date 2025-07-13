@@ -187,6 +187,14 @@ export default {
     onSubmit(form) {
       this.$refs[form].validate((valid) => {
         if (valid) {
+          if (this.sd_reasonning.img_width % 8 !== 0) {
+            this.$message.error("图片宽度必须为8的倍数")
+            return false
+          }
+          if (this.sd_reasonning.img_height % 8 !== 0) {
+            this.$message.error("图片高度必须为8的倍数")
+            return false
+          }
           this.loading_img = true
           this.$message.success("开始生成图片")
           apis.sdGeneratePic(this.sd_reasonning).then(res => {

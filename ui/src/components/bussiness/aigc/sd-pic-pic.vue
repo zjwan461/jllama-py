@@ -27,7 +27,7 @@
                     :before-upload="beforeUpload"
                     :on-remove="fileRemove"
                     :on-exceed="exceed"
-                    action="http://127.0.0.1:5000/upload">
+                    :action="uploadUrl">
                     <i class="el-icon-upload"></i>
                     <div class="el-upload__text">将图片拖到此处，或<em>点击上传</em></div>
                     <div class="el-upload__tip" slot="tip">只能上传jpg/png等图片文件</div>
@@ -151,7 +151,7 @@
 
 <script>
 import apis from "../../../common/apis"
-import {endLoading, startLoading} from "../../../common/common"
+import {endLoading, startLoading, closestMultipleOf8} from "../../../common/common"
 import ImageViewer from '@/components/ImageViewer.vue';
 import SdInfo from '@/components/SdInfo.vue';
 
@@ -163,6 +163,7 @@ export default {
   },
   data() {
     return {
+      uploadUrl: "http://127.0.0.1:5000/upload",
       fileList: [],
       current_seed: -1,
       loading_img: false,
@@ -199,6 +200,7 @@ export default {
   },
   created() {
     this.getSdInfo()
+    this.getUploadUrl()
   },
   methods: {
     openFileSelect(val) {
@@ -223,7 +225,7 @@ export default {
         if (valid) {
           this.loading_img = true
           this.$message.success("开始生成图片")
-
+          //todo
         }
       })
     },
@@ -242,8 +244,9 @@ export default {
     },
     uploadSuccess(response, file, fileList) {
       this.sd_reasonning.input_img = response.file_path
-      this.sd_reasonning.img_width = response.width
-      this.sd_reasonning.img_height = response.height
+      // 自动计算满足8的倍数的值,SD生成图片的width、height必须是8的倍数
+      this.sd_reasonning.img_width = closestMultipleOf8(response.width)
+      this.sd_reasonning.img_height = closestMultipleOf8(response.height)
       this.fileList = fileList
     },
     beforeUpload(file) {
@@ -254,6 +257,14 @@ export default {
     },
     exceed(files, fileList) {
       this.$message.warning("一次只能处理一张图")
+    },
+    getUploadUrl() {
+      const base_url = this.$store.state.sysInfo.base_url
+      if (base_url) {
+        this.uploadUrl = base_url + "/upload"
+      } else {
+        console.log("未从store找到base_url,将使用默认http://127.0.0.1:5000/upload")
+      }
     },
   }
 }
