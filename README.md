@@ -8,15 +8,15 @@ Vue、ElementUI
 
 ### 后端
 
-python3.11、pywebview、llama-cpp-python、transformers、pytorch
+python3.11、pywebview、llama-cpp-python、transformers、pytorch、Stable Diffusion
 
 ## 介绍
 
-jllama-py是[jllama](https://github.com/zjwan461/jllama)的Python版本，并且得益于使用了python作为技术底座，在原本jllama的基础上做了一些功能增强。 是一个基于python构建的桌面端AI模型工具集。集成了 **模型下载**、**模型部署**、**服务监控**、**gguf模型量化**、**gguf拆分合并** 、**权重格式转换**、**模型微调**等工具合集。让使用者无需掌握各种AI相关技术就能快速在本地运行模型进行模型推理、量化等操作、模型微调工作。
+jllama-py是[jllama](https://github.com/zjwan461/jllama)的Python版本，并且得益于使用了python作为技术底座，在原本jllama的基础上做了一些功能增强。 是一个基于python构建的桌面端AI模型工具集。集成了 **模型下载**、**模型部署**、**服务监控**、**gguf模型量化**、**gguf拆分合并** 、**权重格式转换**、**模型微调**、**StableDiffusion**等工具合集。让使用者无需掌握各种AI相关技术就能快速在本地运行模型进行模型推理、量化等操作、模型微调、AIGC创作等工作。
 
 ##  限制
 
-jllama-py目前只支持大语言模型（LLM）。未来会考虑支持视觉、音频等多模态模型。jllama-py支持huggingface、gguf模型格式文件的本地推理，但是在本地部署方案上仅支持gguf模型权重格式，不过jllama-py也提供了将huggingface格式模型转换为gguf模型格式的功能。此外jllama-py仅支持Windows操作系统。目前jllama-py也只支持cuda的GPU加速方案。
+jllama-py目前只支持大语言模型（LLM）。未来会考虑支持视觉、音频等多模态模型。jllama-py支持huggingface、gguf模型格式文件的本地推理，但是在本地部署方案上仅支持gguf模型权重格式，不过jllama-py也提供了将huggingface格式模型转换为gguf模型格式的功能。此外jllama-py仅支持Windows操作系统。目前jllama-py也只支持cuda的GPU加速方案。AIGC方面支持StableDiffusion 1.5版本
 
 ## 安装和使用
 
@@ -48,7 +48,7 @@ pip install jllama-py
 $env:CMAKE_ARGS = "-DGGML_CUDA=ON"
 pip install jllama-py
 ```
-关于pytorch的cuda加速，请额外执行如下命令。可参考[pytorch官方说明](https://pytorch.org/get-started/locally/) 。tips: **50系显卡驱动比较新,请使用cuda12.8版本**。在jllama-py中，pytorch用于hf格式的模型推理以及模型微调。
+**关于pytorch的cuda加速，请额外执行如下命令**。可参考[pytorch官方说明](https://pytorch.org/get-started/locally/) 。**tips: 50系显卡驱动比较新,请使用cuda12.8版本**。在jllama-py中，pytorch用于hf格式的模型推理以及模型微调。
 
 ```shell
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/${你的cuda版本}
@@ -295,16 +295,24 @@ jllama-py内置了llamafactory-0.9.3版本。关于llamafactory，请参考[LLaM
 
 ![](https://gitee.com/zjwan461/images/raw/master/img/image-20250707002154475.png) 
 
-### AIGC专区
+### 九、AIGC专区
 
 #### Stable Diffustion文生图
 ![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015028.png)
 jllama-py对Stable Diffustion 1.5 文生图做了简单的实现。可以通过简单的提示词和基础的参数调整生成图片。具体的操作步骤如下。
 
 1. 安装SD基础环境依赖，也就是下载SD基础模型。这个过程所需的时长取决于你的网络状况。你也可以手动下载SD1.5的模型放在设置的模型目录下。
-![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015325.png)
+  ![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015325.png)
 2. 填写提示词和其他相关参数即可，点击按钮生成图片。
-![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015551.png)
+  ![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015551.png)
+
+#### Stable Diffusion图生图
+
+和文生图操作类似，只需要多额外上传一张参考图，多配置一个`变化率`参数即可。变化率越高，AI发挥的空间越大，反之AI会更多的参考原图的细节。
+
+![image-20250713214713424](https://gitee.com/zjwan461/images/raw/master/img/image-20250713214713424.png) 
+
+
 
 
  ## 开发接入
