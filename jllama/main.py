@@ -212,6 +212,9 @@ class JsApi:
     def save_image(self, img_base64):
         return self.controller.save_image(img_base64, window)
 
+    def sd_pic_to_pic(self, params):
+        return self.controller.sd_pic_to_pic(params, window)
+
 
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 

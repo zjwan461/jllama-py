@@ -225,7 +225,14 @@ export default {
         if (valid) {
           this.loading_img = true
           this.$message.success("开始生成图片")
-          //todo
+          apis.sdPicToPic(this.sd_reasonning).then(res => {
+            this.loading_img = false
+            this.generate_imgs = res.images
+            this.current_seed = res.seed
+          }).catch(e => {
+            this.loading_img = false
+            this.$message.error(e)
+          })
         }
       })
     },

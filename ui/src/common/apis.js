@@ -193,4 +193,7 @@ export default {
   saveImages(base64) {
     return window.pywebview.api.save_image(base64)
   },
+  sdPicToPic(params) {
+    return window.pywebview.api.sd_pic_to_pic(params)
+  },
 }
