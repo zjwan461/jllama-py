@@ -9,7 +9,7 @@ def check_ui_install():
         raise Exception("jllama ui尚未构建,请参考执行npm run build后copy dist文件夹到jllama/ui/dist文件夹下")
 
 
-check_flag = os.environ["check_ui_install"]
+check_flag = os.getenv("check_ui_install", False)
 if check_flag:
     check_ui_install()
 
