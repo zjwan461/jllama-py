@@ -54,7 +54,7 @@ pip install jllama-py
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/${你的cuda版本}
 ```
 
-![image-20250707002734351](https://gitee.com/zjwan461/images/raw/master/img/image-20250707002734351.png) 
+![image-20250707002734351](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250707002734351.png) 
 
 ### 2. 使用源码编译安装
 
@@ -90,13 +90,13 @@ pip install -r pytorch-cuda.txt
 
 一个简单的系统资源监控面板
 
-![image-20250630194707165](https://gitee.com/zjwan461/images/raw/master/img/image-20250630194707165.png) 
+![image-20250630194707165](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630194707165.png) 
 
 ###  二、模型管理
 
 jllama-py提供了两种模型文件下载方式。[Hugging Face.](https://huggingface.co/)和[model scope](https://www.modelscope.cn/home) 不过考虑到国内网络问题建议使用modelscope的方式下载模型。
 
-![image-20250630195248563](https://gitee.com/zjwan461/images/raw/master/img/image-20250630195248563.png) 
+![image-20250630195248563](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630195248563.png) 
 
 
 
@@ -108,11 +108,11 @@ jllama-py提供了两种模型文件下载方式。[Hugging Face.](https://huggi
 
 需要指定模型类型。如果是gguf的模型则选择gguf，此外huggingface格式模型则选择hf
 
-![image-20250630195410925](https://gitee.com/zjwan461/images/raw/master/img/image-20250630195410925.png) 
+![image-20250630195410925](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630195410925.png) 
 
 在弹出的模型文件item中，选择你想要下载的模型文件即可进行在线下载。如果不想使用jllama-py的在线下载功能，可以不勾选在线下载开关，直接关闭对话框即可。
 
-![image-20250630224929986](https://gitee.com/zjwan461/images/raw/master/img/image-20250630224929986.png) 
+![image-20250630224929986](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630224929986.png) 
 
 
 
@@ -122,27 +122,27 @@ jllama-py提供了两种模型文件下载方式。[Hugging Face.](https://huggi
 
 AI推理是本地测试模型能力的工具，其并不具备并发能力。其作用是用来快速运行一个模型，完成一些简单的AI问答功能。虽然底层也是通过一个http api的方式来进行交互，但其并不兼容openAI的请求报文格式。
 
-![image-20250630225537057](https://gitee.com/zjwan461/images/raw/master/img/image-20250630225537057.png) 
+![image-20250630225537057](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630225537057.png) 
 
 AI Chat：
 
 在开启了模型推理服务后，点击列表右侧的`chat`按钮即可进入AI Chat页。在这个页面你可以和大模型进行简单的AI问答。
 
-![image-20250630200131927](https://gitee.com/zjwan461/images/raw/master/img/image-20250630200131927.png)  
+![image-20250630200131927](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630200131927.png)  
 
 #### 本地部署
 
  本地部署仅支持gguf类型的模型。底层使用llama-cpp-python部署一个兼容openAI的http server。本地部署会在jllama-py中维护一个llama-cpp-python的配置，通过修改这个配置来对本地部署的模型进行维护。jllama-py支持直接编辑和通过本地编辑器编辑的方式来修改此配置文件。在`执行部署`选项卡中即可以在本地开启一个兼容openAI的http server。开启后你可以将本地服务配置到各种RAG工具中，如`Cherry Studio`、`Dify`。关于配置项怎么写，请参考llama-cpp-python官方说明[OpenAI Compatible Web Server - llama-cpp-python](https://llama-cpp-python.readthedocs.io/en/latest/server/)中的Configuration and Multi-Model Support章节。
 
-![image-20250630215048711](https://gitee.com/zjwan461/images/raw/master/img/image-20250630215048711.png) 
+![image-20250630215048711](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630215048711.png) 
 
-![image-20250630215406001](https://gitee.com/zjwan461/images/raw/master/img/image-20250630215406001.png) 
+![image-20250630215406001](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630215406001.png) 
 
 在Cherry Studio中配置jllama-py服务
 
-![image-20250630221642290](https://gitee.com/zjwan461/images/raw/master/img/image-20250630221642290.png) 
+![image-20250630221642290](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630221642290.png) 
 
-![image-20250630221540764](https://gitee.com/zjwan461/images/raw/master/img/image-20250630221540764.png) 
+![image-20250630221540764](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630221540764.png) 
 
 
 
@@ -189,13 +189,13 @@ AI Chat：
 
 如果在第二点的模型管理中并没有使用在线下载模型，jllama-py也提供了手动导入模型的方式。
 
- ![image-20250630225908254](https://gitee.com/zjwan461/images/raw/master/img/image-20250630225908254.png) 
+ ![image-20250630225908254](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630225908254.png) 
 
  ### 七、模型格式转换
 
 因为jllama-py的本地部署方式只支持gguf模型格式。所以如果是transformers的原生模型格式想要使用本地部署功能需要将.safetensors格式的模型文件转换为gguf文件格式。在jllama-py中，你可以通过内置的脚本实现这一功能。
 
-![image-20250630230419906](https://gitee.com/zjwan461/images/raw/master/img/image-20250630230419906.png) 
+![image-20250630230419906](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630230419906.png) 
 
  
 
@@ -211,9 +211,9 @@ AI Chat：
 
 此功能对本地机器的性能有较高要求，建议显存在16G+的机器使用本地微调功能。配置项请参考右侧的参数说明。此外本地微调只支持lora微调这一种方式，如需要进行全参数微调或者freeze参数微调请使用llamafactory微调模式。在微调之前也可以使用微调代码预览的功能，进行大致的代码review。
 
-![image-20250630231024560](https://gitee.com/zjwan461/images/raw/master/img/image-20250630231024560.png) 
+![image-20250630231024560](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630231024560.png) 
 
-![image-20250630231617863](https://gitee.com/zjwan461/images/raw/master/img/image-20250630231617863.png) 
+![image-20250630231617863](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630231617863.png) 
 
 #### 远程微调
 
@@ -287,13 +287,13 @@ yarl==1.20.1
 
 在微调之前先按要求填写好微调参数，之后点击远程微调按钮。在弹出的对话框中填写好远程Linux服务器的信息和微调目录以及python安装目录。
 
-![image-20250630232005217](https://gitee.com/zjwan461/images/raw/master/img/image-20250630232005217.png) 
+![image-20250630232005217](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250630232005217.png) 
 
 #### llamafactory微调
 
 jllama-py内置了llamafactory-0.9.3版本。关于llamafactory，请参考[LLaMA Factory](https://llamafactory.readthedocs.io/zh-cn/latest/getting_started/installation.html)官方网站
 
-![](https://gitee.com/zjwan461/images/raw/master/img/image-20250707002154475.png) 
+![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250707002154475.png) 
 
 ### 九、AIGC专区
 
@@ -302,15 +302,15 @@ jllama-py内置了llamafactory-0.9.3版本。关于llamafactory，请参考[LLaM
 jllama-py对Stable Diffustion 1.5 文生图做了简单的实现。可以通过简单的提示词和基础的参数调整生成图片。具体的操作步骤如下。
 
 1. 安装SD基础环境依赖，也就是下载SD基础模型。这个过程所需的时长取决于你的网络状况。你也可以手动下载SD1.5的模型放在设置的模型目录下。
-  ![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015325.png)
+    ![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015325.png)
 2. 填写提示词和其他相关参数即可，点击按钮生成图片。
-  ![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015551.png)
+    ![](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/20250713015551.png)
 
 #### Stable Diffusion图生图
 
 和文生图操作类似，只需要多额外上传一张参考图，多配置一个`变化率`参数即可。变化率越高，AI发挥的空间越大，反之AI会更多的参考原图的细节。
 
-![image-20250713214713424](https://gitee.com/zjwan461/images/raw/master/img/image-20250713214713424.png) 
+![image-20250713214713424](https://jerrysu232.oss-cn-shenzhen.aliyuncs.com/img/image-20250713214713424.png) 
 
 
 

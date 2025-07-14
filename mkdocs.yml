@@ -46,9 +46,9 @@ watch:
   - llama-cpp-python-cuda.md
 
 nav:
-  - "Getting Started": "index.md"
-  - "Install llama-cpp-python(CPU)": "api-reference.md"
-  - "Install llama-cpp-python(CUDA)": "api-reference.md"
+  - "快速开始": "index.md"
+  - "安装llama-cpp-python(CPU)": "cpp_cpu.md"
+  - "安装llama-cpp-python(CUDA)": "cpp_gpu.md"
 
 markdown_extensions:
   - attr_list
