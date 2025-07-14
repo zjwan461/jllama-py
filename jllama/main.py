@@ -15,6 +15,7 @@ import jllama.ai.reasoning_service as reasoning
 import jllama.ai.llama_server as llama_server
 import jllama.ai.llamafactory_server as llamafactory_server
 import jllama.util.common_util as common_util
+from jllama.util.update_util import update_version, update_other
 
 controller = api.Api()
 app_name = config.get_app_name()
@@ -358,6 +359,9 @@ def stop_process():
 
 
 def main():
+    # 走更新逻辑
+    update_version()
+    update_other()
     # 加载页面的监听
     window.events.loaded += before_show
     window.events.closed += stop_process
