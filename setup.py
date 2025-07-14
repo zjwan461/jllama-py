@@ -1,7 +1,6 @@
 # setup.py
 import os.path
-from jllama.env import jllama_version
-
+from jllama import __version__ as jllama_version
 from setuptools import setup, find_packages
 
 
