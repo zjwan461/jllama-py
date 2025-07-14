@@ -12,8 +12,8 @@ build:
     - cp -rf ui/dist jllama/ui/
     - python setup.py bdist_wheel sdist
   tools:
-    python: 3.11
-    nodejs: 22
+    python: "3.11"
+    nodejs: "22"
 mkdocs:
   configuration: mkdocs.yml
 
