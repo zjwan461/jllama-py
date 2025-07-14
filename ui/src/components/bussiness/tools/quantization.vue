@@ -77,6 +77,12 @@
             <el-table-column label="执行时间" prop="create_time">
             </el-table-column>
             <el-table-column label="量化精度" prop="param">
+              <template slot-scope="scope">
+                <el-tag
+                  type="primary"
+                  disable-transitions>{{ scope.row.param }}
+                </el-tag>
+              </template>
             </el-table-column>
           </el-table>
           <div class="block">

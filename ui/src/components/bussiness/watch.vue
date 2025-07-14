@@ -25,9 +25,15 @@
           label="模型名称">
         </el-table-column>
         <el-table-column
-          width="60"
+          width="70"
           prop="model_type"
           label="类型">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.model_type === 'gguf' ? 'primary' : 'success'"
+              disable-transitions>{{ scope.row.model_type }}
+            </el-tag>
+          </template>
         </el-table-column>
         <el-table-column
           prop="file_path"

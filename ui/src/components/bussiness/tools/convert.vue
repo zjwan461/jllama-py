@@ -48,6 +48,9 @@
                   <el-form-item label="输出文件">
                     <span>{{ props.row.output }}</span>
                   </el-form-item>
+                  <el-form-item label="量化参数">
+                    <span>{{ props.row.q_type }}</span>
+                  </el-form-item>
                 </el-form>
               </template>
             </el-table-column>

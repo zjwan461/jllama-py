@@ -18,6 +18,12 @@
         <el-table-column
           prop="result"
           label="微调结果">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.result === '成功' ? 'success' : 'danger'"
+              disable-transitions>{{ scope.row.result }}
+            </el-tag>
+          </template>
         </el-table-column>
         <el-table-column
           width="500px"

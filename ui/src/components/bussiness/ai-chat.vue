@@ -56,8 +56,8 @@
 </template>
 
 <script>
-import apis from '../../common/apis';
-import {endLoading, startLoading} from "@/common/common";
+import apis from '../../common/apis'
+import {endLoading, startLoading} from "@/common/common"
 
 export default {
   name: 'ChatWindow',
@@ -299,9 +299,9 @@ export default {
 .message-content {
   flex: 1;
 
-  .assistant {
+  /*.assistant {
     max-width: 90%;
-  }
+  }*/
 }
 
 .message-bubble {

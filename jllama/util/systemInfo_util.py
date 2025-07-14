@@ -48,7 +48,8 @@ def get_gpu_info():
     gpus = GPUtil.getGPUs()
     if len(gpus) > 0:
         for gpu in gpus:
-            item = {"name": f"{gpu.name}", "memory": f"{gpu.memoryTotal / 1024:.2f}", "driver": f"{gpu.driver}"}
+            item = {"name": f"{gpu.name}", "memory": f"{gpu.memoryTotal / 1024:.2f}", "driver": f"{gpu.driver}",
+                    "memory_free": f"{gpu.memoryFree}"}
             # 显存使用率
             result.append(item)
     else:
@@ -61,8 +62,11 @@ def get_gpu_info():
                         "name": gpu.Name,
                         "driver": gpu.DriverVersion,
                     }
-                    memory = round(gpu.AdapterRAM / (1024 ** 3), 2) if gpu.AdapterRAM else "N/A"
-                    memory = "N/A" if memory < 0 else memory
+                    if not gpu.AdapterRAM:
+                        continue
+                    memory = round(gpu.AdapterRAM / (1024 ** 3), 2)
+                    if memory < 0:
+                        continue
                     gpu_info["memory"] = memory
                     result.append(gpu_info)
 

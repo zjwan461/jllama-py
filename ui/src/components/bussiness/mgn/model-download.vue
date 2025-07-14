@@ -14,7 +14,15 @@
           <el-button type="primary" @click="getTableData">查询</el-button>
           <el-button type="success" @click="create">新增</el-button>
         </el-form-item>
+        <el-form-item>
+          <div style="margin-left: 50px">
+            <el-link type="primary" href="https://www.modelscope.cn/models" target="_blank">魔搭社区</el-link>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <el-link type="primary" href="https://huggingface.co/models" target="_blank">Huggingface</el-link>
+          </div>
+        </el-form-item>
       </el-form>
+
       <el-table :data="tableData" border style="width: 100%" @expand-change="loadExpandData">
         <el-table-column type="expand">
           <template slot-scope="props">
@@ -44,8 +52,20 @@
         <el-table-column prop="name" label="模型名称">
         </el-table-column>
         <el-table-column prop="type" label="模型类型">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.type === 'gguf' ? 'primary' : 'success'"
+              disable-transitions>{{ scope.row.type }}
+            </el-tag>
+          </template>
         </el-table-column>
         <el-table-column prop="download_platform" label="下载平台">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.download_platform === 'modelscope' ? 'primary' : 'success'"
+              disable-transitions>{{ scope.row.download_platform }}
+            </el-tag>
+          </template>
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="160">
           <template slot-scope="scope">
@@ -64,7 +84,6 @@
 
     <el-dialog :title="dialogTitle" :visible.sync="showDialog" :close-on-press-escape=false :close-on-click-modal=false
                :destroy-on-close=true @close="resetDialog">
-      <a href="https://www.modelscope.cn/models" target="_blank" style="">模型广场</a>
       <el-form :model="modelForm" :rules="rules" ref="modelForm">
         <el-form-item label="下载平台" label-width="120px" prop="download_platform">
           <el-select v-model="modelForm.download_platform" placeholder="下载平台">

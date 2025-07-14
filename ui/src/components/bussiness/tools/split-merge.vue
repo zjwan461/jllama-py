@@ -79,6 +79,12 @@
             <el-table-column label="执行时间" prop="create_time">
             </el-table-column>
             <el-table-column label="选项" prop="option">
+              <template slot-scope="scope">
+                <el-tag
+                  :type="scope.row.option === 'split' ? 'primary' : 'success'"
+                  disable-transitions>{{ scope.row.option }}
+                </el-tag>
+              </template>
             </el-table-column>
           </el-table>
           <div class="block">
