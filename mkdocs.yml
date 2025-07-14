@@ -42,6 +42,8 @@ plugins:
 
 watch:
   - README.md
+  - llama-cpp-python-cpu.md
+  - llama-cpp-python-cuda.md
 
 nav:
   - "Getting Started": "index.md"
