@@ -42,13 +42,15 @@ plugins:
 
 watch:
   - README.md
+  - docs
   - llama-cpp-python-cpu.md
   - llama-cpp-python-cuda.md
 
 nav:
   - "快速开始": "index.md"
+  - "安装和构建": "install.md"
   - "安装llama-cpp-python(CPU)": "cpp_cpu.md"
-  - "安装llama-cpp-python(CUDA)": "cpp_gpu.md"
+  - "安装llama-cpp-python(CUDA)": "cpp_cuda.md"
 
 markdown_extensions:
   - attr_list

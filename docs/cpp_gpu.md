@@ -1,1 +1,0 @@
--8<- "llama-cpp-python-gpu.md"
