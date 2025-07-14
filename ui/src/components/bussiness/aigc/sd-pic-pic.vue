@@ -117,11 +117,7 @@
         <el-col :span="12">
           <div class="image-area" v-loading="loading_img">
             <div v-if="generate_imgs.length==0" style="line-height: 28px">
-              <el-image>
-                <div slot="error" class="image-slot">
-                  <i class="el-icon-picture-outline"></i>
-                </div>
-              </el-image>
+              <el-empty description="AIGC图生图"></el-empty>
             </div>
             <div style="text-align: center" v-if="current_seed !==-1">
               图片种子:
