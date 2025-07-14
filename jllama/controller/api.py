@@ -751,7 +751,7 @@ class Api:
         aigc = params.get("aigc")
         min_seed = aigc.get("min_seed")
         max_seed = aigc.get("max_seed")
-        if min_seed <= max_seed:
+        if min_seed >= max_seed:
             raise ValueError("种子数的范围最大值必须大于最小值")
         config.save_aigc_config(aigc)
         auto_open_log_window = params.get("auto_open_log_window", True)
