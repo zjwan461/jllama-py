@@ -11,7 +11,7 @@ build:
     python: "3.11"
     nodejs: "22"
   commands:
-    - cd ui && npm install
+    - cd ui && npm install && npm run build
     - cp -rf dist/ ../jllama/ui
 mkdocs:
   configuration: mkdocs.yml
