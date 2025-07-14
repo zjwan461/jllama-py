@@ -10,7 +10,7 @@ build:
   commands:
     - cd ui/ && npm install && npm run build
     - cp -rf ui/dist jllama/ui/
-    - python setup.py
+    - python setup.py sdist
   tools:
     python: "3.11"
     nodejs: "22"
