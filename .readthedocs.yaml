@@ -12,7 +12,7 @@ build:
     nodejs: "22"
   commands:
     - cd ui && npm install && npm run build
-    - cp -rf ./dist/ ../jllama/ui
+    - cp -rf ui/dist/ jllama/ui
 mkdocs:
   configuration: mkdocs.yml
 
