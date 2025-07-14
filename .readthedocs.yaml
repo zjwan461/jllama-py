@@ -5,8 +5,12 @@
 version: 2
 
 # Set the version of Python and other tools you might need
-#build:
-#  os: ubuntu-22.04
+build:
+  os: ubuntu-22.04
+  commands:
+    - cd ui/ && npm install && npm run build
+    - cp -rf ui/dist jllama/ui/
+    - python setup.py bdist_wheel sdist
 #  tools:
 #    python: "3.11"
 
