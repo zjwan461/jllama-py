@@ -43,16 +43,23 @@ def list_schedulers() -> list:
 
 def pic_to_pic(sd_origin_model_path, input_image: Image, prompt: str, negative_prompt: str = None,
                checkpoint_path: str = None, num_images=1,
-               lora_path: str = None, guidance_scale=7.5, seed=-1, scheduler="Euler", strength=0.75,
+               lora_path: str = None, ip_adapter_path: str = None, ip_adapter_subfolder: str = None,
+               ip_adapter_weight_name: str = None,
+               guidance_scale=7.5, seed=-1, scheduler="Euler",
+               strength=0.75,
                num_inference_steps=30, lora_alpha=0.7, log_step=5,
                min_seed=1, max_seed=9999999999):
     # 设置设备
     device, torch_dtype = get_base()
     logger.info("开始加载SD模型")
+    pipeline = StableDiffusionImg2ImgPipeline
+    if ip_adapter_path:
+        pipeline = StableDiffusionPipeline
+    logger.info(f"pipeline use: {pipeline.__name__}")
     # 使用第三方checkpoint生成图片，需要指定原生SD的config位置
     if checkpoint_path:
         logger.info(f"使用第三方checkpoint生成图片: {checkpoint_path}")
-        pipe = StableDiffusionImg2ImgPipeline.from_single_file(
+        pipe = pipeline.from_single_file(
             checkpoint_path,
             torch_dtype=torch_dtype,
             safety_checker=None,  # 可以移除安全检查器，但要注意风险
@@ -63,7 +70,7 @@ def pic_to_pic(sd_origin_model_path, input_image: Image, prompt: str, negative_p
     else:
         logger.info(f"使用原生SD模型生成图片: {sd_origin_model_path}")
         # 使用原生sd模型生成图片
-        pipe = StableDiffusionImg2ImgPipeline.from_pretrained(
+        pipe = pipeline.from_pretrained(
             sd_origin_model_path,
             torch_dtype=torch_dtype,
             safety_checker=None,  # 可以移除安全检查器，但要注意风险
@@ -74,22 +81,35 @@ def pic_to_pic(sd_origin_model_path, input_image: Image, prompt: str, negative_p
 
     load_lora(lora_alpha, lora_path, pipe)
 
+    ip_adapter_image = None
+    if ip_adapter_path and ip_adapter_subfolder and ip_adapter_weight_name:
+        logger.info(f"加载IP_Adapter:{ip_adapter_path}/{ip_adapter_subfolder}/{ip_adapter_weight_name}")
+        pipe.load_ip_adapter(ip_adapter_path, subfolder=ip_adapter_subfolder, weight_name=ip_adapter_weight_name)
+        ip_adapter_image = input_image
+        input_image = None
+
     # 采样方式
     load_scheduler(pipe, scheduler)
 
     generator, seed = get_generator(device, max_seed, min_seed, seed)
     logger.info(f"开始生成图像: '{prompt}'")
 
+    if pipeline == StableDiffusionPipeline:
+        simple_sd_callback = SimpleSDCallback(log_step=log_step, total_step=num_inference_steps)
+    else:
+        simple_sd_callback = SimpleSDCallback(log_step=log_step, total_step=int(num_inference_steps * strength))
+
     images = pipe(
         prompt=prompt,
         negative_prompt=negative_prompt,
         num_images_per_prompt=num_images,
         image=input_image,
+        ip_adapter_image=ip_adapter_image,
         strength=strength,  # 控制图像变化程度（0-1）
         guidance_scale=guidance_scale,
         num_inference_steps=num_inference_steps,
         generator=generator,
-        callback_on_step_end=SimpleSDCallback(log_step=log_step, total_step=int(num_inference_steps * strength)),
+        callback_on_step_end=simple_sd_callback,
     ).images
 
     logger.info(f"生成完成")
