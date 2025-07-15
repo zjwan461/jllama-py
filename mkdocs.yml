@@ -41,6 +41,7 @@ plugins:
             - https://numpy.org/doc/stable/objects.inv
 
 watch:
+  - jllama
   - README.md
   - docs
   - llama-cpp-python-cpu.md
