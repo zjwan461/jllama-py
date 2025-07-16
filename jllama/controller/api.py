@@ -1200,7 +1200,7 @@ class Api:
         result["images"] = images_base64
         return result
 
-    def check_sd_env(self):
+    def check_sd_env(self) -> StableDiffusionInfo:
         session = SqliteSqlalchemy().session
         sd_info = session.query(StableDiffusionInfo).get(999)
         if sd_info is None or sd_info.state == '待初始化' or not os.path.exists(sd_info.main_model_path):
@@ -1254,6 +1254,7 @@ class Api:
         img_num = int(params.get("img_num"))
         img_height = int(params.get("img_height"))
         img_width = int(params.get("img_width"))
+        ip_adapter_model = params.get("ip_adapter_model")
 
         if input_img is None or len(input_img) == 0:
             raise ValueError("请选择图片")
@@ -1276,6 +1277,10 @@ class Api:
         if lora_alpha > 1.0 or lora_alpha < 0:
             raise ValueError("lora_alpha为0-1的小数")
 
+        if ip_adapter_model and len(ip_adapter_model) > 0 and not os.path.exists(
+                sd_info.ip_adapter_model_path + "/models/" + ip_adapter_model):
+            raise ValueError(f"找不到ip_adapter_model文件：{ip_adapter_model}")
+
         input_image = common_util.load_image(input_img)
         input_image = input_image.resize((img_width, img_height))
 
@@ -1287,6 +1292,9 @@ class Api:
                                   negative_prompt=negative_prompt,
                                   checkpoint_path=checkpoint,
                                   lora_path=lora,
+                                  ip_adapter_path=sd_info.ip_adapter_model_path,
+                                  ip_adapter_subfolder="models",
+                                  ip_adapter_weight_name=ip_adapter_model,
                                   num_images=img_num,
                                   guidance_scale=guidance_scale,
                                   seed=seed,
@@ -1371,11 +1379,12 @@ class Api:
         finally:
             session.rollback()
 
-        if sd_info is None:
-            return []
-        else:
+        model_list = []
+        if sd_info is not None:
             amp = sd_info.ip_adapter_model_path
             if os.path.exists(amp) and os.path.exists(f"{amp}/models"):
-                return os.listdir(f"{amp}/models")
-            else:
-                return []
+                base_dir = f"{amp}/models"
+                for entry in os.listdir(base_dir):
+                    if not os.path.isdir(os.path.join(base_dir, entry)):
+                        model_list.append(entry)
+        return model_list

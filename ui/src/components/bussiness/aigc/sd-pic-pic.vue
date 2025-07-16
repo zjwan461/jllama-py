@@ -9,7 +9,7 @@
       <el-row>
         <el-col :span="12">
           <div>
-            <SdInfo :sd_info="sd_info" @getSdInfo="getSdInfo"></SdInfo>
+            <SdInfo :sd_info="sd_info" @getSdInfo="getSdInfo" @getIpAdapterModels="getIpAdapterModels"></SdInfo>
             <div v-if="sd_info.state ==='已初始化'">
               <el-form :model="sd_reasonning" ref="form" :rules="rules">
                 <el-form-item label="上传原图" prop="input_img">
@@ -108,7 +108,9 @@
 
                 </el-form-item>
                 <el-form-item label="IP-Adapter" v-if="sd_info.ip_adapter_state === '已初始化'">
-                  <el-select></el-select>
+                  <el-select v-model="sd_reasonning.ip_adapter_model">
+                    <el-option v-for="item in ipAdapterModels" :label="item" :value="item"></el-option>
+                  </el-select>
                 </el-form-item>
                 <el-form-item>
                   <el-button type="primary" @click="onSubmit('form')">提交</el-button>
@@ -201,6 +203,7 @@ export default {
   created() {
     this.getSdInfo()
     this.getUploadUrl()
+    this.getIpAdapterModels()
   },
   methods: {
     openFileSelect(val) {
@@ -273,6 +276,13 @@ export default {
         console.log("未从store找到base_url,将使用默认http://127.0.0.1:5000/upload")
       }
     },
+    getIpAdapterModels() {
+      apis.getIpAdapterModels().then(res => {
+        this.ipAdapterModels = res
+      }).catch(e => {
+        this.$message.error(e)
+      })
+    }
   }
 }
 </script>

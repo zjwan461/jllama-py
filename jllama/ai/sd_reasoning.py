@@ -53,7 +53,7 @@ def pic_to_pic(sd_origin_model_path, input_image: Image, prompt: str, negative_p
     device, torch_dtype = get_base()
     logger.info("开始加载SD模型")
     pipeline = StableDiffusionImg2ImgPipeline
-    if ip_adapter_path:
+    if ip_adapter_path and ip_adapter_subfolder and ip_adapter_weight_name:
         pipeline = StableDiffusionPipeline
     logger.info(f"pipeline use: {pipeline.__name__}")
     # 使用第三方checkpoint生成图片，需要指定原生SD的config位置

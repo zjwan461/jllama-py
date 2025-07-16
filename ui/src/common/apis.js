@@ -202,4 +202,7 @@ export default {
   initIpAdapterFaceid() {
     return window.pywebview.api.init_ip_adapter_faceid()
   },
+  getIpAdapterModels() {
+    return window.pywebview.api.get_ip_adapter_models()
+  },
 }

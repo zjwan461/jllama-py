@@ -1,10 +1,10 @@
 <template>
-  <div class="sd-info" v-loading="sd_info_loading">
+  <div class="sd-info">
     <div>SD环境状态：
       <el-tag type="success" v-if="sd_info.state=='已初始化'">{{ sd_info.state }}</el-tag>
       <el-tag type="danger" v-else>{{ sd_info.state }}</el-tag> &nbsp;&nbsp;&nbsp;&nbsp;
       <el-tooltip content="初始化SD基础运行环境">
-        <el-button @click="initSd" type="text" size="mini" round v-if="sd_info.state === '待初始化'">初始化
+        <el-button :loading="sd_info_loading" @click="initSd" type="text" size="mini" round v-if="sd_info.state === '待初始化'">初始化
         </el-button>
       </el-tooltip>
     </div>
@@ -84,7 +84,7 @@ export default {
         this.ip_adapter_loading = false
         this.$message.success("IP-Adapter环境初始化完成")
         this.$emit('getSdInfo') // 触发父组件方法
-
+        this.$emit('getIpAdapterModels')
       }).catch(e => {
         this.ip_adapter_loading = false
         this.$message.error(e)

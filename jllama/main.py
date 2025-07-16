@@ -222,6 +222,9 @@ class JsApi:
     def init_ip_adapter_faceid(self):
         return self.controller.init_ip_adapter_faceid(window)
 
+    def get_ip_adapter_models(self):
+        return self.controller.get_ip_adapter_models()
+
 
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 
