@@ -30,8 +30,8 @@ from ip_adapter.ip_adapter_faceid import IPAdapterFaceID, IPAdapterFaceIDPlus
 sd_origin_model_path = r"E:\models\AI-ModelScope\stable-diffusion-v1-5"
 base_model_path = r"E:\models\MusePublic\majicMIX_realistic_maijuxieshi_SD_1_5\majicmixRealistic_v7.safetensors"
 vae_model_path = r"E:/models\zhuzhukeji\sd-vae-ft-mse"
-image_encoder_path = "laion/CLIP-ViT-H-14-laion2B-s32B-b79K"
-ip_ckpt = r"E:\models\guaidao\IP-Adapter-FaceID\ip-adapter-faceid_sd15.bin"
+image_encoder_path = r"E:/models/laion/CLIP-ViT-H-14-laion2B-s32B-b79K"
+ip_ckpt = r"E:\models\guaidao\IP-Adapter-FaceID\ip-adapter-faceid_sd15.bin" #ip-adapter-faceid-plusv2_sd15.bin
 lora_ckpt = r"E:\models\guaidao\IP-Adapter-FaceID\ip-adapter-faceid_sd15_lora.safetensors"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -61,8 +61,8 @@ pipe = StableDiffusionPipeline.from_single_file(
 
 # load ip-adapter
 
-# ip_model = IPAdapterFaceID(pipe, ip_ckpt, device)
-ip_model = IPAdapterFaceIDPlus(pipe, image_encoder_path, ip_ckpt, device,)
+ip_model = IPAdapterFaceID(pipe, ip_ckpt, device)
+# ip_model = IPAdapterFaceIDPlus(pipe, image_encoder_path, ip_ckpt, device,)
 
 # generate image
 prompt = "1girl,naked,beach,busty"
