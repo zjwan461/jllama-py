@@ -1311,3 +1311,71 @@ class Api:
             images_base64.append(img_str)
         result["images"] = images_base64
         return result
+
+    def init_ip_adapter(self, window):
+        model_save_dir = config.get_ai_config().get("model_save_dir")
+        model_dir = snapshot_download("AI-ModelScope/IP-Adapter", cache_dir=model_save_dir,
+                                      allow_file_pattern="*")
+        session = SqliteSqlalchemy().session
+        try:
+            sd_info = session.query(StableDiffusionInfo).get(999)
+            if sd_info is None:
+                sd_info = StableDiffusionInfo(id=999)
+            sd_info.ip_adapter_model_path = model_dir
+            sd_info.ip_adapter_state = "已初始化"
+            session.commit()
+            window.evaluate_js("vue.messageArrive('jllama提醒','IP-Adapter环境初始化成功','success')")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.rollback()
+
+    def init_ip_adapter_faceid(self, window):
+        model_save_dir = config.get_ai_config().get("model_save_dir")
+        faceid_model_dir = snapshot_download("guaidao/IP-Adapter-FaceID", cache_dir=model_save_dir,
+                                             allow_file_pattern="*")
+
+        insightface_model_dir = snapshot_download("deepghs/insightface", cache_dir=model_save_dir,
+                                                  allow_file_pattern="*")
+
+        image_encoder_model_dir = snapshot_download("laion/CLIP-ViT-H-14-laion2B-s32B-b79K", cache_dir=model_save_dir,
+                                                    allow_file_pattern="*")
+
+        session = SqliteSqlalchemy().session
+        try:
+            sd_info = session.query(StableDiffusionInfo).get(999)
+            if sd_info is None:
+                sd_info = StableDiffusionInfo(id=999)
+            sd_info.ip_adapter_faceid_model_path = faceid_model_dir
+            sd_info.insightface_model_path = insightface_model_dir
+            sd_info.image_encoder_model_path = image_encoder_model_dir
+            sd_info.ip_adapter_faceid_state = "已初始化"
+            session.commit()
+            window.evaluate_js("vue.messageArrive('jllama提醒','IP-Adapter-FaceId环境初始化成功','success')")
+        except Exception as e:
+            logger.error(e)
+            session.rollback()
+            raise e
+        finally:
+            session.rollback()
+
+    def get_ip_adapter_models(self):
+        session = SqliteSqlalchemy().session
+        sd_info = None
+        try:
+            sd_info = session.query(StableDiffusionInfo).get(999)
+        except Exception as e:
+            logger.error(e)
+        finally:
+            session.rollback()
+
+        if sd_info is None:
+            return []
+        else:
+            amp = sd_info.ip_adapter_model_path
+            if os.path.exists(amp) and os.path.exists(f"{amp}/models"):
+                return os.listdir(f"{amp}/models")
+            else:
+                return []

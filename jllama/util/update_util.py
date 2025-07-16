@@ -37,12 +37,14 @@ def update_other():
         with open(update_sql_file, encoding="utf-8") as f:
             update_sql = f.read()
             if update_sql and len(update_sql) > 0:
-                try:
-                    conn, cursor = prepare_conn()
-                    cursor.execute(update_sql)
-                except Exception as e:
-                    logger.error(e)
-                    conn.rollback()
-                finally:
-                    cursor.close()
-                    conn.close()
+                conn, cursor = prepare_conn()
+                for sql in update_sql.split(';'):
+                    if sql and len(sql) > 0:
+                        logger.info(f"start to execute update sql: {sql}")
+                        try:
+                            cursor.execute(sql)
+                        except Exception as e:
+                            logger.error(e)
+                            conn.rollback()
+                cursor.close()
+                conn.close()

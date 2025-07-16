@@ -133,6 +133,12 @@ class StableDiffusionInfo(BaseEntity):
     main_model_path = Column(String(500))
     sd_version = Column(String(50), default="1.5")
     state = Column(String(50), default="待初始化")
+    ip_adapter_model_path = Column(String(500))
+    ip_adapter_state = Column(String(50), default="待初始化")
+    insightface_model_path = Column(String(500))
+    image_encoder_model_path = Column(String(500))
+    ip_adapter_faceid_model_path = Column(String(500))
+    ip_adapter_faceid_state = Column(String(50), default="待初始化")
 
 
 class SqliteSqlalchemy(object):

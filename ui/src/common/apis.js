@@ -196,4 +196,10 @@ export default {
   sdPicToPic(params) {
     return window.pywebview.api.sd_pic_to_pic(params)
   },
+  initIpAdapter() {
+    return window.pywebview.api.init_ip_adapter()
+  },
+  initIpAdapterFaceid() {
+    return window.pywebview.api.init_ip_adapter_faceid()
+  },
 }

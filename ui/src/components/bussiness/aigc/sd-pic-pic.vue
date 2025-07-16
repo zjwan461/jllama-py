@@ -107,6 +107,9 @@
                   </el-col>
 
                 </el-form-item>
+                <el-form-item label="IP-Adapter" v-if="sd_info.ip_adapter_state === '已初始化'">
+                  <el-select></el-select>
+                </el-form-item>
                 <el-form-item>
                   <el-button type="primary" @click="onSubmit('form')">提交</el-button>
                 </el-form-item>
@@ -159,6 +162,7 @@ export default {
   },
   data() {
     return {
+      ipAdapterModels: [],
       uploadUrl: "http://127.0.0.1:5000/upload",
       fileList: [],
       current_seed: -1,

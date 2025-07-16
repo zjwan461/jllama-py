@@ -216,6 +216,12 @@ class JsApi:
     def sd_pic_to_pic(self, params):
         return self.controller.sd_pic_to_pic(params, window)
 
+    def init_ip_adapter(self):
+        return self.controller.init_ip_adapter(window)
+
+    def init_ip_adapter_faceid(self):
+        return self.controller.init_ip_adapter_faceid(window)
+
 
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 
