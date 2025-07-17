@@ -54,16 +54,6 @@
                   <el-col :span="9">
                     <el-input-number v-model="sd_reasonning.seed"></el-input-number>
                   </el-col>
-                  <el-col class="line" :span="3">采样方式</el-col>
-                  <el-col :span="9">
-                    <el-select v-model="sd_reasonning.scheduler">
-                      <el-option value="Euler">Euler</el-option>
-                      <el-option value="DPM">DPM</el-option>
-                      <el-option value="LMS">LMS</el-option>
-                      <el-option value="PNDM">PNDM</el-option>
-                      <el-option value="DDIM">DDIM</el-option>
-                    </el-select>
-                  </el-col>
                 </el-form-item>
 
                 <el-form-item label="" prop="num_inference_steps">
@@ -178,10 +168,9 @@ export default {
         scheduler: 'Euler',
         num_inference_steps: 30,
         guidance_scale: 3.0,
-        img_num: 2,
+        img_num: 1,
         img_height: 512,
         img_width: 512,
-        strength: 0.50
       },
       rules: {
         prompt: [
@@ -196,7 +185,6 @@ export default {
   created() {
     this.getSdInfo()
     this.getUploadUrl()
-    this.getIpAdapterModels()
   },
   methods: {
     openFileSelect(val) {
@@ -226,7 +214,7 @@ export default {
         if (valid) {
           this.loading_img = true
           this.$message.success("开始生成图片")
-          apis.sdPicToPic(this.sd_reasonning).then(res => {
+          apis.sdIpAdapterFaceid(this.sd_reasonning).then(res => {
             this.loading_img = false
             this.generate_imgs = res.images
             this.current_seed = res.seed
@@ -252,9 +240,6 @@ export default {
     },
     uploadSuccess(response, file, fileList) {
       this.sd_reasonning.input_img = response.file_path
-      // 自动计算满足8的倍数的值,SD生成图片的width、height必须是8的倍数
-      this.sd_reasonning.img_width = closestMultipleOf8(response.width)
-      this.sd_reasonning.img_height = closestMultipleOf8(response.height)
       this.fileList = fileList
     },
     beforeUpload(file) {
@@ -273,13 +258,6 @@ export default {
       } else {
         console.log("未从store找到base_url,将使用默认http://127.0.0.1:5000/upload")
       }
-    },
-    getIpAdapterModels() {
-      apis.getIpAdapterModels().then(res => {
-        this.ipAdapterModels = res
-      }).catch(e => {
-        this.$message.error(e)
-      })
     }
   }
 }

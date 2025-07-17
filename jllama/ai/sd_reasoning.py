@@ -1,9 +1,15 @@
+import cv2
 import torch
 from PIL import Image
 from diffusers import StableDiffusionPipeline, EulerDiscreteScheduler, DDIMScheduler, DPMSolverMultistepScheduler, \
     LMSDiscreteScheduler, PNDMScheduler, StableDiffusionImg2ImgPipeline
 import matplotlib.pyplot as plt
 from random import randint
+
+from insightface.app import FaceAnalysis
+from insightface.utils import face_align
+from ip_adapter.ip_adapter_faceid import IPAdapterFaceID
+
 from jllama.util.logutil import Logger
 from enum import Enum
 
@@ -148,6 +154,7 @@ def load_lora(lora_alpha, lora_path, pipe):
         # 加载 LoRA 权重
         logger.info(f"加载第三方LoRA: {lora_path}")
         pipe.load_lora_weights(lora_path, alpha=lora_alpha)
+        pipe.fuse_lora()
 
 
 def text_to_pic(sd_origin_model_path, prompt: str, negative_prompt: str = None, checkpoint_path: str = None,
@@ -218,6 +225,87 @@ def text_to_pic(sd_origin_model_path, prompt: str, negative_prompt: str = None, 
     logger.info(f"生成完成")
 
     del pipe
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    logger.info(f"已卸载模型")
+    return images, seed
+
+
+def ip_adapter_faceid_pic(sd_origin_model_path, ip_adapter_faceid_model_path,
+                          input_image_path: str, prompt: str,
+                          negative_prompt: str = None,
+                          checkpoint_path: str = None,
+                          lora_path: str = None,
+                          num_images=1, guidance_scale=7.5, seed=-1,
+                          num_inference_steps=30, lora_alpha=0.7, height=512, width=512, log_step=5,
+                          min_seed=1, max_seed=9999999999):
+    logger.info("开始加载参考图人脸")
+    app = FaceAnalysis(name="buffalo_l", root="E:/models/insightface",
+                       providers=['AzureExecutionProvider', 'CPUExecutionProvider'])
+    app.prepare(ctx_id=0, det_size=(640, 640))
+
+    image = cv2.imread(input_image_path)
+    faces = app.get(image)
+
+    faceid_embeds = torch.from_numpy(faces[0].normed_embedding).unsqueeze(0)
+    face_image = face_align.norm_crop(image, landmark=faces[0].kps, image_size=224)
+
+    logger.info("成功加载参考图人脸")
+
+    # 设置设备
+    device = get_base()
+
+    noise_scheduler = DDIMScheduler(
+        num_train_timesteps=1000,
+        beta_start=0.00085,
+        beta_end=0.012,
+        beta_schedule="scaled_linear",
+        clip_sample=False,
+        set_alpha_to_one=False,
+        steps_offset=1,
+    )
+
+    logger.info("开始加载SD模型")
+    # 使用第三方checkpoint生成图片，需要指定原生SD的config位置
+    if checkpoint_path:
+        logger.info(f"使用第三方checkpoint生成图片: {checkpoint_path}")
+        pipe = StableDiffusionPipeline.from_single_file(
+            checkpoint_path,
+            torch_dtype=torch.float16,
+            scheduler=noise_scheduler,
+            safety_checker=None,  # 可以移除安全检查器，但要注意风险
+            config=sd_origin_model_path,
+            use_safetensors=True,
+            local_files_only=True,
+        )
+    else:
+        logger.info(f"使用原生SD模型生成图片: {sd_origin_model_path}")
+        # 使用原生sd模型生成图片
+        pipe = StableDiffusionPipeline.from_pretrained(
+            sd_origin_model_path,
+            torch_dtype=torch.float16,
+            scheduler=noise_scheduler,
+            safety_checker=None,  # 可以移除安全检查器，但要注意风险
+            use_safetensors=True,
+            local_files_only=True
+        )
+
+    load_lora(lora_alpha, lora_path, pipe)
+
+    logger.info(f"开始加载IP-AdapterFaceId: {ip_adapter_faceid_model_path}")
+    ip_model = IPAdapterFaceID(pipe, ip_adapter_faceid_model_path, device)
+
+    seed = get_generator(device, max_seed, min_seed, seed)[-1]
+
+    images = ip_model.generate(
+        prompt=prompt, negative_prompt=negative_prompt, face_image=face_image, faceid_embeds=faceid_embeds,
+        num_samples=num_images,
+        width=width, height=height,
+        num_inference_steps=num_inference_steps, seed=seed, guidance_scale=guidance_scale,
+        callback_on_step_end=SimpleSDCallback(log_step=log_step, total_step=num_inference_steps),
+    )
+
+    del pipe, ip_model, face_image, faceid_embeds
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
     logger.info(f"已卸载模型")

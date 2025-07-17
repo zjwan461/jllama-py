@@ -37,7 +37,7 @@ import jllama.util.pip_util as pip_util
 import jllama.ai.llamafactory_server as llamafactory_server
 from jllama.env import jllama_version, factory_version, cpp_version
 from modelscope import snapshot_download
-from jllama.ai.sd_reasoning import supported_scheduler, list_schedulers, text_to_pic, pic_to_pic
+from jllama.ai.sd_reasoning import supported_scheduler, list_schedulers, text_to_pic, pic_to_pic, ip_adapter_faceid_pic
 
 logger = Logger(__name__)
 
@@ -1393,3 +1393,84 @@ class Api:
                     if not os.path.isdir(os.path.join(base_dir, entry)):
                         model_list.append(entry)
         return model_list
+
+    def sd_ip_adapter_faceid(self, params, window):
+        sd_info = self.check_sd_env()
+        if sd_info.ip_adapter_faceid_state != "已初始化":
+            raise ValueError("IP-Adapter-FaceID环境未初始化")
+        """
+        seed: -1,
+        checkpoint: null,
+        lora: null,
+        scheduler: 'Euler',
+        num_inference_steps: 30,
+        img_num: 2,
+        img_height: 512,
+        img_width: 512
+        """
+        input_img = params.get("input_img")
+        seed = int(params.get("seed", -1))
+        prompt = params.get("prompt")
+        negative_prompt = params.get("negative_prompt")
+        checkpoint = params.get("checkpoint")
+        lora = params.get("lora")
+        lora_alpha = float(params.get("lora_alpha"))
+        guidance_scale = float(params.get("guidance_scale"))
+        num_inference_steps = int(params.get("num_inference_steps"))
+        img_num = int(params.get("img_num"))
+        img_height = int(params.get("img_height"))
+        img_width = int(params.get("img_width"))
+        ip_adapter_faceid_model = params.get("ip_adapter_faceid_model")
+
+        if input_img is None or len(input_img) == 0:
+            raise ValueError("请选择图片")
+
+        if prompt is None or len(prompt) == 0:
+            raise ValueError("正向提示词必填")
+
+        if checkpoint is not None and len(checkpoint) > 0 and not os.path.exists(checkpoint):
+            raise ValueError(f"找不到checkpoint文件：{checkpoint}")
+
+        if lora is not None and len(lora) > 0 and not os.path.exists(lora):
+            raise ValueError(f"找不到lora文件：{lora}")
+
+        if lora_alpha > 1.0 or lora_alpha < 0:
+            raise ValueError("lora_alpha为0-1的小数")
+
+        if ip_adapter_faceid_model and len(ip_adapter_faceid_model) > 0 and not os.path.exists(
+                sd_info.ip_adapter_faceid_model_path + "/" + ip_adapter_faceid_model):
+            raise ValueError(f"找不到ip_adapter_model文件：{ip_adapter_faceid_model}")
+
+        log_handler.textViewer = self.get_log_viewer()
+        aigc_config = config.get_aigc_config()
+        images, seed = ip_adapter_faceid_pic(sd_origin_model_path=sd_info.main_model_path,
+                                             ip_adapter_faceid_model_path=sd_info.ip_adapter_faceid_model_path + "/" + ip_adapter_faceid_model,
+                                             input_image_path=input_img,
+                                             prompt=prompt,
+                                             negative_prompt=negative_prompt,
+                                             checkpoint_path=checkpoint,
+                                             lora_path=lora,
+                                             num_images=img_num,
+                                             guidance_scale=guidance_scale,
+                                             seed=seed,
+                                             num_inference_steps=num_inference_steps,
+                                             lora_alpha=lora_alpha,
+                                             height=img_height,
+                                             width=img_width,
+                                             log_step=aigc_config.get("log_step", 5),
+                                             min_seed=aigc_config.get("min_seed", 1),
+                                             max_seed=aigc_config.get("max_seed", 9999999999)
+                                             )
+
+        window.evaluate_js("vue.messageArrive('jllama提醒','图片生成成功','success')")
+
+        result = {"seed": seed}
+        images_base64 = []
+        for image in images:
+            # 转换为 Base64
+            buffered = BytesIO()
+            image.save(buffered, format="PNG")
+            img_str = "data:image/png;base64," + base64.b64encode(buffered.getvalue()).decode()
+            images_base64.append(img_str)
+        result["images"] = images_base64
+        return result

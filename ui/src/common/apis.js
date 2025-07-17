@@ -205,4 +205,7 @@ export default {
   getIpAdapterModels() {
     return window.pywebview.api.get_ip_adapter_models()
   },
+  sdIpAdapterFaceid(params) {
+    return window.pywebview.api.sd_ip_adapter_faceid(params)
+  },
 }
