@@ -1,6 +1,7 @@
 import base64
 import json
 import os.path
+import shutil
 import tempfile
 import threading
 import time
@@ -1347,6 +1348,10 @@ class Api:
 
         insightface_model_dir = snapshot_download("deepghs/insightface", cache_dir=model_save_dir,
                                                   allow_file_pattern="*")
+
+        Path(f"{insightface_model_dir}/models").mkdir(exist_ok=True)
+        shutil.copytree(f"{insightface_model_dir}/buffalo_l", f"{insightface_model_dir}/models/buffalo_l")
+        shutil.copytree(f"{insightface_model_dir}/buffalo_s", f"{insightface_model_dir}/models/buffalo_s")
 
         image_encoder_model_dir = snapshot_download("laion/CLIP-ViT-H-14-laion2B-s32B-b79K", cache_dir=model_save_dir,
                                                     allow_file_pattern="*")

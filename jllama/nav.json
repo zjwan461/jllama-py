@@ -97,6 +97,12 @@
         "title": "SD图生图",
         "icon": "el-icon-picture-outline",
         "href": "/aigc/sd-pic-pic"
+      },
+      {
+        "id": 43,
+        "title": "IP-Adapter-FaceID",
+        "icon": "el-icon-view",
+        "href": "/aigc/sd-ip-adapter-faceid"
       }
     ]
   }

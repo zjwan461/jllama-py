@@ -74,7 +74,11 @@ const routes = [{
       path: '/aigc/sd-pic-pic',
       name: 'sd-pic-pic',
       component: () => import('../components/bussiness/aigc/sd-pic-pic.vue')
-    },
+    }, {
+      path: '/aigc/sd-ip-adapter-faceid',
+      name: 'sd-ip-adapter-faceid',
+      component: () => import('../components/bussiness/aigc/sd-ip-adapter-faceid')
+    }
     ]
   }]
 

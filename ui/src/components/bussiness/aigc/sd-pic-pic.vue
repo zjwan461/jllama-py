@@ -9,7 +9,7 @@
       <el-row>
         <el-col :span="12">
           <div>
-            <SdInfo :sd_info="sd_info" @getSdInfo="getSdInfo" @getIpAdapterModels="getIpAdapterModels"></SdInfo>
+            <SdInfo :sd_info="sd_info" @getSdInfo="getSdInfo"></SdInfo>
             <div v-if="sd_info.state ==='已初始化'">
               <el-form :model="sd_reasonning" ref="form" :rules="rules">
                 <el-form-item label="上传原图" prop="input_img">
@@ -109,7 +109,8 @@
                 </el-form-item>
                 <el-form-item label="IP-Adapter" v-if="sd_info.ip_adapter_state === '已初始化'">
                   <el-select v-model="sd_reasonning.ip_adapter_model">
-                    <el-option v-for="(item, index) in ipAdapterModels" :key="index" :label="item" :value="item"></el-option>
+                    <el-option v-for="(item, index) in ipAdapterModels" :key="index" :label="item"
+                               :value="item"></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item>
@@ -219,6 +220,9 @@ export default {
     getSdInfo() {
       apis.getSdInfo().then(res => {
         this.sd_info = JSON.parse(res)
+        if (this.sd_info.state !== '已初始化') {
+          this.$message.error('检测到未初始化SD基础环境，请初始化后使用此功能')
+        }
       }).catch(e => {
         this.$message.error(e)
       })
