@@ -37,7 +37,8 @@ import jllama.util.pip_util as pip_util
 import jllama.ai.llamafactory_server as llamafactory_server
 from jllama.env import jllama_version, factory_version, cpp_version
 from modelscope import snapshot_download
-from jllama.ai.sd_reasoning import supported_scheduler, list_schedulers, text_to_pic, pic_to_pic, ip_adapter_faceid_pic
+from jllama.ai.sd_reasoning import supported_scheduler, list_schedulers, text_to_pic, pic_to_pic, ip_adapter_faceid_pic, \
+    default_negative_prompt
 
 logger = Logger(__name__)
 
@@ -1476,3 +1477,6 @@ class Api:
             images_base64.append(img_str)
         result["images"] = images_base64
         return result
+
+    def get_default_negative_prompt(self):
+        return default_negative_prompt()

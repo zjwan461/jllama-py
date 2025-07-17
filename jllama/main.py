@@ -228,6 +228,8 @@ class JsApi:
     def sd_ip_adapter_faceid(self, params):
         return self.controller.sd_ip_adapter_faceid(params, window)
 
+    def get_default_negative_prompt(self):
+        return self.controller.get_default_negative_prompt()
 
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 

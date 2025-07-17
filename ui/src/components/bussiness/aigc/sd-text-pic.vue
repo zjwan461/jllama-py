@@ -161,6 +161,7 @@ export default {
   },
   created() {
     this.getSdInfo()
+    this.getDefaultNegativePrompt()
   },
   methods: {
     openFileSelect(val) {
@@ -219,6 +220,15 @@ export default {
     viewImage(image) {
       this.$refs.imageViewerRef.loadImage(image);
       this.viewerVisible = true
+    },
+    getDefaultNegativePrompt() {
+      apis.getDefaultNegativePrompt().then(res => {
+        if (res && res.length > 0) {
+          this.sd_reasonning.negative_prompt = res
+        }
+      }).catch(e => {
+        this.$message.error(e)
+      })
     }
   }
 }

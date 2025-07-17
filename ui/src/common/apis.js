@@ -208,4 +208,7 @@ export default {
   sdIpAdapterFaceid(params) {
     return window.pywebview.api.sd_ip_adapter_faceid(params)
   },
+  getDefaultNegativePrompt() {
+    return window.pywebview.api.get_default_negative_prompt()
+  },
 }

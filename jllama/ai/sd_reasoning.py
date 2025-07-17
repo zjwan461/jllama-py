@@ -333,6 +333,10 @@ class SimpleSDCallback:
         return callback_kwargs
 
 
+def default_negative_prompt():
+    return "monochrome, lowres, bad anatomy, worst quality, low quality, blurry"
+
+
 # 示例用法
 if __name__ == "__main__":
     print(list_schedulers())
