@@ -109,7 +109,7 @@
                 </el-form-item>
                 <el-form-item label="IP-Adapter" v-if="sd_info.ip_adapter_state === '已初始化'">
                   <el-select v-model="sd_reasonning.ip_adapter_model">
-                    <el-option v-for="item in ipAdapterModels" :label="item" :value="item"></el-option>
+                    <el-option v-for="(item, index) in ipAdapterModels" :key="index" :label="item" :value="item"></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item>
