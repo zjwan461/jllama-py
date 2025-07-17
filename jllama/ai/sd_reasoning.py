@@ -8,7 +8,7 @@ from random import randint
 
 from insightface.app import FaceAnalysis
 from insightface.utils import face_align
-from ip_adapter.ip_adapter_faceid import IPAdapterFaceID
+from ip_adapter.ip_adapter_faceid import IPAdapterFaceID, IPAdapterFaceIDPlus
 
 from jllama.util.logutil import Logger
 from enum import Enum
@@ -232,6 +232,7 @@ def text_to_pic(sd_origin_model_path, prompt: str, negative_prompt: str = None, 
 
 
 def ip_adapter_faceid_pic(sd_origin_model_path, ip_adapter_faceid_model_path, insightface_model_path,
+                          image_encoder_model_path: str,
                           input_image_path: str, prompt: str,
                           negative_prompt: str = None,
                           checkpoint_path: str = None,
@@ -293,7 +294,11 @@ def ip_adapter_faceid_pic(sd_origin_model_path, ip_adapter_faceid_model_path, in
     load_lora(lora_alpha, lora_path, pipe)
 
     logger.info(f"开始加载IP-AdapterFaceId: {ip_adapter_faceid_model_path}")
-    ip_model = IPAdapterFaceID(pipe, ip_adapter_faceid_model_path, device)
+    if "plusv2" in ip_adapter_faceid_model_path:
+        logger.info("检测到plusv2模型，IPAdapterFaceIDPlus加载模型")
+        ip_model = IPAdapterFaceIDPlus(pipe, image_encoder_model_path, ip_adapter_faceid_model_path, device)
+    else:
+        ip_model = IPAdapterFaceID(pipe, ip_adapter_faceid_model_path, device)
 
     seed = get_generator(device, max_seed, min_seed, seed)[-1]
 

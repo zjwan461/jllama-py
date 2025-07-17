@@ -89,10 +89,11 @@
                                      placeholder="lora影响系数"></el-input-number>
                   </el-col>
                 </el-form-item>
-                <el-form-item label="IP-Adapter-FaceID">
+                <el-form-item label="IP-Adapter-FaceID" prop="ip_adapter_faceid_model">
                   <el-select v-model="sd_reasonning.ip_adapter_faceid_model">
                     <el-option label="ip-adapter-faceid_sd15.bin" value="ip-adapter-faceid_sd15.bin"></el-option>
-                    <el-option label="ip-adapter-faceid-plusv2_sd15.bin" value="ip-adapter-faceid-plusv2_sd15.bin"></el-option>
+                    <el-option label="ip-adapter-faceid-plusv2_sd15.bin"
+                               value="ip-adapter-faceid-plusv2_sd15.bin"></el-option>
                   </el-select>
                 </el-form-item>
                 <el-form-item>
@@ -178,6 +179,9 @@ export default {
         ],
         input_img: [
           {required: true, message: '请选择图片', trigger: 'blur'}
+        ],
+        ip_adapter_faceid_model: [
+          {required: true, message: '请选择IP-Adapter-FaceID模型', trigger: 'blur'}
         ]
       },
     }
@@ -202,7 +206,7 @@ export default {
         this.sd_info = JSON.parse(res)
         if (this.sd_info.state !== '已初始化') {
           this.$message.error('检测到未初始化SD基础环境，请初始化后使用此功能')
-        } else if (this.sd_info.ip_adapter_faceid_state !=='已初始化') {
+        } else if (this.sd_info.ip_adapter_faceid_state !== '已初始化') {
           this.$message.error('检测到未初始化IP-Adapter-FaceID环境，请初始化后使用此功能');
         }
       }).catch(e => {
