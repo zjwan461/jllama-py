@@ -231,7 +231,7 @@ def text_to_pic(sd_origin_model_path, prompt: str, negative_prompt: str = None, 
     return images, seed
 
 
-def ip_adapter_faceid_pic(sd_origin_model_path, ip_adapter_faceid_model_path,
+def ip_adapter_faceid_pic(sd_origin_model_path, ip_adapter_faceid_model_path, insightface_model_path,
                           input_image_path: str, prompt: str,
                           negative_prompt: str = None,
                           checkpoint_path: str = None,
@@ -240,7 +240,7 @@ def ip_adapter_faceid_pic(sd_origin_model_path, ip_adapter_faceid_model_path,
                           num_inference_steps=30, lora_alpha=0.7, height=512, width=512, log_step=5,
                           min_seed=1, max_seed=9999999999):
     logger.info("开始加载参考图人脸")
-    app = FaceAnalysis(name="buffalo_l", root="E:/models/insightface",
+    app = FaceAnalysis(name="buffalo_l", root=insightface_model_path,
                        providers=['AzureExecutionProvider', 'CPUExecutionProvider'])
     app.prepare(ctx_id=0, det_size=(640, 640))
 
@@ -253,7 +253,7 @@ def ip_adapter_faceid_pic(sd_origin_model_path, ip_adapter_faceid_model_path,
     logger.info("成功加载参考图人脸")
 
     # 设置设备
-    device = get_base()
+    device = get_base()[0]
 
     noise_scheduler = DDIMScheduler(
         num_train_timesteps=1000,

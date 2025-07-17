@@ -1445,6 +1445,7 @@ class Api:
         aigc_config = config.get_aigc_config()
         images, seed = ip_adapter_faceid_pic(sd_origin_model_path=sd_info.main_model_path,
                                              ip_adapter_faceid_model_path=sd_info.ip_adapter_faceid_model_path + "/" + ip_adapter_faceid_model,
+                                             insightface_model_path=sd_info.insightface_model_path,
                                              input_image_path=input_img,
                                              prompt=prompt,
                                              negative_prompt=negative_prompt,
