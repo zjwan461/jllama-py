@@ -6,7 +6,7 @@ ui/dist
 **/__pycache__
 .venv*
 ./tmp
-train*
+train*/
 lora*
 final*
 cache
