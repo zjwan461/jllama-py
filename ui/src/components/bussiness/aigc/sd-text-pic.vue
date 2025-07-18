@@ -135,7 +135,9 @@ export default {
       viewerVisible: false,
       generate_imgs: [],
       sd_info: {
-        state: '待初始化'
+        state: '待初始化',
+        ip_adapter_state: '待初始化',
+        ip_adapter_faceid_state: '待初始化'
       },
       sd_reasonning: {
         prompt: '',
