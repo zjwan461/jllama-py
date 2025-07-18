@@ -273,7 +273,8 @@ export default {
         top_p: 0.90,
         top_k: 40,
         memory: 5,
-        stream: true
+        stream: true,
+        torch_dtype: "auto"
       }
       this.selectedModel = {}
       this.getTableData()
