@@ -1,20 +1,25 @@
 import argparse
+import sys
+
 from jllama import __version__
 
 
 def main():
     parser = argparse.ArgumentParser(description='jllama-cli')
 
-    # 可选参数（带短选项和长选项）
-    parser.add_argument('-v', '--version', help='jllama版本')
+    parser.add_argument('-v', '--version', action="version", version=f'jllama {__version__}', help='jllama版本')
+
+    parser.add_argument('-s', '--serve', action="store_true", help='启动jllama')
 
     args = parser.parse_args()
 
-    _version = args.version
-    if _version:
-        print(__version__)
+    if args.serve:
+        from jllama.main import main as serve
+        serve()
     else:
-        parser.print_usage()
+        parser.print_usage(
+            sys.stderr
+        )
 
 
 if __name__ == '__main__':

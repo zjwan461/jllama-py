@@ -36,6 +36,7 @@ setup(
     entry_points={
         'console_scripts': [
             'jllama = jllama.main:main',  # 格式：'命令名 = 模块名.函数名:函数入口'
+            'jllama-cli = jllama.cli:main',  # 格式：'命令名 = 模块名.函数名:函数入口'
         ],
     },
     package_data={
