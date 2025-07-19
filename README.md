@@ -34,8 +34,10 @@ CUDA版本安装请参考[llama-cpp-python-cuda](llama-cpp-python-cuda.md)
 # 省略llama-cpp-python的安装过程
 ...
 pip install jllama-py
-# 运行
+# 直接使用jllama运行
 jllama
+# 或者使用jllama-cli运行
+jllama-cli --serve
 ```
 直接安装请参考如下。CPU版本安装请提前下载好`MinGW`或安装`Visual Studio`；CUDA版本安装请安装`Visual Studio 2022`软件并安装`C++运行环境`。
 ```shell
@@ -69,7 +71,13 @@ npm install
 npm run build
 # copy ui/dist文件夹到jllama/ui/dist目录下
 cd ../jllama
+# 直接运行main.py启动jllama
 python main.py
+
+# 如需构建jllama可执行文件可继续执行如下命令
+cd .. #或c到jllama-py根目录下执行如下命令
+python setup.py bdist_wheel sdist
+pip install dist/jllama_py-{jllama_version}-py3-none-any.whl
 ```
 
 jllama-py使用了llama-cpp-python作为模型推理技术底座，默认情况下安装的是CPU版本的llama-cpp-python。如果需要使用cuda进行加速推理，请参考如下。
