@@ -144,7 +144,7 @@ class StableDiffusionInfo(BaseEntity):
 class SqliteSqlalchemy(object):
     def __init__(self):
         # 创建Sqlite连接引擎
-        engine = create_engine(config.get_db_url(), echo=True)
+        engine = create_engine(config.get_db_url(), echo=False)
         # 创建表
         Base.metadata.create_all(engine, checkfirst=True)
         # 创建Sqlite的session连接对象
