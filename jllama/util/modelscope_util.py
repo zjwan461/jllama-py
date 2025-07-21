@@ -10,13 +10,21 @@ def get_modelscope_model_file(repo: str, revision="master", root="", gguf_only: 
         data = resp.json()
         files = data["Data"]["Files"]
         file_list = []
+        sub_list = []
         for item in files:
+            if item["Type"] == "tree":
+                sub_list += get_modelscope_model_file(repo, revision, item["Name"], gguf_only, allow_file_pattern)
+                continue
+
             if re.search(allow_file_pattern, item["Name"]):
                 if gguf_only:
                     if item["Name"].endswith(".gguf"):
                         file_list.append(item)
                 else:
                     file_list.append(item)
+
+        if len(sub_list) > 0:
+            file_list += sub_list
         return file_list
     else:
         print(f"resp http status= {resp.status_code}")
@@ -91,4 +99,7 @@ def search_modelscope_model(model_name, page_size=50, text_generation_only: bool
 
 if __name__ == '__main__':
     print(search_modelscope_model("Qwen3-0.6B-GGUF"))
-    print(get_modelscope_model_file("Qwen/Qwen3-0.6B-GGUF", gguf_only=False, allow_file_pattern=".*"))
+    import json
+
+    print(json.dumps(
+        get_modelscope_model_file("deepseek-ai/DeepSeek-R1-0528-Qwen3-8B", gguf_only=False, allow_file_pattern=".*")))

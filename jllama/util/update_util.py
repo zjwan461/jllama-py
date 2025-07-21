@@ -4,9 +4,6 @@ from pathlib import Path
 
 from jllama.config import get_db_url
 from jllama.env import jllama_version, cpp_version, factory_version
-from jllama.util.logutil import Logger
-
-logger = Logger(__name__)
 
 
 def prepare_conn():
@@ -23,7 +20,7 @@ def update_version():
         cursor.execute(update_sql, (cpp_version, factory_version, jllama_version))
         conn.commit()
     except Exception as e:
-        logger.error(e)
+        # print(f"update version fail with sql:{update_sql}", e)
         conn.rollback()
     finally:
         cursor.close()
@@ -40,11 +37,11 @@ def update_other():
                 conn, cursor = prepare_conn()
                 for sql in update_sql.split(';'):
                     if sql and len(sql) > 0:
-                        logger.info(f"start to execute update sql: {sql}")
+                        # print(f"start to execute update sql: {sql}")
                         try:
                             cursor.execute(sql)
                         except Exception as e:
-                            logger.error(e)
+                            # print(f"execute sql:{sql} fail", e)
                             conn.rollback()
                 cursor.close()
                 conn.close()

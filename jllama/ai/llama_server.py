@@ -200,4 +200,4 @@ def run_llama_server(model=None, model_alias=None, n_gpu_layers=None,
 
 
 if __name__ == "__main__":
-    run_llama_server(model="E:\models\Qwen\Qwen3-0.6B.gguf", config_file="../llama_cpp_config.json")
+    run_llama_server(model=r"D:\models\Qwen\Qwen2___5-0___5B-Instruct-GGUF\qwen2.5-0.5b-instruct-q8_0.gguf", model_alias="qwen2.5-0.5B-gguf", n_gpu_layers=-1)

@@ -49,6 +49,7 @@ class Model(BaseEntity):
     type = Column(String(10), default="gguf")
     save_dir = Column(String(255))
     import_dir = Column(String(255))
+    primary_gguf = Column(String(1000))
     files = relationship("FileDownload", backref="model")
 
 
