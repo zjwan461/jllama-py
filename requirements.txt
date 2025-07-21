@@ -7,12 +7,14 @@ GPUtil==1.4.0
 SQLAlchemy==2.0.41
 modelscope==1.26.0
 orjson==3.10.18
-transformers==4.52.4; sys_platform != 'darwin'
+transformers>=4.52.4; sys_platform != 'darwin'
+transformers>=4.49.0,<=4.51.3,!=4.52.0; sys_platform == 'darwin'
 accelerate==1.7.0
 addict==2.4.0
 WMI==1.5.1; sys_platform == 'win32'
 hf_xet==1.1.5
-torch~=2.7.1
+torch~=2.7.1; sys_platform != 'darwin'
+torch~=2.2.2; sys_platform == 'darwin'
 numpy~=1.26.4
 tqdm~=4.67.1
 sentencepiece~=0.2.0
@@ -20,7 +22,8 @@ pyyaml~=6.0.2
 huggingface-hub~=0.33.0
 uvicorn~=0.34.3
 datasets~=3.6.0
-bitsandbytes~=0.46.0
+bitsandbytes~=0.46.0; sys_platform != 'darwin'
+bitsandbytes~=0.42.0; sys_platform == 'darwin'
 peft~=0.15.2
 safetensors~=0.5.3
 jinja2~=3.1.6
@@ -31,7 +34,6 @@ llama-cpp-python[server]~=0.3.2
 matplotlib~=3.10.3
 diffusers~=0.34.0
 pillow~=11.3.0
-transformers~=4.52.4
 setuptools~=78.1.1
 insightface~=0.7.3
 ip_adapterv~=0.1.0

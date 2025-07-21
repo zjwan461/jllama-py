@@ -21,8 +21,6 @@ def main():
     parser.add_argument('--show', action="store", help='查看模型详细信息')
     parser.add_argument('--primary', nargs=2, action="store", help='给模型的primary gguf打标')
     parser.add_argument('--run', action="store", help='运行模型')
-    parser.add_argument('--stop', action="store", help='停止模型')
-    parser.add_argument('--ps', action="store_true", help='列出正在运行的模型')
 
     args = parser.parse_args()
 
@@ -53,12 +51,6 @@ def main():
     elif args.run:
         from jllama.controller.console_api import console_api
         console_api.run_model(args.run)
-    elif args.stop:
-        from jllama.controller.console_api import console_api
-        console_api.stop_model(args.stop)
-    elif args.ps:
-        from jllama.controller.console_api import console_api
-        console_api.ps_process()
     else:
         parser.print_usage(
             sys.stderr
