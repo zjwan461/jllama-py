@@ -362,7 +362,6 @@ clean_count = 0
 
 def before_show():
     global clean_count
-    print("before_show")
     # 第一次加载窗口时，停止所有正在运行的模型
     if clean_count == 0:
         controller.stop_all_running_model()
