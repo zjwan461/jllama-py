@@ -3,7 +3,9 @@ import re
 
 
 def get_modelscope_model_file(repo: str, revision="master", root="", gguf_only: bool = True,
-                              allow_file_pattern: str = ".*"):
+                              allow_file_pattern: str = "*"):
+    if allow_file_pattern == "*":
+        allow_file_pattern = ".*"
     resp = requests.get(
         "https://modelscope.cn/api/v1/models/" + repo + "/repo/files?Revision=" + revision + "&Root=" + root)
     if resp.status_code == 200:
@@ -102,4 +104,4 @@ if __name__ == '__main__':
     import json
 
     print(json.dumps(
-        get_modelscope_model_file("deepseek-ai/DeepSeek-R1-0528-Qwen3-8B", gguf_only=False, allow_file_pattern=".*")))
+        get_modelscope_model_file("deepseek-ai/DeepSeek-R1-0528-Qwen3-8B", gguf_only=False, allow_file_pattern="*")))

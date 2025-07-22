@@ -62,7 +62,7 @@ class ConsoleApi:
         self.format_print(data)
 
     def download_model(self, param):
-        allow_file_pattern = ".*"
+        allow_file_pattern = "*"
         if len(param) >= 2:
             model_name = param[0]
             allow_file_pattern = param[1]
@@ -122,6 +122,7 @@ class ConsoleApi:
         model = session.query(Model).filter(Model.name == model_name).filter(Model.type == "gguf").first()
         if model is None:
             model = self.download_model([model_name])
+            model = session.query(Model).filter(Model.name == model_name).filter(Model.type == "gguf").first()
 
         if model.primary_gguf is None:
             print(f"{model_name} has no primary gguf, use jllama-cli --primary $(gguf_file) to mark primary gguf")
