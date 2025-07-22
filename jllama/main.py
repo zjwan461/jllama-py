@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 import tempfile
 
 from flask_cors import CORS
@@ -231,6 +232,7 @@ class JsApi:
     def get_default_negative_prompt(self):
         return self.controller.get_default_negative_prompt()
 
+
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 
 CORS(server)
@@ -373,6 +375,9 @@ def stop_process():
 
 
 def main():
+    if sys.platform != 'windows' and sys.platform != 'win32':
+        print(f'🌺 jllama must running on Windows platform,but your platform is {sys.platform}')
+        exit(-1)
     # 走更新逻辑
     update_version()
     update_other()

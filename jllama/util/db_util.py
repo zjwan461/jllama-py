@@ -142,6 +142,13 @@ class StableDiffusionInfo(BaseEntity):
     ip_adapter_faceid_state = Column(String(50), default="待初始化")
 
 
+class LlamaServerProcess(BaseEntity):
+    __tablename__ = "llama_server_process"
+    pid = Column(Integer, primary_key=True, nullable=False)
+    model_name = Column(String(50), nullable=False, unique=True)
+    params = Column(String(50))
+
+
 class SqliteSqlalchemy(object):
     def __init__(self):
         # 创建Sqlite连接引擎
