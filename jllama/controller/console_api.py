@@ -121,15 +121,15 @@ class ConsoleApi:
         session = SqliteSqlalchemy().session
         model = session.query(Model).filter(Model.name == model_name).filter(Model.type == "gguf").first()
         if model is None:
-            model = self.download_model([model_name])
+            self.download_model([model_name])
             model = session.query(Model).filter(Model.name == model_name).filter(Model.type == "gguf").first()
 
         if model.primary_gguf is None:
             print(f"{model_name} has no primary gguf, use jllama-cli --primary $(gguf_file) to mark primary gguf")
             return False
+
         process_list = self.list_process_db()
         if len(process_list) > 0:
-
             for item in process_list:
                 if is_pid_running(item.pid):
                     print(f"llama server process is running. Will terminate and restart")
@@ -164,7 +164,6 @@ class ConsoleApi:
         for process in process_list:
             kill_process_by_pid(process.pid)
             self.rm_process_db(process.model_name)
-
 
     def remove_model_config(self, config_file_path, model_name):
         with open(config_file_path, "r+", encoding="utf-8") as f:
@@ -226,8 +225,8 @@ class ConsoleApi:
     def mark_primary(self, param):
         model_name = param[0]
         gguf_file_name = param[1]
+        session = SqliteSqlalchemy().session
         try:
-            session = SqliteSqlalchemy().session
             model = session.query(Model).filter(Model.name == model_name).first()
             file = session.query(FileDownload).filter(FileDownload.model_name == model_name).filter(
                 FileDownload.file_name == gguf_file_name).first()
@@ -249,11 +248,12 @@ class ConsoleApi:
             session.close()
 
     def list_process_db(self):
+        session = SqliteSqlalchemy().session
         try:
-            session = SqliteSqlalchemy().session
-            return session.query(LlamaServerProcess).all()
+           process_list = session.query(LlamaServerProcess).all()
         finally:
             session.close()
+        return process_list
 
     def rm_process_db(self, model_name):
         session = SqliteSqlalchemy().session
