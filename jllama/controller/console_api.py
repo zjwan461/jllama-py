@@ -250,7 +250,7 @@ class ConsoleApi:
     def list_process_db(self):
         session = SqliteSqlalchemy().session
         try:
-           process_list = session.query(LlamaServerProcess).all()
+            process_list = session.query(LlamaServerProcess).all()
         finally:
             session.close()
         return process_list
@@ -287,5 +287,14 @@ class ConsoleApi:
         finally:
             session.close()
 
+    def list_file(self, model_name):
+        file_list = get_modelscope_model_file(model_name)
+        data = [
+            ["No.", "Name", "Size"]
+        ]
+        for index, file in enumerate(file_list):
+            data.append([str(index + 1), file["Name"], str(file["Size"])])
+
+        self.format_print(data)
 
 console_api = ConsoleApi()
