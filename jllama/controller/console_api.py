@@ -292,8 +292,9 @@ class ConsoleApi:
         data = [
             ["No.", "Name", "Size"]
         ]
-        for index, file in enumerate(file_list):
-            data.append([str(index + 1), file["Name"], str(file["Size"])])
+        if file_list:
+            for index, file in enumerate(file_list):
+                data.append([str(index + 1), file["Name"], str(file["Size"])])
 
         self.format_print(data)
 
