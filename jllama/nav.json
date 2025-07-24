@@ -103,6 +103,12 @@
         "title": "IP-Adapter-FaceID",
         "icon": "el-icon-view",
         "href": "/aigc/sd-ip-adapter-faceid"
+      },
+      {
+      "id": 44,
+        "title": "OCR",
+        "icon": "el-icon-picture-outline-round",
+        "href": "/aigc/ocr"
       }
     ]
   }
