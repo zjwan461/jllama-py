@@ -39,6 +39,7 @@ from jllama.env import jllama_version, factory_version, cpp_version
 from modelscope import snapshot_download
 from jllama.ai.sd_reasoning import supported_scheduler, list_schedulers, text_to_pic, pic_to_pic, ip_adapter_faceid_pic, \
     default_negative_prompt
+from jllama.util.modelscope_util import search_modelscope_model
 
 logger = Logger(__name__)
 
@@ -1480,3 +1481,11 @@ class Api:
 
     def get_default_negative_prompt(self):
         return default_negative_prompt()
+
+    def model_search_suggest(self, search, model_type):
+        result = search_modelscope_model(model_name=search, gguf_only=model_type == 'gguf')
+        res_list = []
+        if result["success"]:
+            for item in result["models"]:
+                res_list.append(dict(value=item))
+        return res_list

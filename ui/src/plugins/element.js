@@ -44,7 +44,7 @@ import {
   Steps,
   Alert,
   Tabs,
-  TabPane, Slider, Spinner, Collapse, CollapseItem, Link, Descriptions, Empty
+  TabPane, Slider, Spinner, Collapse, CollapseItem, Link, Descriptions, Empty, Autocomplete
 
 } from 'element-ui'
 
@@ -102,3 +102,4 @@ Vue.use(CollapseItem)
 Vue.use(Link)
 Vue.use(Descriptions)
 Vue.use(Empty)
+Vue.use(Autocomplete)

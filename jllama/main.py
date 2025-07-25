@@ -232,6 +232,9 @@ class JsApi:
     def get_default_negative_prompt(self):
         return self.controller.get_default_negative_prompt()
 
+    def model_search_suggest(self, search, model_type):
+        return self.controller.model_search_suggest(search, model_type)
+
 
 server = Flask(__name__, static_folder="ui/dist", static_url_path="/")
 

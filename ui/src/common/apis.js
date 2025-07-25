@@ -211,4 +211,7 @@ export default {
   getDefaultNegativePrompt() {
     return window.pywebview.api.get_default_negative_prompt()
   },
+  modelSearchSuggest(search, model_type) {
+    return window.pywebview.api.model_search_suggest(search,model_type)
+  },
 }

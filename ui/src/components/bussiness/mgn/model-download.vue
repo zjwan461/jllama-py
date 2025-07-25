@@ -91,11 +91,18 @@
             <el-option label="huggingface" value="huggingface"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="repo" label-width="120px" prop="repo">
+          <el-autocomplete
+            v-model="modelForm.repo"
+            :fetch-suggestions="querySearchAsync"
+            placeholder="请输入模型仓库"
+            clearable
+            size="medium"
+          ></el-autocomplete>
+          <!--          <el-input v-model="modelForm.repo" autocomplete="off"></el-input>-->
+        </el-form-item>
         <el-form-item label="模型名称" label-width="120px" prop="name">
           <el-input v-model="modelForm.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="repo" label-width="120px" prop="repo">
-          <el-input v-model="modelForm.repo" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="类型" label-width="120px">
           <el-select v-model="modelForm.type">
@@ -179,6 +186,20 @@ export default {
     this.getTableData()
   },
   methods: {
+    querySearchAsync(queryString, cb) {
+      if (this.modelForm.download_platform === "modelscope") {
+        if (queryString && queryString.length > 0) {
+          apis.modelSearchSuggest(queryString, this.modelForm.type).then(res => {
+            cb(res)
+          }).catch(e => {
+            this.$message.error(e)
+          })
+        }
+      } else {
+        cb([])
+      }
+
+    },
     delFile(item) {
       this.$confirm('你确定要删除此模型文件？', '提示').then(() => {
         const loading = startLoading()
